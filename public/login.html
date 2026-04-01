@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>سودان كربتو | تسجيل الدخول</title>
+  <!-- Google Fonts + Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', 'Tahoma', sans-serif;
+      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* خلفية نجوم متحركة */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background-color: #ffffff;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(1);}
+      100% { opacity: 1; transform: scale(1.2);}
+    }
+
+    /* كارد زجاجي */
+    .glass-card {
+      position: relative;
+      z-index: 2;
+      max-width: 480px;
+      width: 100%;
+      background: rgba(15, 25, 45, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+      padding: 32px 28px;
+      transition: transform 0.3s ease;
+    }
+    .glass-card:hover {
+      transform: translateY(-5px);
+    }
+
+    /* العلامة التجارية */
+    .brand {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .brand-icon {
+      font-size: 52px;
+      background: linear-gradient(135deg, #F0B90B, #FFD966);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+    }
+    .brand h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(120deg, #fff, #c0e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .brand p {
+      color: #a0b4d7;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    h2 {
+      font-size: 26px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 28px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    h2 i {
+      color: #F0B90B;
+      font-size: 28px;
+    }
+
+    /* الحقول */
+    .input-group {
+      margin-bottom: 22px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #d0e2ff;
+    }
+    .input-group label i {
+      margin-left: 6px;
+      color: #F0B90B;
+    }
+    .input-group input {
+      width: 100%;
+      height: 54px;
+      background: rgba(10, 20, 35, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 32px;
+      padding: 0 20px;
+      font-size: 15px;
+      color: #fff;
+      transition: all 0.25s;
+      outline: none;
+      font-family: 'Cairo', sans-serif;
+    }
+    .input-group input:focus {
+      border-color: #F0B90B;
+      box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
+      background: rgba(10, 20, 35, 0.9);
+    }
+    .input-group input::placeholder {
+      color: #6c86a3;
+    }
+
+    /* حقل كلمة السر مع زر إظهار */
+    .password-wrapper {
+      position: relative;
+    }
+    .password-wrapper input {
+      padding-left: 85px;
+    }
+    .toggle-password {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #F0B90B;
+      border: none;
+      border-radius: 40px;
+      padding: 6px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0a0f2a;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .toggle-password:hover {
+      background: #ffcc33;
+    }
+
+    /* زر الدخول */
+    .login-btn {
+      background: linear-gradient(95deg, #F0B90B, #FFD966);
+      width: 100%;
+      height: 56px;
+      border: none;
+      border-radius: 44px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0a0f2a;
+      margin-top: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 20px rgba(240,185,11,0.25);
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      background: #ffcc33;
+    }
+
+    /* روابط */
+    .links {
+      text-align: center;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .links a {
+      color: #F0B90B;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+    .links a:hover {
+      text-decoration: underline;
+      color: #ffdd77;
+    }
+
+    /* رسائل التنبيه */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(12px);
+      font-weight: 500;
+    }
+    .toast.success { background: #10b981; }
+    .toast.error { background: #ef4444; }
+
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 11px;
+      color: #7c8fb0;
+    }
+
+    @media (max-width: 480px) {
+      .glass-card { padding: 28px 20px; }
+      .login-btn { height: 52px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="starsContainer"></div>
+
+<div class="glass-card">
+  <div class="brand">
+    <div class="brand-icon"><i class="fa-brands fa-bitcoin"></i></div>
+    <h1>سودان كربتو</h1>
+    <p>عالمك الآمن للاستثمار الرقمي</p>
+  </div>
+
+  <h2><i class="fa-solid fa-arrow-right-to-bracket"></i> تسجيل الدخول</h2>
+
+  <div class="input-group">
+    <label><i class="fa-regular fa-envelope"></i> البريد الإلكتروني</label>
+    <input type="email" id="email" placeholder="example@domain.com">
+  </div>
+
+  <div class="input-group">
+    <label><i class="fa-solid fa-lock"></i> كلمة السر</label>
+    <div class="password-wrapper">
+      <input type="password" id="password" placeholder="••••••••">
+      <button type="button" class="toggle-password" onclick="togglePassword()">إظهار</button>
+    </div>
+  </div>
+
+  <button class="login-btn" id="loginBtn"><i class="fa-solid fa-arrow-left"></i> دخول</button>
+
+  <div class="links">
+    <a href="#" id="forgotPassBtn"><i class="fa-regular fa-circle-question"></i> هل نسيت كلمة السر؟</a>
+    <a href="index.html"><i class="fa-regular fa-user-plus"></i> ليس لديك حساب؟ إنشاء حساب جديد</a>
+  </div>
+
+  <footer>© 2025 سودان كربتو – استثمر بثقة</footer>
+</div>
+
+<div class="toast" id="toastMessage">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="toastText"></span>
+</div>
+
+<script>
+  // ======================= التهيئة =======================
+  const API_BASE = "https://sudan-crypto-4mgt.onrender.com"; // غيّر إلى رابط السيرفر الفعلي
+  let toastTimeout = null;
+
+  // إنشاء النجوم
+  function createStars() {
+    const container = document.getElementById('starsContainer');
+    for (let i = 0; i < 180; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      const size = Math.random() * 3 + 1;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      star.style.animationDuration = Math.random() * 3 + 2 + 's';
+      container.appendChild(star);
+    }
+  }
+  createStars();
+
+  // إظهار رسالة toast
+  function showToast(message, isError = false) {
+    const toast = document.getElementById('toastMessage');
+    const toastText = document.getElementById('toastText');
+    const icon = toast.querySelector('i');
+    toastText.innerText = message;
+    if (isError) {
+      icon.className = 'fa-solid fa-circle-exclamation';
+      toast.classList.add('error');
+      toast.classList.remove('success');
+    } else {
+      icon.className = 'fa-solid fa-circle-check';
+      toast.classList.add('success');
+      toast.classList.remove('error');
+    }
+    toast.style.display = 'flex';
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 3000);
+  }
+
+  // إظهار/إخفاء كلمة المرور
+  function togglePassword() {
+    const input = document.getElementById('password');
+    const btn = document.querySelector('.toggle-password');
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = 'إخفاء';
+    } else {
+      input.type = 'password';
+      btn.textContent = 'إظهار';
+    }
+  }
+
+  // تسجيل الدخول
+  async function login() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email) return showToast('✏️ أدخل البريد الإلكتروني', true);
+    if (!password) return showToast('🔒 أدخل كلمة السر', true);
+
+    showToast('⏳ جاري تسجيل الدخول...');
+
+    try {
+      const res = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'فشل تسجيل الدخول');
+
+      localStorage.setItem('userEmail', email);
+      showToast('✅ تم تسجيل الدخول بنجاح');
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    } catch (err) {
+      showToast(err.message || '❌ خطأ في الاتصال', true);
+    }
+  }
+
+  // رابط "هل نسيت كلمة السر؟" (سيتم تفعيله لاحقاً)
+  function forgotPassword() {
+    showToast('📧 سيتم تفعيل استعادة كلمة المرور قريباً');
+    // يمكن توجيه المستخدم لصفحة مستقبلية: window.location.href = 'forgot.html';
+  }
+
+  // ربط الأحداث
+  document.getElementById('loginBtn').addEventListener('click', login);
+  document.getElementById('forgotPassBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    forgotPassword();
+  });
+
+  // السماح بتسجيل الدخول بالضغط على Enter
+  const inputs = document.querySelectorAll('input');
+  inputs.forEach(input => {
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') login();
+    });
+  });
+</script>
+</body>
+</html>
