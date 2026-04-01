@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سودان كربتو | إنشاء حساب</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#0f172a,#1e3a8a);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+}
+
+.container{
+  width:100%;
+  max-width:420px;
+  background:#fff;
+  border-radius:25px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.logo{
+  font-weight:800;
+  color:#2563eb;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.login-link{
+  font-size:13px;
+  text-decoration:none;
+  color:#2563eb;
+  font-weight:600;
+}
+
+h2{
+  text-align:center;
+  margin-bottom:15px;
+}
+
+label{
+  display:block;
+  margin-top:10px;
+  font-size:13px;
+  font-weight:600;
+}
+
+.input{
+  width:100%;
+  height:45px;
+  border-radius:12px;
+  border:1px solid #ddd;
+  padding:0 12px;
+  margin-top:5px;
+}
+
+.input:focus{
+  border-color:#2563eb;
+  outline:none;
+}
+
+.input-group{
+  position:relative;
+}
+
+.input-group i{
+  position:absolute;
+  left:10px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#2563eb;
+}
+
+.input-group input{
+  padding-left:35px;
+}
+
+.password-toggle{
+  position:absolute;
+  left:10px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+  color:#2563eb;
+}
+
+.code-box{
+  display:flex;
+  gap:5px;
+  margin-top:10px;
+}
+
+.code-box input{
+  width:100%;
+  height:45px;
+  text-align:center;
+  font-size:18px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+.btn{
+  width:100%;
+  height:45px;
+  border:none;
+  border-radius:30px;
+  margin-top:15px;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.btn:hover{
+  opacity:0.9;
+}
+
+.country{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+footer{
+  text-align:center;
+  font-size:12px;
+  margin-top:15px;
+  color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top">
+    <div class="logo">
+      <i class="fa-brands fa-bitcoin"></i>
+      سودان كربتو
+    </div>
+    <a href="login.html" class="login-link">تسجيل الدخول</a>
+  </div>
+
+  <h2>إنشاء حساب</h2>
+
+  <label>الاسم الحقيقي</label>
+  <div class="input-group">
+    <i class="fa-regular fa-user"></i>
+    <input class="input" type="text">
+  </div>
+
+  <label>البريد الإلكتروني</label>
+  <div class="input-group">
+    <i class="fa-regular fa-envelope"></i>
+    <input class="input" type="email">
+  </div>
+
+  <label>كود التحقق (6 أرقام)</label>
+  <div class="code-box">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+    <input maxlength="1">
+  </div>
+
+  <label>الدولة</label>
+  <div class="input-group country">
+    <i class="fa-solid fa-flag"></i>
+    <input class="input" value="السودان +249 🇸🇩" readonly>
+  </div>
+
+  <label>رقم الهاتف</label>
+  <div class="input-group">
+    <i class="fa-solid fa-phone"></i>
+    <input class="input" type="tel">
+  </div>
+
+  <label>رمز الإحالة (اختياري)</label>
+  <div class="input-group">
+    <i class="fa-solid fa-gift"></i>
+    <input class="input" type="text">
+  </div>
+
+  <label>كلمة المرور</label>
+  <div class="input-group">
+    <i class="fa-solid fa-lock"></i>
+    <input class="input" type="password" id="pass">
+    <span class="password-toggle" onclick="toggle('pass')">
+      <i class="fa-regular fa-eye"></i>
+    </span>
+  </div>
+
+  <label>تأكيد كلمة المرور</label>
+  <div class="input-group">
+    <i class="fa-solid fa-lock"></i>
+    <input class="input" type="password" id="pass2">
+    <span class="password-toggle" onclick="toggle('pass2')">
+      <i class="fa-regular fa-eye"></i>
+    </span>
+  </div>
+
+  <button class="btn">إنشاء الحساب</button>
+
+  <footer>© جميع الحقوق محفوظة - سودان كربتو</footer>
+
+</div>
+
+<script>
+function toggle(id){
+  const input=document.getElementById(id);
+  input.type=input.type==="password"?"text":"password";
+}
+</script>
+
+</body>
+</html>
