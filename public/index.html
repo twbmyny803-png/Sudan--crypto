@@ -336,7 +336,7 @@
 
   <div class="input-group">
     <label><i class="fa-regular fa-user"></i> الاسم الحقيقي</label>
-    <input type="text" id="fullName" placeholder="أدخل اسمك كاملاً">
+    <input type="text" id="fullName" placeholder="الاسم الكامل">
   </div>
 
   <div class="input-group">
@@ -365,7 +365,7 @@
 
   <div class="input-group">
     <label><i class="fa-solid fa-phone"></i> رقم الهاتف</label>
-    <input type="tel" id="phone" placeholder="912345678">
+    <input type="tel" id="phone" placeholder="+249 رقم الهاتف">
   </div>
 
   <div class="input-group">
@@ -389,7 +389,7 @@
     </div>
   </div>
 
-  <button class="btn-register" id="createBtn"><i class="fa-regular fa-user-plus"></i> إنشاء الحساب</button>
+  <button class="btn-register" id="createBtn" onclick="register()"><i class="fa-regular fa-user-plus"></i> إنشاء حساب</button>
 
   <div class="alert-message" id="registerSuccess"></div>
   <div class="alert-message alert-error" id="registerError"></div>
@@ -517,76 +517,48 @@
     }
   }
 
-  async function verifyCodeBeforeRegister(email) {
-    const code = getCode();
-    if (code.length !== 6) {
-      showAlert('verifyError', '⚠️ أدخل الكود المكون من 6 أرقام', true);
-      return false;
-    }
-    try {
-      const res = await fetch(`${API_BASE}/verify-code`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message || 'كود غير صحيح');
-      hideAlert('verifyError');
-      return true;
-    } catch (err) {
-      showAlert('verifyError', err.message, true);
-      return false;
-    }
-  }
+  function register() {
+    const name = document.querySelector('input[placeholder="الاسم الكامل"]').value;
+    const email = document.getElementById("email").value;
+    const phone = document.querySelector('input[placeholder="+249 رقم الهاتف"]').value;
+    const password = document.getElementById("password").value;
 
-  async function createAccount() {
-    const fullName = document.getElementById('fullName').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const referralCode = document.getElementById('referralCode').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const confirm = document.getElementById('confirmPassword').value.trim();
+    fetch(API_BASE + "/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        phone,
+        password
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert("تم إرسال الكود للإيميل");
+        
+        // حفظ الإيميل مؤقت
+        localStorage.setItem("email", email);
 
-    if (!fullName) return showAlert('registerError', '✏️ الاسم الحقيقي مطلوب', true);
-    if (!email) return showAlert('registerError', '📧 البريد الإلكتروني مطلوب', true);
-    if (!phone) return showAlert('registerError', '📞 رقم الهاتف مطلوب', true);
-    if (password.length < 8) return showAlert('registerError', '🔒 كلمة المرور 8 أحرف على الأقل', true);
-    if (password !== confirm) return showAlert('registerError', '❌ كلمتا المرور غير متطابقتين', true);
-
-    const verified = await verifyCodeBeforeRegister(email);
-    if (!verified) return;
-
-    try {
-      const res = await fetch(`${API_BASE}/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: fullName,
-          email,
-          phone,
-          password,
-          referrer: referralCode
-        })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message || 'فشل إنشاء الحساب');
-      showAlert('registerSuccess', '🎉 تم إنشاء الحساب بنجاح! جاري التحويل...');
-      setTimeout(() => {
-        window.location.href = 'login.html';
-      }, 1500);
-    } catch (err) {
-      showAlert('registerError', err.message, true);
-    }
+        window.location.href = "verify.html";
+      } else {
+        alert(data.message);
+      }
+    });
   }
 
   // ربط الأحداث
   document.getElementById('sendCodeBtn').addEventListener('click', sendCode);
   document.getElementById('resendBtn').addEventListener('click', sendCode);
-  document.getElementById('createBtn').addEventListener('click', createAccount);
+  // تم استبدال مستمع الحدث لـ createBtn بـ onclick مباشرة في الـ HTML كما طلبت
 
   // تعبئة رمز الإحالة من الرابط
   const urlRef = new URLSearchParams(window.location.search).get('ref');
   if (urlRef) document.getElementById('referralCode').value = urlRef;
 </script>
+
 </body>
-    </html>
+</html>
