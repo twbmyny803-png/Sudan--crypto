@@ -7,14 +7,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// 🔥 ربط Resend بطريقة آمنة
+// 🔥 Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// قراءة صفحات الموقع
+// 📁 ملفات الموقع
 app.use(express.static(path.join(__dirname, "public")));
 
 let users = [];
-let codes = {}; // تخزين الأكواد مؤقت
+let codes = {};
 
 // 📨 تسجيل + إرسال كود
 app.post("/register", async (req, res) => {
@@ -29,15 +29,21 @@ app.post("/register", async (req, res) => {
     return res.json({ success: false, message: "الإيميل مستخدم" });
   }
 
-  const code = Math.floor(100000 + Math.random() * 900000);
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
   codes[email] = code;
 
   try {
     await resend.emails.send({
-      from: "Sudan Crypto <onboarding@resend.dev>", // أو دومينك
+      from: "Sudan Crypto <noreply@yourdomain.com>", // ⚠️ غيرها لدومينك الحقيقي
       to: email,
-      subject: "كود التحقق",
-      html: `<h2>كود التحقق الخاص بك: ${code}</h2>`
+      subject: "كود التحقق - Sudan Crypto",
+      html: `
+        <div style="font-family:Arial;text-align:center;">
+          <h2>كود التحقق الخاص بك</h2>
+          <h1 style="color:#2563eb;">${code}</h1>
+          <p>لا تشارك هذا الكود مع أي شخص</p>
+        </div>
+      `
     });
 
     users.push({
@@ -51,6 +57,7 @@ app.post("/register", async (req, res) => {
     res.json({ success: true, message: "تم إرسال الكود" });
 
   } catch (err) {
+    console.error("EMAIL ERROR:", err);
     res.json({ success: false, message: "فشل إرسال الكود" });
   }
 });
@@ -59,7 +66,7 @@ app.post("/register", async (req, res) => {
 app.post("/verify", (req, res) => {
   const { email, code } = req.body;
 
-  if (codes[email] == code) {
+  if (codes[email] === code) {
     let user = users.find(u => u.email === email);
     if (user) user.verified = true;
 
@@ -68,7 +75,7 @@ app.post("/verify", (req, res) => {
     return res.json({ success: true });
   }
 
-  res.json({ success: false, message: "الكود غير صحيح" });
+  res.json({ success: false, message: "كود التحقق غير صحيح" });
 });
 
 // 🔑 تسجيل الدخول
