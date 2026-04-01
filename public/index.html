@@ -523,7 +523,7 @@
     const phone = document.querySelector('input[placeholder="+249 رقم الهاتف"]').value;
     const password = document.getElementById("password").value;
 
-    fetch(API_BASE + "/register", {
+    fetch("https://sudan-crypto-4mgt.onrender.com/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -547,13 +547,16 @@
       } else {
         alert(data.message);
       }
+    })
+    .catch(err => {
+      console.error("Error:", err);
+      alert("حدث خطأ في الاتصال بالسيرفر");
     });
   }
 
   // ربط الأحداث
   document.getElementById('sendCodeBtn').addEventListener('click', sendCode);
   document.getElementById('resendBtn').addEventListener('click', sendCode);
-  // تم استبدال مستمع الحدث لـ createBtn بـ onclick مباشرة في الـ HTML كما طلبت
 
   // تعبئة رمز الإحالة من الرابط
   const urlRef = new URLSearchParams(window.location.search).get('ref');
@@ -561,4 +564,4 @@
 </script>
 
 </body>
-</html>
+             </html>
