@@ -1,9 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// 🔥 مهم: قراءة ملفات HTML
+app.use(express.static(path.join(__dirname, "public")));
 
 let users = [];
 
@@ -32,6 +36,14 @@ app.post("/register", (req, res) => {
   res.json({ success: true, message: "تم التسجيل بنجاح" });
 });
 
-app.listen(10000, () => {
-  console.log("Server running on port 10000");
+// 🔥 الصفحة الرئيسية
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// 🔥 مهم لـ Render
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
