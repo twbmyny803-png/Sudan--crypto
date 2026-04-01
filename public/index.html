@@ -501,7 +501,8 @@
     hideAlert('sendError');
     showAlert('sendSuccess', '⏳ جاري إرسال الكود...');
     try {
-      const res = await fetch(`${API_BASE}/send-code`, {
+      // ✅ استخدام المسار الكامل للـ API بدلاً من المسار النسبي
+      const res = await fetch(`${API_BASE}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -523,7 +524,8 @@
     const phone = document.querySelector('input[placeholder="+249 رقم الهاتف"]').value;
     const password = document.getElementById("password").value;
 
-    fetch("https://sudan-crypto-4mgt.onrender.com/register", {
+    // ✅ استخدام المسار الكامل للـ API
+    fetch(`${API_BASE}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -564,4 +566,4 @@
 </script>
 
 </body>
-             </html>
+  </html>
