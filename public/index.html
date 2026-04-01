@@ -1,180 +1,592 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Sudan Crypto</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>سودان كربتو | إنشاء حساب احترافي</title>
+  <!-- Google Fonts & Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<style>
-body {
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-  display: flex;
-  justify-content: center;
-}
+    body {
+      font-family: 'Cairo', 'Tahoma', sans-serif;
+      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-.container {
-  width: 350px;
-  padding: 20px;
-}
+    /* خلفية متحركة نجوم */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: transparent;
+      z-index: 0;
+    }
 
-.logo {
-  text-align: center;
-  font-size: 30px;
-  margin-bottom: 20px;
-  color: #2D6AF6;
-}
+    .star {
+      position: absolute;
+      background-color: #ffffff;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle 3s infinite alternate;
+    }
 
-.logo i {
-  font-size: 35px;
-}
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(1);}
+      100% { opacity: 1; transform: scale(1.2);}
+    }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-}
+    /* كارد رئيسي */
+    .glass-card {
+      position: relative;
+      z-index: 2;
+      max-width: 520px;
+      width: 100%;
+      background: rgba(15, 25, 45, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255,255,255,0.1);
+      padding: 32px 28px;
+      transition: transform 0.3s ease;
+    }
 
-.btn {
-  width: 100%;
-  padding: 12px;
-  background: #2D6AF6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
+    .glass-card:hover {
+      transform: translateY(-5px);
+    }
 
-.password-box {
-  position: relative;
-}
+    /* الهيدر */
+    .brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .brand-icon {
+      font-size: 52px;
+      background: linear-gradient(135deg, #F0B90B, #FFD966);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+    }
+    .brand h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(120deg, #fff, #c0e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .brand p {
+      color: #a0b4d7;
+      font-size: 14px;
+      margin-top: 4px;
+    }
 
-.password-box i {
-  position: absolute;
-  right: 10px;
-  top: 15px;
-  cursor: pointer;
-}
+    /* العناوين */
+    h2 {
+      font-size: 26px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 24px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    h2 i {
+      color: #F0B90B;
+      font-size: 28px;
+    }
 
-.code-box {
-  display: flex;
-  justify-content: space-between;
-  margin: 10px 0;
-}
+    /* الحقول */
+    .input-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #d0e2ff;
+      letter-spacing: 0.3px;
+    }
+    .input-group label i {
+      margin-left: 6px;
+      color: #F0B90B;
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      height: 52px;
+      background: rgba(10, 20, 35, 0.7);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 28px;
+      padding: 0 18px;
+      font-size: 15px;
+      color: #fff;
+      transition: all 0.25s;
+      outline: none;
+      font-family: 'Cairo', sans-serif;
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: #F0B90B;
+      box-shadow: 0 0 0 3px rgba(240, 185, 11, 0.2);
+      background: rgba(10, 20, 35, 0.9);
+    }
+    .input-group input::placeholder {
+      color: #6c86a3;
+    }
 
-.code-box input {
-  width: 45px;
-  text-align: center;
-  font-size: 20px;
-}
+    /* حقل كلمة المرور مع زر إظهار */
+    .password-wrapper {
+      position: relative;
+    }
+    .password-wrapper input {
+      padding-left: 75px;
+    }
+    .toggle-password {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #F0B90B;
+      border: none;
+      border-radius: 40px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0a0f2a;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .toggle-password:hover {
+      background: #ffcc33;
+    }
 
-.timer {
-  text-align: center;
-  font-size: 14px;
-  margin-top: 5px;
-}
+    /* زر التحقق */
+    .btn-verify {
+      background: linear-gradient(95deg, #F0B90B, #FFD966);
+      border: none;
+      width: 100%;
+      height: 50px;
+      border-radius: 40px;
+      font-weight: 800;
+      font-size: 16px;
+      color: #0a0f2a;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 6px 14px rgba(240,185,11,0.25);
+    }
+    .btn-verify:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(240,185,11,0.4);
+    }
 
-.login-bottom {
-  text-align: center;
-  margin-top: 15px;
-}
+    /* قسم الكود */
+    .code-section {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 32px;
+      padding: 16px;
+      margin: 18px 0 12px;
+      border: 1px solid rgba(240,185,11,0.3);
+    }
+    .code-box {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 12px 0;
+      direction: ltr;
+    }
+    .code-box input {
+      width: 52px;
+      height: 58px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: 800;
+      background: #0f1a2c;
+      border: 2px solid #2c3e5c;
+      border-radius: 20px;
+      color: #F0B90B;
+    }
+    .timer {
+      text-align: center;
+      font-size: 13px;
+      color: #b9d0ff;
+    }
+    .resend {
+      text-align: center;
+      color: #F0B90B;
+      margin-top: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      display: none;
+    }
 
-</style>
+    /* زر إنشاء الحساب */
+    .btn-register {
+      background: linear-gradient(135deg, #F0B90B, #e6a700);
+      width: 100%;
+      height: 56px;
+      border: none;
+      border-radius: 44px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0a0f2a;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-register:hover {
+      transform: scale(0.98);
+      background: #ffcc33;
+    }
+
+    /* روابط */
+    .links {
+      text-align: center;
+      margin-top: 24px;
+    }
+    .links a {
+      color: #F0B90B;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: 0.2s;
+    }
+    .links a:hover {
+      text-decoration: underline;
+      color: #ffdd77;
+    }
+
+    /* التنبيهات */
+    .alert-message {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+    .alert-success {
+      background: #10b98133;
+      color: #c6f7e2;
+      border: 1px solid #10b981;
+    }
+    .alert-error {
+      background: #ef444433;
+      color: #ffb3b3;
+      border: 1px solid #ef4444;
+    }
+    footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 11px;
+      color: #7c8fb0;
+    }
+
+    @media (max-width: 500px) {
+      .glass-card { padding: 24px 18px; }
+      .code-box input { width: 45px; height: 52px; font-size: 22px; }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="container">
+<!-- خلفية نجوم متحركة -->
+<div class="stars" id="starsContainer"></div>
 
-<div class="logo">
-<i class="fa-brands fa-bitcoin"></i>
-سودان كربتو
-</div>
+<div class="glass-card">
+  <div class="brand">
+    <div class="brand-icon"><i class="fa-brands fa-bitcoin"></i></div>
+    <h1>سودان كربتو</h1>
+    <p>منصة الاستثمار الرقمي الأكثر أماناً</p>
+  </div>
 
-<input type="text" placeholder="الاسم الكامل">
+  <h2><i class="fa-regular fa-user-plus"></i> إنشاء حساب</h2>
 
-<input type="email" id="email" placeholder="البريد الإلكتروني">
+  <div class="input-group">
+    <label><i class="fa-regular fa-user"></i> الاسم الحقيقي</label>
+    <input type="text" id="fullName" placeholder="أدخل اسمك كاملاً">
+  </div>
 
-<button class="btn" id="sendCode">إرسال الكود</button>
-<div class="timer" id="timer"></div>
+  <div class="input-group">
+    <label><i class="fa-regular fa-envelope"></i> البريد الإلكتروني</label>
+    <input type="email" id="email" placeholder="example@domain.com">
+  </div>
 
-<!-- مربعات الكود -->
-<div class="code-box">
-<input maxlength="1">
-<input maxlength="1">
-<input maxlength="1">
-<input maxlength="1">
-<input maxlength="1">
-<input maxlength="1">
-</div>
+  <button class="btn-verify" id="sendCodeBtn"><i class="fa-regular fa-paper-plane"></i> تحقق من البريد</button>
+  <div class="alert-message" id="sendSuccess"></div>
+  <div class="alert-message alert-error" id="sendError"></div>
 
-<input type="text" placeholder="رقم الهاتف +249">
+  <div class="code-section" id="codeSection" style="display: none;">
+    <div style="text-align:center; font-weight:700; margin-bottom:8px;"><i class="fa-solid fa-key"></i> أدخل كود التحقق</div>
+    <div class="code-box">
+      <input type="text" maxlength="1" inputmode="numeric">
+      <input type="text" maxlength="1" inputmode="numeric">
+      <input type="text" maxlength="1" inputmode="numeric">
+      <input type="text" maxlength="1" inputmode="numeric">
+      <input type="text" maxlength="1" inputmode="numeric">
+      <input type="text" maxlength="1" inputmode="numeric">
+    </div>
+    <div class="timer"><i class="fa-regular fa-clock"></i> إعادة الإرسال خلال <span id="count">60</span> ثانية</div>
+    <div class="resend" id="resendBtn">إرسال الكود مرة أخرى</div>
+    <div class="alert-message alert-error" id="verifyError"></div>
+  </div>
 
-<div class="password-box">
-<input type="password" id="password" placeholder="كلمة السر">
-<i class="fa-solid fa-eye" onclick="togglePassword()"></i>
-</div>
+  <div class="input-group">
+    <label><i class="fa-solid fa-phone"></i> رقم الهاتف</label>
+    <input type="tel" id="phone" placeholder="912345678">
+  </div>
 
-<div class="password-box">
-<input type="password" placeholder="تأكيد كلمة السر">
-</div>
+  <div class="input-group">
+    <label><i class="fa-solid fa-gift"></i> رمز الإحالة (اختياري)</label>
+    <input type="text" id="referralCode" placeholder="أدخل الرمز إن وجد">
+  </div>
 
-<input type="text" placeholder="رمز الإحالة (اختياري)">
+  <div class="input-group">
+    <label><i class="fa-solid fa-lock"></i> كلمة المرور</label>
+    <div class="password-wrapper">
+      <input type="password" id="password" placeholder="8 أحرف أو أكثر">
+      <button type="button" class="toggle-password" onclick="toggleField('password', this)">إظهار</button>
+    </div>
+  </div>
 
-<button class="btn">إنشاء حساب</button>
+  <div class="input-group">
+    <label><i class="fa-solid fa-check-circle"></i> تأكيد كلمة المرور</label>
+    <div class="password-wrapper">
+      <input type="password" id="confirmPassword" placeholder="أعد كتابة كلمة المرور">
+      <button type="button" class="toggle-password" onclick="toggleField('confirmPassword', this)">إظهار</button>
+    </div>
+  </div>
 
-<div class="login-bottom">
-عندك حساب؟ <a href="#">تسجيل الدخول</a>
-</div>
+  <button class="btn-register" id="createBtn"><i class="fa-regular fa-user-plus"></i> إنشاء الحساب</button>
 
+  <div class="alert-message" id="registerSuccess"></div>
+  <div class="alert-message alert-error" id="registerError"></div>
+
+  <div class="links">
+    <a href="login.html"><i class="fa-solid fa-arrow-left"></i> لديك حساب؟ سجل دخول</a>
+  </div>
+
+  <footer>© 2025 سودان كربتو – استثمر بثقة</footer>
 </div>
 
 <script>
-let timer = 60;
-let interval;
+  // ====================== التكوين الأساسي ======================
+  const API_BASE = "https://sudan-crypto-4mgt.onrender.com"; // خادمك الحالي
+  let timerInterval = null;
+  let countdown = 60;
 
-document.getElementById("sendCode").onclick = function() {
-  if (timer < 60) return;
-
-  alert("تم إرسال الكود");
-
-  interval = setInterval(() => {
-    timer--;
-    document.getElementById("timer").innerText = "إعادة الإرسال بعد " + timer + " ثانية";
-
-    if (timer == 0) {
-      clearInterval(interval);
-      document.getElementById("timer").innerText = "";
-      timer = 60;
+  // ---------- إنشاء النجوم المتحركة ----------
+  function createStars() {
+    const starsContainer = document.getElementById('starsContainer');
+    for (let i = 0; i < 180; i++) {
+      let star = document.createElement('div');
+      star.classList.add('star');
+      let size = Math.random() * 3 + 1;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      star.style.animationDuration = Math.random() * 3 + 2 + 's';
+      starsContainer.appendChild(star);
     }
-  }, 1000);
-};
-
-// اظهار كلمة السر
-function togglePassword() {
-  let pass = document.getElementById("password");
-  if (pass.type === "password") {
-    pass.type = "text";
-  } else {
-    pass.type = "password";
   }
-}
+  createStars();
 
-// التنقل بين مربعات الكود
-const inputs = document.querySelectorAll(".code-box input");
+  // ---------- دوال مساعدة ----------
+  function showAlert(elementId, message, isError = false) {
+    const box = document.getElementById(elementId);
+    box.innerText = message;
+    box.style.display = 'block';
+    if (isError) box.classList.add('alert-error');
+    else box.classList.add('alert-success');
+    setTimeout(() => {
+      box.style.display = 'none';
+      box.classList.remove('alert-error', 'alert-success');
+    }, 4000);
+  }
 
-inputs.forEach((input, index) => {
-  input.addEventListener("input", () => {
-    if (input.value && index < inputs.length - 1) {
-      inputs[index + 1].focus();
+  function hideAlert(elementId) {
+    const box = document.getElementById(elementId);
+    box.style.display = 'none';
+  }
+
+  function toggleField(fieldId, btn) {
+    const input = document.getElementById(fieldId);
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = 'إخفاء';
+    } else {
+      input.type = 'password';
+      btn.textContent = 'إظهار';
     }
-  });
-});
-</script>
+  }
 
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  // ---------- كود التحقق ----------
+  const codeInputs = document.querySelectorAll('.code-box input');
+  function focusNext(index) {
+    if (index < 5) codeInputs[index + 1].focus();
+  }
+  codeInputs.forEach((inp, idx) => {
+    inp.addEventListener('input', (e) => {
+      inp.value = inp.value.replace(/[^0-9]/g, '');
+      if (inp.value.length === 1 && idx < 5) focusNext(idx);
+    });
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && inp.value === '' && idx > 0) codeInputs[idx - 1].focus();
+    });
+  });
+
+  function getCode() {
+    return Array.from(codeInputs).map(i => i.value).join('');
+  }
+
+  function startTimer() {
+    const countSpan = document.getElementById('count');
+    const resendBtn = document.getElementById('resendBtn');
+    if (timerInterval) clearInterval(timerInterval);
+    let time = 60;
+    countSpan.innerText = time;
+    resendBtn.style.display = 'none';
+    timerInterval = setInterval(() => {
+      time--;
+      countSpan.innerText = time;
+      if (time <= 0) {
+        clearInterval(timerInterval);
+        resendBtn.style.display = 'block';
+      }
+    }, 1000);
+  }
+
+  async function sendCode() {
+    const email = document.getElementById('email').value.trim();
+    if (!email) return showAlert('sendError', '✏️ أدخل البريد الإلكتروني أولاً', true);
+    if (!isValidEmail(email)) return showAlert('sendError', '📧 بريد إلكتروني غير صحيح', true);
+    hideAlert('sendError');
+    showAlert('sendSuccess', '⏳ جاري إرسال الكود...');
+    try {
+      const res = await fetch(`${API_BASE}/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'فشل الإرسال');
+      showAlert('sendSuccess', '✅ تم إرسال الكود إلى بريدك');
+      document.getElementById('codeSection').style.display = 'block';
+      startTimer();
+      codeInputs[0].focus();
+    } catch (err) {
+      showAlert('sendError', err.message || '❌ خطأ في الإرسال', true);
+    }
+  }
+
+  async function verifyCodeBeforeRegister(email) {
+    const code = getCode();
+    if (code.length !== 6) {
+      showAlert('verifyError', '⚠️ أدخل الكود المكون من 6 أرقام', true);
+      return false;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'كود غير صحيح');
+      hideAlert('verifyError');
+      return true;
+    } catch (err) {
+      showAlert('verifyError', err.message, true);
+      return false;
+    }
+  }
+
+  async function createAccount() {
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const referralCode = document.getElementById('referralCode').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const confirm = document.getElementById('confirmPassword').value.trim();
+
+    if (!fullName) return showAlert('registerError', '✏️ الاسم الحقيقي مطلوب', true);
+    if (!email) return showAlert('registerError', '📧 البريد الإلكتروني مطلوب', true);
+    if (!phone) return showAlert('registerError', '📞 رقم الهاتف مطلوب', true);
+    if (password.length < 8) return showAlert('registerError', '🔒 كلمة المرور 8 أحرف على الأقل', true);
+    if (password !== confirm) return showAlert('registerError', '❌ كلمتا المرور غير متطابقتين', true);
+
+    const verified = await verifyCodeBeforeRegister(email);
+    if (!verified) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: fullName,
+          email,
+          phone,
+          password,
+          referrer: referralCode
+        })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || 'فشل إنشاء الحساب');
+      showAlert('registerSuccess', '🎉 تم إنشاء الحساب بنجاح! جاري التحويل...');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 1500);
+    } catch (err) {
+      showAlert('registerError', err.message, true);
+    }
+  }
+
+  // ربط الأحداث
+  document.getElementById('sendCodeBtn').addEventListener('click', sendCode);
+  document.getElementById('resendBtn').addEventListener('click', sendCode);
+  document.getElementById('createBtn').addEventListener('click', createAccount);
+
+  // تعبئة رمز الإحالة من الرابط
+  const urlRef = new URLSearchParams(window.location.search).get('ref');
+  if (urlRef) document.getElementById('referralCode').value = urlRef;
+</script>
 </body>
-</html>
+    </html>
