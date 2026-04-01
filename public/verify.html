@@ -89,7 +89,7 @@ function verify(){
 
   const email = localStorage.getItem("email");
 
-  fetch("/verify", {
+  fetch("https://sudan-crypto-4mgt.onrender.com/verify", {
     method:"POST",
     headers:{
       "Content-Type":"application/json"
@@ -105,8 +105,12 @@ function verify(){
       alert("تم التحقق بنجاح");
       window.location.href = "login.html";
     }else{
-      alert("الكود غلط");
+      alert("كود التحقق غير صحيح");
     }
+  })
+  .catch(err => {
+    console.error("Error:", err);
+    alert("حدث خطأ في الاتصال بالسيرفر");
   });
 }
 
