@@ -311,7 +311,7 @@
   <div class="glass-card">
     <div class="header">
       <div class="welcome">
-        <h2>مرحباً، <span id="userName">...</span></h2>
+        <h2 id="welcome">مرحباً، <span id="userName">...</span></h2>
         <p>أهلاً بك في منصتك الرقمية</p>
       </div>
       <div class="social-icons">
@@ -386,82 +386,72 @@
     <div class="timer-box">
       <div class="timer-value" id="remainingDays">0</div>
       <div class="timer-label">الأيام المتبقية</div>
-      <div class="timer-value" id="remainingTime" style="font-size: 18px; margin-top: 5px;">--:--:--:--</div>
-      <div class="timer-label">الوقت المتبقي (يوم - ساعة - دقيقة - ثانية)</div>
     </div>
   </div>
 
-  <!-- آخر النشاط -->
+  <!-- آخر النشاطات -->
   <div class="glass-card">
-    <h3 style="color:white; margin-bottom:12px;"><i class="fa-solid fa-clock"></i> آخر النشاط</h3>
-    <div id="activityBox" class="activity-list">
-      <div class="empty-activity">جاري التحميل...</div>
+    <h3 style="color:white; margin-bottom:12px; font-size:16px;">آخر النشاطات</h3>
+    <div class="activity-list" id="activityList">
+      <div class="empty-activity">لا توجد نشاطات حالياً</div>
     </div>
   </div>
 
   <!-- الشريط السفلي -->
   <div class="bottom-nav">
-    <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
-    <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i><span>الباقات</span></a>
-    <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل</span></a>
-    <a href="assets.html"><i class="fa-solid fa-briefcase"></i><span>الأصول</span></a>
-    <a href="account.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
+    <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i>الرئيسية</a>
+    <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i>الباقات</a>
+    <a href="referrals.html"><i class="fa-solid fa-users"></i>فريقي</a>
+    <a href="profile.html"><i class="fa-solid fa-user"></i>حسابي</a>
   </div>
 
 </div>
 
-<div class="toast" id="toastMessage">
-  <i class="fa-solid fa-circle-check"></i>
-  <span id="toastText"></span>
-</div>
+<div id="toast" class="toast"></div>
 
 <script>
-  const API_BASE = "https://sudan-crypto-4mgt.onrender.com"; // غيّر إلى رابط السيرفر
-  const email = localStorage.getItem("userEmail");
-  let packageEndDate = null;
-  let timerInterval = null;
+  const API_BASE = ""; // اتركه فارغاً إذا كان السيرفر في نفس الدومين
 
-  if (!email) window.location.href = "login.html";
-
-  function showToast(message, isError = false) {
-    const toast = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
-    const icon = toast.querySelector('i');
-    toastText.innerText = message;
-    if (isError) {
-      icon.className = 'fa-solid fa-circle-exclamation';
-      toast.classList.add('error');
-      toast.classList.remove('success');
-    } else {
-      icon.className = 'fa-solid fa-circle-check';
-      toast.classList.add('success');
-      toast.classList.remove('error');
-    }
-    toast.style.display = 'flex';
-    setTimeout(() => toast.style.display = 'none', 3000);
-  }
-
-  // تحديث العداد الزمني
-  function updateTimer() {
-    if (!packageEndDate) return;
-    const now = new Date().getTime();
-    const diff = packageEndDate - now;
-    if (diff <= 0) {
-      document.getElementById('remainingDays').innerText = '0';
-      document.getElementById('remainingTime').innerHTML = 'انتهت';
-      if (timerInterval) clearInterval(timerInterval);
+  // جلب بيانات المستخدم
+  async function loadUserData() {
+    const email = localStorage.getItem('userEmail');
+    if (!email) {
+      location.href = 'login.html';
       return;
     }
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (86400000)) / (3600000));
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    document.getElementById('remainingDays').innerText = days;
-    document.getElementById('remainingTime').innerHTML = `${days} يوم - ${hours} س - ${minutes} د - ${seconds} ث`;
+
+    try {
+      const res = await fetch(`${API_BASE}/user-data?email=${email}`);
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('userName').textContent = data.user.name;
+        document.getElementById('balance').textContent = data.user.balance.toFixed(2);
+        document.getElementById('income').textContent = data.user.income.toFixed(2);
+        
+        if (data.user.package) {
+          document.getElementById('packageName').textContent = data.user.package.name;
+          document.getElementById('packageStatus').textContent = 'مفعلة';
+          document.getElementById('startDate').textContent = data.user.package.startDate;
+          document.getElementById('dailyProfit').textContent = data.user.package.dailyProfit;
+          document.getElementById('remainingDays').textContent = data.user.package.remainingDays;
+        }
+      }
+    } catch (err) {
+      console.error('Error loading user data:', err);
+    }
   }
 
-  // تحويل الأرباح
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'flex';
+    toast.className = 'toast ' + (isError ? 'error' : 'success');
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+
   async function transferIncome() {
+    const email = localStorage.getItem('userEmail');
+    showToast('جاري تحويل الأرباح...');
     try {
       const res = await fetch(`${API_BASE}/transfer-income`, {
         method: 'POST',
@@ -469,82 +459,14 @@
         body: JSON.stringify({ email })
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      showToast('تم تحويل الأرباح إلى الرصيد');
-      setTimeout(() => location.reload(), 1500);
-    } catch (err) {
-      showToast(err.message, true);
-    }
-  }
-
-  // جلب بيانات المستخدم
-  async function loadUserData() {
-    try {
-      const res = await fetch(`${API_BASE}/user-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error('فشل تحميل البيانات');
-
-      document.getElementById('userName').innerText = data.name || 'مستخدم';
-      document.getElementById('balance').innerText = (data.balance || 0).toFixed(2);
-      document.getElementById('income').innerText = (data.incomeBalance || 0).toFixed(2);
-
-      const packageName = data.packageName || 'لا توجد';
-      const dailyProfit = data.dailyProfit || 0;
-      const packageStart = data.packageStart;
-      const packageDuration = data.packageDurationDays || 180;
-
-      document.getElementById('packageName').innerText = packageName;
-      document.getElementById('dailyProfit').innerText = dailyProfit;
-
-      if (packageStart && packageDuration > 0) {
-        const startDate = new Date(packageStart);
-        document.getElementById('startDate').innerText = startDate.toLocaleDateString('ar-EG');
-        packageEndDate = startDate.getTime() + (packageDuration * 24 * 60 * 60 * 1000);
-        document.getElementById('packageStatus').innerText = 'نشطة';
-        document.getElementById('packageStatus').style.background = '#F0B90B';
-        document.getElementById('packageStatus').style.color = '#0a0f2a';
-        if (timerInterval) clearInterval(timerInterval);
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 1000);
+      if (data.success) {
+        showToast('تم تحويل الأرباح إلى الرصيد بنجاح');
+        loadUserData();
       } else {
-        document.getElementById('startDate').innerText = '-';
-        document.getElementById('remainingDays').innerText = '0';
-        document.getElementById('remainingTime').innerHTML = 'لا توجد باقة نشطة';
-        document.getElementById('packageStatus').innerText = 'غير مفعلة';
-        document.getElementById('packageStatus').style.background = '#ef4444';
-        document.getElementById('packageStatus').style.color = 'white';
-      }
-
-      // عرض آخر النشاطات
-      const box = document.getElementById('activityBox');
-      if (!data.operations || data.operations.length === 0) {
-        box.innerHTML = '<div class="empty-activity">لا توجد عمليات</div>';
-      } else {
-        let html = '';
-        data.operations.slice(0, 5).forEach(op => {
-          let text = '', icon = '';
-          if (op.type === 'deposit') { text = 'إيداع'; icon = 'fa-arrow-down'; }
-          else if (op.type === 'withdraw') { text = 'سحب'; icon = 'fa-arrow-up'; }
-          else if (op.type === 'daily_profit') { text = 'ربح يومي'; icon = 'fa-chart-line'; }
-          else if (op.type === 'referral_bonus') { text = 'مكافأة إحالة'; icon = 'fa-users'; }
-          else if (op.type === 'transfer_income') { text = 'تحويل أرباح'; icon = 'fa-exchange-alt'; }
-          else return;
-          html += `
-            <div class="activity-item">
-              <div><i class="fa-solid ${icon}" style="width:25px;"></i> ${text}</div>
-              <div>${op.amount} USDT</div>
-            </div>
-          `;
-        });
-        box.innerHTML = html;
+        showToast(data.message, true);
       }
     } catch (err) {
-      console.error(err);
-      showToast(err.message, true);
+      showToast('خطأ في الاتصال', true);
     }
   }
 
@@ -566,5 +488,13 @@
   createStars();
   loadUserData();
 </script>
+
+<script>
+  const name = localStorage.getItem("name");
+
+  if (name) {
+    document.getElementById("welcome").innerText = "مرحباً، " + name;
+  }
+</script>
 </body>
-  </html>
+</html>
