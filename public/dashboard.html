@@ -371,8 +371,8 @@
     <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
     <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i><span>الباقات</span></a>
     <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل اليومي</span></a>
-    <a href="transactions.html"><i class="fa-solid fa-list"></i><span>سجل العمليات</span></a>
-    <a href="account.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
+    <a href="profile.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
+    <a href="#" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i><span>خروج</span></a>
   </div>
 
 </div>
@@ -390,7 +390,9 @@
   let timerInterval = null;
   let profitTimerInterval = null;
 
-  if (!email) window.location.href = "login.html";
+  if (!email) {
+    window.location.replace("login.html");
+  }
 
   function showToast(message, isError = false) {
     const toast = document.getElementById('toastMessage');
@@ -517,6 +519,11 @@
     }
   }
 
+  function logout() {
+    localStorage.clear();
+    window.location.replace("login.html");
+  }
+
   function createStars() {
     const container = document.getElementById('starsContainer');
     for (let i = 0; i < 150; i++) {
@@ -535,4 +542,4 @@
   loadUserData();
 </script>
 </body>
-</html>
+                                                                               </html>
