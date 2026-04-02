@@ -1,545 +1,209 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>سودان كربتو | الرئيسية</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const { Resend } = require("resend");
+const mongoose = require("mongoose");
 
-    body {
-      font-family: 'Cairo', 'Tahoma', sans-serif;
-      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
-      min-height: 100vh;
-      padding: 20px;
-      position: relative;
-    }
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .star {
-      position: absolute;
-      background-color: #fff;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: twinkle 3s infinite alternate;
-    }
-    @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(1);}
-      100% { opacity: 1; transform: scale(1.2);}
-    }
+// 🔐 Resend
+const resend = new Resend("re_NBwHrNvM_8V7mPxiSistfrYy1B5DXTZDg");
 
-    .app {
-      max-width: 500px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
+// 🔥 ربط MongoDB
+mongoose.connect("mongodb+srv://maynwsmanswy_db_user:hOrkK68kCma6kJB5@cluster0.w0jrqw.mongodb.net/sudancrypto?retryWrites=true&w=majority")
+.then(() => console.log("✅ MongoDB connected"))
+.catch(err => console.log("❌ MongoDB error:", err));
 
-    .glass-card {
-      background: rgba(15, 25, 45, 0.65);
-      backdrop-filter: blur(16px);
-      border-radius: 32px;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 20px;
-      margin-bottom: 16px;
-      transition: transform 0.2s;
-    }
+// 📦 Schema
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  phone: String,
+  password: String,
+  ref: String,
+  balance: { type: Number, default: 0 }
+});
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    .welcome h2 {
-      color: white;
-      font-size: 20px;
-    }
-    .welcome p {
-      color: #F0B90B;
-      font-size: 13px;
-    }
-    .social-icons {
-      display: flex;
-      gap: 12px;
-    }
-    .social-icons a {
-      color: white;
-      font-size: 22px;
-      transition: 0.2s;
-    }
-    .social-icons a:hover {
-      color: #F0B90B;
-    }
+const User = mongoose.model("User", userSchema);
 
-    /* شبكة الأزرار الرئيسية (زر واحد فقط) */
-    .main-grid {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 16px;
-    }
-    .main-btn {
-      background: rgba(240, 185, 11, 0.15);
-      border: 1px solid rgba(240, 185, 11, 0.3);
-      border-radius: 20px;
-      padding: 12px 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 50%;
-    }
-    .main-btn i {
-      font-size: 24px;
-      color: #F0B90B;
-      margin-bottom: 6px;
-      display: block;
-    }
-    .main-btn span {
-      font-size: 14px;
-      color: white;
-    }
-    .main-btn:hover {
-      background: rgba(240, 185, 11, 0.3);
-      transform: translateY(-2px);
-    }
+// ملفات الموقع
+app.use(express.static(path.join(__dirname, "public")));
 
-    /* أزرار إضافية */
-    .extra-buttons {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .extra-btn {
-      flex: 1;
-      background: linear-gradient(95deg, #F0B90B, #FFD966);
-      border: none;
-      border-radius: 40px;
-      padding: 12px;
-      font-weight: bold;
-      font-size: 14px;
-      color: #0a0f2a;
-      cursor: pointer;
-      transition: 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .extra-btn:hover {
-      transform: translateY(-2px);
-    }
+let codes = {};
+let resetCodes = {};
 
-    /* بطاقة الباقة */
-    .package-card {
-      background: linear-gradient(135deg, rgba(240,185,11,0.2), rgba(255,217,102,0.1));
-      border: 1px solid rgba(240,185,11,0.4);
-      border-radius: 28px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .package-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .package-name {
-      font-size: 22px;
-      font-weight: bold;
-      color: #F0B90B;
-    }
-    .package-status {
-      background: #10b981;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 40px;
-      font-size: 12px;
-    }
-    .package-info {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      color: #ccc;
-      font-size: 13px;
-    }
-    .timer-box {
-      background: rgba(0,0,0,0.5);
-      border-radius: 20px;
-      padding: 12px;
-      text-align: center;
-      margin-top: 12px;
-    }
-    .timer-value {
-      font-size: 28px;
-      font-weight: bold;
-      color: #F0B90B;
-      font-family: monospace;
-    }
-    .timer-label {
-      font-size: 12px;
-      color: #aaa;
-    }
-    .next-profit-timer {
-      background: rgba(240,185,11,0.2);
-      border-radius: 16px;
-      padding: 10px;
-      margin-top: 10px;
-      text-align: center;
-    }
-    .next-profit-label {
-      font-size: 12px;
-      color: #F0B90B;
-      margin-bottom: 5px;
-    }
-    .next-profit-time {
-      font-size: 18px;
-      font-weight: bold;
-      color: #FFD966;
-      font-family: monospace;
-    }
-
-    /* إحصائيات */
-    .stats-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .stat-card {
-      flex: 1;
-      background: rgba(255,255,255,0.05);
-      border-radius: 20px;
-      padding: 12px;
-      text-align: center;
-    }
-    .stat-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: #F0B90B;
-    }
-    .stat-label {
-      font-size: 12px;
-      color: #aaa;
-    }
-
-    /* الشريط السفلي */
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      background: rgba(15,25,45,0.9);
-      backdrop-filter: blur(12px);
-      border-radius: 40px;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    .bottom-nav a {
-      text-align: center;
-      color: #aaa;
-      text-decoration: none;
-      font-size: 12px;
-      transition: 0.2s;
-    }
-    .bottom-nav a i {
-      font-size: 22px;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .bottom-nav a.active {
-      color: #F0B90B;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1e293b;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 14px;
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-    .toast.success { background: #10b981; }
-    .toast.error { background: #ef4444; }
-
-    @media (max-width: 500px) {
-      .main-btn { padding: 10px 16px; }
-      .main-btn i { font-size: 20px; }
-      .extra-btn { font-size: 12px; padding: 10px; }
-    }
-  </style>
-</head>
-<body>
-
-<div class="stars" id="starsContainer"></div>
-
-<div class="app">
-
-  <div class="glass-card">
-    <div class="header">
-      <div class="welcome">
-        <h2>مرحباً، <span id="userName">...</span></h2>
-        <p>أهلاً بك في منصتك الرقمية</p>
-      </div>
-      <div class="social-icons">
-        <a href="https://wa.me/16727123329" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-        <a href="https://t.me/lool0002" target="_blank"><i class="fa-brands fa-telegram"></i></a>
-      </div>
-    </div>
-  </div>
-
-  <!-- الزر الرئيسي الوحيد: عن المنصة -->
-  <div class="glass-card">
-    <div class="main-grid">
-      <div class="main-btn" onclick="location.href='about.html'">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>عن المنصة</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- الأزرار السفلية -->
-  <div class="glass-card">
-    <div class="extra-buttons">
-      <button class="extra-btn" onclick="transferIncome()">
-        <i class="fa-solid fa-exchange-alt"></i> تحويل الأرباح
-      </button>
-      <button class="extra-btn" onclick="location.href='withdraw.html'">
-        <i class="fa-solid fa-arrow-up"></i> سحب
-      </button>
-      <button class="extra-btn" onclick="location.href='income.html'">
-        <i class="fa-solid fa-chart-line"></i> الدخل اليومي
-      </button>
-    </div>
-  </div>
-
-  <!-- إحصائيات -->
-  <div class="glass-card">
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="balance">0</div>
-        <div class="stat-label">الرصيد (USDT)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="income">0</div>
-        <div class="stat-label">الأرباح (USDT)</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- بطاقة الباقة -->
-  <div class="package-card" id="packageCard">
-    <div class="package-header">
-      <span class="package-name" id="packageName">لا توجد باقة</span>
-      <span class="package-status" id="packageStatus">غير مفعلة</span>
-    </div>
-    <div class="package-info">
-      <span><i class="fa-regular fa-calendar"></i> تاريخ البدء: <span id="startDate">-</span></span>
-      <span><i class="fa-solid fa-chart-simple"></i> الربح اليومي: <span id="dailyProfit">0</span> USDT</span>
-    </div>
-    <div class="timer-box">
-      <div class="timer-value" id="remainingDays">0</div>
-      <div class="timer-label">الأيام المتبقية</div>
-      <div class="timer-value" id="remainingTime" style="font-size: 18px; margin-top: 5px;">--:--:--:--</div>
-      <div class="timer-label">الوقت المتبقي (يوم - ساعة - دقيقة - ثانية)</div>
-    </div>
-    <div class="next-profit-timer" id="nextProfitTimer">
-      <div class="next-profit-label"><i class="fa-regular fa-clock"></i> الوقت المتبقي لنزول الربح اليومي</div>
-      <div class="next-profit-time" id="nextProfitTime">--:--:--</div>
-    </div>
-  </div>
-
-  <!-- الشريط السفلي (5 أزرار) -->
-  <div class="bottom-nav">
-    <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
-    <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i><span>الباقات</span></a>
-    <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل اليومي</span></a>
-    <a href="profile.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
-    <a href="#" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i><span>خروج</span></a>
-  </div>
-
-</div>
-
-<div class="toast" id="toastMessage">
-  <i class="fa-solid fa-circle-check"></i>
-  <span id="toastText"></span>
-</div>
-
-<script>
-  const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
-  const email = localStorage.getItem("userEmail");
-  let packageEndDate = null;
-  let lastProfitTime = null;
-  let timerInterval = null;
-  let profitTimerInterval = null;
+// ================== إرسال كود ==================
+app.post("/send-code", async (req, res) => {
+  const { email } = req.body;
 
   if (!email) {
-    window.location.replace("login.html");
+    return res.json({ success: false, message: "أدخل الإيميل" });
   }
 
-  function showToast(message, isError = false) {
-    const toast = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
-    const icon = toast.querySelector('i');
-    toastText.innerText = message;
-    if (isError) {
-      icon.className = 'fa-solid fa-circle-exclamation';
-      toast.classList.add('error');
-      toast.classList.remove('success');
-    } else {
-      icon.className = 'fa-solid fa-circle-check';
-      toast.classList.add('success');
-      toast.classList.remove('error');
-    }
-    toast.style.display = 'flex';
-    setTimeout(() => toast.style.display = 'none', 3000);
+  // 🔥 أهم سطر (الحل)
+  const exists = await User.findOne({ email });
+
+  if (exists) {
+    return res.json({
+      success: false,
+      message: "هذا البريد مسجل بالفعل"
+    });
   }
 
-  function updateTimer() {
-    if (!packageEndDate) return;
-    const now = new Date().getTime();
-    const diff = packageEndDate - now;
-    if (diff <= 0) {
-      document.getElementById('remainingDays').innerText = '0';
-      document.getElementById('remainingTime').innerHTML = 'انتهت';
-      if (timerInterval) clearInterval(timerInterval);
-      return;
-    }
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (86400000)) / (3600000));
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    document.getElementById('remainingDays').innerText = days;
-    document.getElementById('remainingTime').innerHTML = `${days} يوم - ${hours} س - ${minutes} د - ${seconds} ث`;
+  const code = Math.floor(100000 + Math.random() * 900000);
+  codes[email] = code;
+
+  try {
+    await resend.emails.send({
+      from: "Sudan Crypto <noreply@sudancrypto.com>",
+      to: email,
+      subject: "كود التحقق",
+      html: `<h2>كود التحقق: ${code}</h2>`
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.json({ success: false, message: "فشل الإرسال" });
+  }
+});
+
+// ================== تحقق من الكود ==================
+app.post("/verify", (req, res) => {
+  const { email, code } = req.body;
+
+  if (codes[email] == code) {
+    delete codes[email];
+    return res.json({ success: true });
   }
 
-  function updateProfitTimer() {
-    if (!lastProfitTime) {
-      document.getElementById('nextProfitTime').innerHTML = '--:--:--';
-      return;
-    }
-    const now = new Date().getTime();
-    const nextProfit = lastProfitTime + (24 * 60 * 60 * 1000);
-    const diff = nextProfit - now;
-    if (diff <= 0) {
-      document.getElementById('nextProfitTime').innerHTML = 'جاهز للنزول';
-      return;
-    }
-    const hours = Math.floor(diff / (3600000));
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    document.getElementById('nextProfitTime').innerHTML = `${hours} ساعة ${minutes} دقيقة ${seconds} ثانية`;
+  res.json({ success: false });
+});
+
+// ================== تسجيل ==================
+app.post("/register", async (req, res) => {
+  const { name, email, phone, password, ref } = req.body;
+
+  if (!name || !email || !phone || !password) {
+    return res.json({ success: false, message: "املأ كل الحقول" });
   }
 
-  async function transferIncome() {
-    try {
-      const res = await fetch(`${API_BASE}/transfer-income`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      showToast('تم تحويل الأرباح إلى الرصيد');
-      setTimeout(() => location.reload(), 1500);
-    } catch (err) {
-      showToast(err.message, true);
-    }
+  if (password.length < 8) {
+    return res.json({ success: false, message: "كلمة السر ضعيفة" });
   }
 
-  async function loadUserData() {
-    try {
-      const res = await fetch(`${API_BASE}/user-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error('فشل تحميل البيانات');
-
-      document.getElementById('userName').innerText = data.name || 'مستخدم';
-      document.getElementById('balance').innerText = (data.balance || 0).toFixed(2);
-      document.getElementById('income').innerText = (data.incomeBalance || 0).toFixed(2);
-
-      const packageName = data.packageName || 'لا توجد';
-      const dailyProfit = data.dailyProfit || 0;
-      const packageStart = data.packageStart;
-      const packageDuration = data.packageDurationDays || 180;
-      lastProfitTime = data.lastProfitAt ? new Date(data.lastProfitAt).getTime() : null;
-
-      document.getElementById('packageName').innerText = packageName;
-      document.getElementById('dailyProfit').innerText = dailyProfit;
-
-      if (packageStart && packageDuration > 0) {
-        const startDate = new Date(packageStart);
-        document.getElementById('startDate').innerText = startDate.toLocaleDateString('ar-EG');
-        packageEndDate = startDate.getTime() + (packageDuration * 24 * 60 * 60 * 1000);
-        document.getElementById('packageStatus').innerText = 'نشطة';
-        document.getElementById('packageStatus').style.background = '#F0B90B';
-        document.getElementById('packageStatus').style.color = '#0a0f2a';
-        if (timerInterval) clearInterval(timerInterval);
-        updateTimer();
-        timerInterval = setInterval(updateTimer, 1000);
-      } else {
-        document.getElementById('startDate').innerText = '-';
-        document.getElementById('remainingDays').innerText = '0';
-        document.getElementById('remainingTime').innerHTML = 'لا توجد باقة نشطة';
-        document.getElementById('packageStatus').innerText = 'غير مفعلة';
-        document.getElementById('packageStatus').style.background = '#ef4444';
-        document.getElementById('packageStatus').style.color = 'white';
-      }
-
-      if (lastProfitTime) {
-        if (profitTimerInterval) clearInterval(profitTimerInterval);
-        updateProfitTimer();
-        profitTimerInterval = setInterval(updateProfitTimer, 1000);
-      } else {
-        document.getElementById('nextProfitTime').innerHTML = 'لا توجد بيانات';
-      }
-    } catch (err) {
-      console.error(err);
-      showToast(err.message, true);
-    }
+  const exists = await User.findOne({ email });
+  if (exists) {
+    return res.json({ success: false, message: "الإيميل مستخدم" });
   }
 
-  function logout() {
-    localStorage.clear();
-    window.location.replace("login.html");
+  const user = new User({
+    name,
+    email,
+    phone,
+    password,
+    ref: ref || null
+  });
+
+  await user.save();
+
+  res.json({ success: true });
+});
+
+// ================== تسجيل دخول ==================
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email, password });
+
+  if (!user) {
+    return res.json({ success: false, message: "بيانات غلط" });
   }
 
-  function createStars() {
-    const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 150; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      star.style.width = (Math.random() * 3 + 1) + 'px';
-      star.style.height = star.style.width;
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 5 + 's';
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      container.appendChild(star);
-    }
+  res.json({
+    success: true,
+    name: user.name,
+    email: user.email
+  });
+});
+
+// ================== نسيت كلمة السر ==================
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.json({ success: false, message: "غير موجود" });
   }
-  createStars();
-  loadUserData();
-</script>
-</body>
-</html>
+
+  const code = Math.floor(100000 + Math.random() * 900000);
+  resetCodes[email] = code;
+
+  await resend.emails.send({
+    from: "Sudan Crypto <noreply@sudancrypto.com>",
+    to: email,
+    subject: "Reset Password",
+    html: `<h1>${code}</h1>`
+  });
+
+  res.json({ success: true });
+});
+
+// ================== تحقق reset ==================
+app.post("/verify-reset-code", (req, res) => {
+  const { email, code } = req.body;
+
+  if (resetCodes[email] == code) {
+    resetCodes[email + "_ok"] = true;
+    return res.json({ success: true });
+  }
+
+  res.json({ success: false });
+});
+
+// ================== تعيين كلمة جديدة ==================
+app.post("/reset-password", async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!resetCodes[email + "_ok"]) {
+    return res.json({ success: false });
+  }
+
+  await User.updateOne({ email }, { password: newPassword });
+
+  delete resetCodes[email];
+  delete resetCodes[email + "_ok"];
+
+  res.json({ success: true });
+});
+
+// ==================
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.post("/user-data", async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.json({ success: false });
+  }
+
+  res.json({
+    success: true,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    isVerified: user.isVerified || false
+  });
+});
+
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log("Server running on " + PORT);
+});
