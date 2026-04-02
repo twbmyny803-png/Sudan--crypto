@@ -376,133 +376,93 @@
   <div class="input-group">
     <label><i class="fa-solid fa-lock"></i> كلمة المرور</label>
     <div class="password-wrapper">
-      <input type="password" id="password" placeholder="8 أحرف أو أكثر">
-      <button type="button" class="toggle-password" onclick="toggleField('password', this)">إظهار</button>
+      <input type="password" id="password" placeholder="••••••••">
+      <button class="toggle-password" id="togglePass">إظهار</button>
     </div>
   </div>
 
-  <div class="input-group">
-    <label><i class="fa-solid fa-check-circle"></i> تأكيد كلمة المرور</label>
-    <div class="password-wrapper">
-      <input type="password" id="confirmPassword" placeholder="أعد كتابة كلمة المرور">
-      <button type="button" class="toggle-password" onclick="toggleField('confirmPassword', this)">إظهار</button>
-    </div>
-  </div>
-
-  <button class="btn-register" id="createBtn" onclick="register()"><i class="fa-regular fa-user-plus"></i> إنشاء حساب</button>
-
-  <div class="alert-message" id="registerSuccess"></div>
-  <div class="alert-message alert-error" id="registerError"></div>
+  <button class="btn-register" id="registerBtn"><i class="fa-solid fa-user-check"></i> إنشاء الحساب الآن</button>
 
   <div class="links">
-    <a href="login.html"><i class="fa-solid fa-arrow-left"></i> لديك حساب؟ سجل دخول</a>
+    <a href="login.html">لديك حساب بالفعل؟ تسجيل الدخول <i class="fa-solid fa-arrow-left"></i></a>
   </div>
 
-  <footer>© 2025 سودان كربتو – استثمر بثقة</footer>
+  <footer>
+    &copy; 2024 سودان كربتو - جميع الحقوق محفوظة
+  </footer>
 </div>
 
 <script>
-  // ====================== التكوين الأساسي ======================
-  const API_BASE = "https://sudan-crypto-4mgt.onrender.com"; // خادمك الحالي
-  let timerInterval = null;
-  let countdown = 60;
-
-  // ---------- إنشاء النجوم المتحركة ----------
-  function createStars() {
-    const starsContainer = document.getElementById('starsContainer');
-    for (let i = 0; i < 180; i++) {
-      let star = document.createElement('div');
-      star.classList.add('star');
-      let size = Math.random() * 3 + 1;
-      star.style.width = size + 'px';
-      star.style.height = size + 'px';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 5 + 's';
-      star.style.animationDuration = Math.random() * 3 + 2 + 's';
-      starsContainer.appendChild(star);
-    }
-  }
-  createStars();
-
-  // ---------- دوال مساعدة ----------
-  function showAlert(elementId, message, isError = false) {
-    const box = document.getElementById(elementId);
-    box.innerText = message;
-    box.style.display = 'block';
-    if (isError) box.classList.add('alert-error');
-    else box.classList.add('alert-success');
-    setTimeout(() => {
-      box.style.display = 'none';
-      box.classList.remove('alert-error', 'alert-success');
-    }, 4000);
+  // إعداد النجوم الخلفية
+  const starsContainer = document.getElementById('starsContainer');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.width = Math.random() * 3 + 'px';
+    star.style.height = star.style.width;
+    star.style.animationDelay = Math.random() * 3 + 's';
+    starsContainer.appendChild(star);
   }
 
-  function hideAlert(elementId) {
-    const box = document.getElementById(elementId);
-    box.style.display = 'none';
-  }
+  // إظهار/إخفاء كلمة المرور
+  const togglePass = document.getElementById('togglePass');
+  const passwordInput = document.getElementById('password');
+  togglePass.addEventListener('click', () => {
+    const type = passwordInput.type === 'password' ? 'text' : 'password';
+    passwordInput.type = type;
+    togglePass.textContent = type === 'password' ? 'إظهار' : 'إخفاء';
+  });
 
-  function toggleField(fieldId, btn) {
-    const input = document.getElementById(fieldId);
-    if (input.type === 'password') {
-      input.type = 'text';
-      btn.textContent = 'إخفاء';
-    } else {
-      input.type = 'password';
-      btn.textContent = 'إظهار';
-    }
-  }
-
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  // ---------- كود التحقق ----------
+  // التعامل مع كود التحقق (الانتقال التلقائي)
   const codeInputs = document.querySelectorAll('.code-box input');
-  function focusNext(index) {
-    if (index < 5) codeInputs[index + 1].focus();
-  }
-  codeInputs.forEach((inp, idx) => {
-    inp.addEventListener('input', (e) => {
-      inp.value = inp.value.replace(/[^0-9]/g, '');
-      if (inp.value.length === 1 && idx < 5) focusNext(idx);
+  codeInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      if (e.target.value && index < 5) codeInputs[index + 1].focus();
     });
-    inp.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && inp.value === '' && idx > 0) codeInputs[idx - 1].focus();
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !e.target.value && index > 0) codeInputs[index - 1].focus();
     });
   });
 
-  function getCode() {
-    return Array.from(codeInputs).map(i => i.value).join('');
-  }
-
+  // العداد الزمني
+  let timer;
   function startTimer() {
-    const countSpan = document.getElementById('count');
-    const resendBtn = document.getElementById('resendBtn');
-    if (timerInterval) clearInterval(timerInterval);
-    let time = 60;
-    countSpan.innerText = time;
-    resendBtn.style.display = 'none';
-    timerInterval = setInterval(() => {
-      time--;
-      countSpan.innerText = time;
-      if (time <= 0) {
-        clearInterval(timerInterval);
-        resendBtn.style.display = 'block';
+    let count = 60;
+    document.getElementById('count').textContent = count;
+    document.getElementById('resendBtn').style.display = 'none';
+    clearInterval(timer);
+    timer = setInterval(() => {
+      count--;
+      document.getElementById('count').textContent = count;
+      if (count <= 0) {
+        clearInterval(timer);
+        document.getElementById('resendBtn').style.display = 'block';
       }
     }, 1000);
   }
 
+  // تنبيهات
+  function showAlert(id, msg, isError = false) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.className = isError ? 'alert-message alert-error' : 'alert-message alert-success';
+    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  }
+
+  // API Base URL
+  const API_BASE = window.location.origin;
+
   async function sendCode() {
-    const email = document.getElementById('email').value.trim();
-    if (!email) return showAlert('sendError', '✏️ أدخل البريد الإلكتروني أولاً', true);
-    if (!isValidEmail(email)) return showAlert('sendError', '📧 بريد إلكتروني غير صحيح', true);
-    hideAlert('sendError');
+    const email = document.getElementById('email').value;
+    if (!email) return showAlert('sendError', '❌ يرجى إدخال البريد الإلكتروني', true);
+
     showAlert('sendSuccess', '⏳ جاري إرسال الكود...');
     try {
       // ✅ استخدام المسار الكامل للـ API بدلاً من المسار النسبي
-      const res = await fetch(`${API_BASE}/register`, {
+      const res = await fetch(`${API_BASE}/send-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -518,47 +478,58 @@
     }
   }
 
-  function register() {
-    const name = document.querySelector('input[placeholder="الاسم الكامل"]').value;
-    const email = document.getElementById("email").value;
-    const phone = document.querySelector('input[placeholder="+249 رقم الهاتف"]').value;
-    const password = document.getElementById("password").value;
+  async function register() {
+    const name = document.getElementById('fullName').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+    const ref = document.getElementById('referralCode').value;
+    const password = document.getElementById('password').value;
+    
+    // تجميع الكود
+    let code = "";
+    codeInputs.forEach(input => code += input.value);
 
-    // ✅ استخدام المسار الكامل للـ API
-    fetch(`${API_BASE}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        phone,
-        password
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        alert("تم إرسال الكود للإيميل");
-        
-        // حفظ الإيميل مؤقت
-        localStorage.setItem("email", email);
+    if (!name || !email || !phone || !password || code.length < 6) {
+      return alert("يرجى إكمال جميع البيانات وكود التحقق");
+    }
 
-        window.location.href = "verify.html";
-      } else {
-        alert(data.message);
+    try {
+      // 1. التحقق من الكود أولاً
+      const verifyRes = await fetch(`${API_BASE}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code })
+      });
+      const verifyData = await verifyRes.json();
+      
+      if (!verifyData.success) {
+        return showAlert('verifyError', '❌ كود التحقق غير صحيح', true);
       }
-    })
-    .catch(err => {
-      console.error("Error:", err);
-      alert("حدث خطأ في الاتصال بالسيرفر");
-    });
+
+      // 2. إتمام التسجيل
+      const regRes = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, password, ref })
+      });
+      const regData = await regRes.json();
+
+      if (regData.success) {
+        alert("✅ تم إنشاء الحساب بنجاح!");
+        window.location.href = "login.html";
+      } else {
+        alert(regData.message);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء التسجيل");
+    }
   }
 
   // ربط الأحداث
   document.getElementById('sendCodeBtn').addEventListener('click', sendCode);
   document.getElementById('resendBtn').addEventListener('click', sendCode);
+  document.getElementById('registerBtn').addEventListener('click', register);
 
   // تعبئة رمز الإحالة من الرابط
   const urlRef = new URLSearchParams(window.location.search).get('ref');
