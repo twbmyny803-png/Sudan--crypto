@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>الباقات والرصيد</title>
+<style>
+body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
+input { padding:10px; margin:5px; width:100% }
+button { padding:10px; margin:5px; cursor:pointer }
+</style>
+</head>
+
+<body>
+
+<h2>إدارة الباقات والرصيد 📦</h2>
+
+<input type="text" id="email" placeholder="البريد">
+<input type="number" id="amount" placeholder="المبلغ">
+
+<button onclick="addBalance()">➕ زيادة رصيد</button>
+<button onclick="deductBalance()">➖ خصم رصيد</button>
+
+<hr>
+
+<input type="text" id="packageName" placeholder="اسم الباقة">
+<input type="number" id="dailyProfit" placeholder="الربح اليومي">
+<input type="number" id="days" placeholder="عدد الأيام">
+
+<button onclick="addPackage()">🔥 إضافة باقة</button>
+
+<script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
+
+async function addBalance(){
+  const email = document.getElementById("email").value;
+  const amount = document.getElementById("amount").value;
+
+  await fetch(API+"/admin-add-balance",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email, amount})
+  });
+
+  alert("تمت الزيادة");
+}
+
+async function deductBalance(){
+  const email = document.getElementById("email").value;
+  const amount = document.getElementById("amount").value;
+
+  await fetch(API+"/admin-deduct-balance",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email, amount})
+  });
+
+  alert("تم الخصم");
+}
+
+async function addPackage(){
+  const email = document.getElementById("email").value;
+  const packageName = document.getElementById("packageName").value;
+  const dailyProfit = document.getElementById("dailyProfit").value;
+  const days = document.getElementById("days").value;
+
+  await fetch(API+"/admin-add-package",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email, packageName, dailyProfit, durationDays:days})
+  });
+
+  alert("تمت إضافة الباقة");
+}
+</script>
+
+</body>
+</html>
