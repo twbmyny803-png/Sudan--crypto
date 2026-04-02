@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>سودان كربتو | إنشاء الطلب</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(1);}
+      100% { opacity: 1; transform: scale(1.2);}
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240,185,11,0.15);
+      border: 1px solid rgba(240,185,11,0.3);
+      border-radius: 40px;
+      padding: 8px 20px;
+      color: #F0B90B;
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 16px;
+      transition: 0.2s;
+    }
+    .glass-card {
+      background: rgba(15, 25, 45, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      color: #F0B90B;
+      font-size: 22px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: #ddd;
+    }
+    .order-id {
+      background: rgba(240,185,11,0.15);
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .order-id-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #F0B90B;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+    .network-buttons {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .network-btn {
+      flex: 1;
+      background: rgba(240,185,11,0.15);
+      border: 1px solid rgba(240,185,11,0.3);
+      border-radius: 40px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .network-btn i {
+      font-size: 28px;
+      color: #F0B90B;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .network-btn:hover {
+      background: rgba(240,185,11,0.3);
+      transform: translateY(-2px);
+    }
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.success { background: #10b981; color: white; }
+    .toast.error { background: #ef4444; color: white; }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="starsContainer"></div>
+
+<div class="container">
+
+  <a href="packages.html" class="back-btn"><i class="fa-solid fa-arrow-right"></i> العودة للباقات</a>
+
+  <div class="glass-card">
+    <h2><i class="fa-solid fa-file-invoice"></i> تفاصيل الطلب</h2>
+    <div class="info-row">
+      <span><i class="fa-solid fa-box"></i> الباقة</span>
+      <span id="packageName">-</span>
+    </div>
+    <div class="info-row">
+      <span><i class="fa-solid fa-dollar-sign"></i> المبلغ</span>
+      <span id="price">- USDT</span>
+    </div>
+    <div class="info-row">
+      <span><i class="fa-solid fa-chart-line"></i> الربح اليومي</span>
+      <span id="dailyProfit">- USDT</span>
+    </div>
+    <div class="info-row">
+      <span><i class="fa-regular fa-clock"></i> المدة</span>
+      <span id="duration">- يوم</span>
+    </div>
+  </div>
+
+  <div class="glass-card">
+    <div class="order-id">
+      <i class="fa-solid fa-hashtag"></i> رقم الطلب
+      <div class="order-id-value" id="orderId">-</div>
+    </div>
+    <h2><i class="fa-solid fa-network-wired"></i> اختر الشبكة</h2>
+    <div class="network-buttons">
+      <div class="network-btn" onclick="selectNetwork('TRC20')">
+        <i class="fa-brands fa-tron"></i>
+        <span>USDT TRC20</span>
+      </div>
+      <div class="network-btn" onclick="selectNetwork('BEP20')">
+        <i class="fa-brands fa-ethereum"></i>
+        <span>USDT BEP20</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div id="toastMessage" class="toast">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="toastText"></span>
+</div>
+
+<script>
+  const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
+  const email = localStorage.getItem("userEmail");
+
+  const packageName = localStorage.getItem("selectedPackage");
+  const price = localStorage.getItem("selectedPrice");
+  const dailyProfit = localStorage.getItem("selectedDailyProfit");
+  const duration = localStorage.getItem("selectedDuration");
+
+  if (!email) window.location.href = "login.html";
+  if (!packageName || !price) window.location.href = "packages.html";
+
+  document.getElementById('packageName').innerText = packageName;
+  document.getElementById('price').innerText = price + " USDT";
+  document.getElementById('dailyProfit').innerText = dailyProfit + " USDT";
+  document.getElementById('duration').innerText = duration + " يوم";
+
+  const orderId = "ORD" + Date.now();
+  document.getElementById('orderId').innerText = orderId;
+
+  function showToast(message, isError = false) {
+    const toast = document.getElementById('toastMessage');
+    const toastText = document.getElementById('toastText');
+    const icon = toast.querySelector('i');
+    toastText.innerText = message;
+    if (isError) {
+      icon.className = 'fa-solid fa-circle-exclamation';
+      toast.className = 'toast error';
+    } else {
+      icon.className = 'fa-solid fa-circle-check';
+      toast.className = 'toast success';
+    }
+    toast.style.display = 'flex';
+    setTimeout(() => toast.style.display = 'none', 3000);
+  }
+
+  function selectNetwork(network) {
+    localStorage.setItem("selectedNetwork", network);
+    localStorage.setItem("orderId", orderId);
+    window.location.href = "deposit.html";
+  }
+
+  function createStars() {
+    const container = document.getElementById('starsContainer');
+    for (let i = 0; i < 150; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      star.style.width = (Math.random() * 3 + 1) + 'px';
+      star.style.height = star.style.width;
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      container.appendChild(star);
+    }
+  }
+  createStars();
+</script>
+
+</body>
+  </html>
