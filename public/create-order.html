@@ -2,619 +2,84 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تفاصيل الطلب - باقات الاستثمار</title>
+    <title>تفاصيل الطلب</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
-            font-family: 'Segoe UI', 'Tahoma', system-ui, sans-serif;
+            background: linear-gradient(145deg, #0a0f1a, #0c1325);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             padding: 40px 20px;
-            min-height: 100vh;
-            position: relative;
+            color: white;
         }
-
-        .stars-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .star-bg {
-            position: absolute;
-            background: radial-gradient(white, rgba(255,255,255,0.3));
-            border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8);}
-            50% { opacity: 1; transform: scale(1.2);}
-        }
-
         .container {
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-        }
-
-        .back-btn {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(245,176,66,0.4);
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #f5b042;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .back-btn:hover {
-            background: rgba(245,176,66,0.2);
-            transform: translateX(-3px);
-        }
-
-        .order-card {
-            background: rgba(15, 22, 40, 0.95);
-            backdrop-filter: blur(12px);
+            max-width: 600px;
+            margin: auto;
+            background: rgba(15,22,40,0.95);
             border-radius: 32px;
-            border: 1px solid rgba(245, 176, 66, 0.5);
             padding: 32px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .title {
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-            background: linear-gradient(90deg, #f5b042, #ffd966);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 28px;
-        }
-
-        .info-box {
-            background: rgba(0,0,0,0.4);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(245,176,66,0.2);
-        }
-
-        .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .info-label {
-            color: #f5b042;
-            font-size: 18px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-value {
-            color: #ffffff;
-            font-size: 18px;
-            font-weight: 500;
-        }
-
-        .highlight-value {
-            color: #4caf50;
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .order-number-box {
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 15px;
-            text-align: center;
-            margin: 20px 0;
-            border-right: 4px solid #f5b042;
-        }
-
-        .order-number-box span:first-child {
-            color: #f5b042;
-            font-size: 14px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .order-number-box span:last-child {
-            color: #ffd966;
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .wallet-section {
-            margin: 25px 0;
-        }
-
-        .wallet-title {
-            color: #f5b042;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            border-right: 3px solid #f5b042;
-            padding-right: 12px;
-        }
-
-        .network-options {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .network-btn {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(245,176,66,0.4);
-            padding: 12px 20px;
-            border-radius: 50px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .network-btn i {
-            color: #f5b042;
-        }
-
-        .network-btn.active {
-            background: rgba(245,176,66,0.25);
-            border-color: #f5b042;
-            color: #f5b042;
-        }
-
-        .address-box {
-            background: rgba(0,0,0,0.6);
-            border-radius: 20px;
-            padding: 15px;
-            border: 1px solid rgba(245,176,66,0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .address-text {
-            color: #ffd966;
-            font-size: 14px;
-            word-break: break-all;
-            font-family: monospace;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .copy-btn {
-            background: #f5b042;
-            border: none;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* قسم رفع الإيصال ورقم العملية */
-        .upload-section {
-            margin: 25px 0;
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 20px;
-        }
-
-        .upload-title {
-            color: #f5b042;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .transaction-input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 15px;
-            border: 1px solid rgba(245,176,66,0.4);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            font-size: 16px;
-            margin-bottom: 15px;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .transaction-input:focus {
-            outline: none;
-            border-color: #f5b042;
-        }
-
-        .file-label {
-            display: block;
-            background: rgba(245,176,66,0.15);
-            border: 1px dashed #f5b042;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #f5b042;
-        }
-
-        .file-label:hover {
-            background: rgba(245,176,66,0.25);
-        }
-
-        .file-label i {
-            font-size: 28px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .preview-image {
-            margin-top: 15px;
-            text-align: center;
-        }
-
-        .preview-image img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 16px;
             border: 1px solid #f5b042;
         }
-
-        /* الباركود */
-        .barcode-section {
-            text-align: center;
-            margin: 25px 0;
-            padding: 15px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-        }
-
-        .barcode-title {
-            color: #f5b042;
-            margin-bottom: 12px;
-        }
-
-        .barcode-img {
-            background: white;
-            padding: 10px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-
-        .barcode-img canvas {
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* العد التنازلي */
-        .timer-section {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-        }
-
-        .timer-label {
-            color: #f5b042;
-            font-size: 14px;
-        }
-
-        .timer-value {
+        .title {
             font-size: 28px;
-            font-weight: bold;
-            color: #ff6666;
-            font-family: monospace;
-            letter-spacing: 3px;
+            text-align: center;
+            color: #f5b042;
+            margin-bottom: 25px;
         }
-
-        .confirm-btn {
-            width: 100%;
-            background: linear-gradient(90deg, #f5b042, #ffd966);
-            border: none;
-            padding: 16px;
-            font-size: 20px;
-            font-weight: bold;
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2a3a50;
+        }
+        .pay-btn {
+            background: #f5b042;
             color: #1a1f2f;
-            border-radius: 50px;
+            padding: 14px;
+            border-radius: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 25px;
             cursor: pointer;
-            margin-top: 20px;
-            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-        }
-
-        .confirm-btn:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        @media (max-width: 550px) {
-            .order-card {
-                padding: 20px;
-            }
-            .info-label, .info-value {
-                font-size: 14px;
-            }
+            gap: 10px;
         }
     </style>
 </head>
 <body>
-<div class="stars-bg" id="starsContainer"></div>
-
 <div class="container">
-    <button class="back-btn" id="backBtn">
-        <i class="fas fa-arrow-right"></i> رجوع للباقات
-    </button>
-
-    <div class="order-card">
-        <div class="title">
-            <i class="fas fa-clipboard-list"></i> تفاصيل الطلب
-        </div>
-
-        <!-- معلومات الباقة -->
-        <div class="info-box">
-            <div class="info-row">
-                <div class="info-label"><i class="fas fa-gem"></i> الباقة</div>
-                <div class="info-value" id="packageName">-</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label"><i class="fas fa-dollar-sign"></i> المبلغ</div>
-                <div class="info-value" id="packagePrice">- USDT</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label"><i class="fas fa-chart-line"></i> الربح اليومي</div>
-                <div class="info-value highlight-value" id="dailyProfit">- $</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label"><i class="fas fa-calendar-alt"></i> مدة الباقة</div>
-                <div class="info-value">280 يوم</div>
-            </div>
-        </div>
-
-        <!-- رقم الطلب -->
-        <div class="order-number-box">
-            <span><i class="fas fa-hashtag"></i> رقم الطلب</span>
-            <span id="orderNumber">-</span>
-        </div>
-
-        <!-- العد التنازلي (الزمن المتبقي) -->
-        <div class="timer-section">
-            <div class="timer-label"><i class="fas fa-hourglass-half"></i> الوقت المتبقي لتأكيد الدفع</div>
-            <div class="timer-value" id="timer">24:00:00</div>
-        </div>
-
-        <!-- عنوان المحفظة -->
-        <div class="wallet-section">
-            <div class="wallet-title">
-                <i class="fas fa-wallet"></i> عنوان المحفظة
-            </div>
-            <div class="network-options" id="networkOptions">
-                <button class="network-btn" data-network="BEP20">
-                    <i class="fab fa-bitcoin"></i> USDT BEP20
-                </button>
-                <button class="network-btn" data-network="TRC20">
-                    <i class="fab fa-tron"></i> USDT TRC20
-                </button>
-            </div>
-            <div class="address-box">
-                <span class="address-text" id="walletAddress">0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0</span>
-                <button class="copy-btn" id="copyBtn">
-                    <i class="fas fa-copy"></i> نسخ
-                </button>
-            </div>
-        </div>
-
-        <!-- الباركود -->
-        <div class="barcode-section">
-            <div class="barcode-title"><i class="fas fa-barcode"></i> باركود الطلب</div>
-            <div class="barcode-img" id="barcode"></div>
-        </div>
-
-        <!-- رقم العملية وإيصال الدفع -->
-        <div class="upload-section">
-            <div class="upload-title"><i class="fas fa-exchange-alt"></i> رقم العملية (Transaction ID)</div>
-            <input type="text" class="transaction-input" id="transactionId" placeholder="أدخل رقم العملية هنا...">
-
-            <div class="upload-title"><i class="fas fa-receipt"></i> إيصال الدفع</div>
-            <label class="file-label" id="fileLabel">
-                <i class="fas fa-cloud-upload-alt"></i>
-                اضغط لرفع الإيصال
-                <input type="file" id="fileInput" accept="image/*">
-            </label>
-            <div class="preview-image" id="preview"></div>
-        </div>
-
-        <button class="confirm-btn" id="confirmBtn">
-            <i class="fas fa-check-circle"></i> تأكيد الطلب
-        </button>
+    <div class="title"><i class="fas fa-clipboard-list"></i> تفاصيل الطلب</div>
+    <div class="row"><span><i class="fas fa-gem"></i> الباقة</span><span id="pkgName">-</span></div>
+    <div class="row"><span><i class="fas fa-dollar-sign"></i> المبلغ</span><span id="pkgPrice">-</span></div>
+    <div class="row"><span><i class="fas fa-chart-line"></i> الربح اليومي</span><span id="dailyProfit">-</span></div>
+    <div class="row"><span><i class="fas fa-calendar-alt"></i> مدة الباقة</span><span>280 يوم</span></div>
+    <div class="row"><span><i class="fas fa-hashtag"></i> رقم الطلب</span><span id="orderNumber">-</span></div>
+    
+    <div class="pay-btn" id="goToPayment">
+        <i class="fas fa-credit-card"></i> إتمام الدفع
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script>
-    // توليد النجوم
-    function createStars() {
-        const starsContainer = document.getElementById('starsContainer');
-        for (let i = 0; i < 150; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star-bg');
-            const size = Math.random() * 3 + 1;
-            star.style.width = size + 'px';
-            star.style.height = size + 'px';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 5 + 's';
-            star.style.animationDuration = Math.random() * 3 + 2 + 's';
-            starsContainer.appendChild(star);
-        }
+    const pkgName = localStorage.getItem('selectedPackage') || 'الباقة البرونزية';
+    const pkgPrice = localStorage.getItem('selectedPrice') || '50 $';
+    const daily = localStorage.getItem('dailyProfit') || '2 $';
+    document.getElementById('pkgName').innerText = pkgName;
+    document.getElementById('pkgPrice').innerText = pkgPrice;
+    document.getElementById('dailyProfit').innerText = daily;
+
+    let orderNumber = localStorage.getItem('orderNumber');
+    if (!orderNumber) {
+        orderNumber = 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
+        localStorage.setItem('orderNumber', orderNumber);
     }
-    createStars();
-
-    // قراءة البيانات من localStorage
-    let packageName = localStorage.getItem('selectedPackage') || 'الباقة البرونزية';
-    let packagePrice = localStorage.getItem('selectedPrice') || '50 $';
-    let dailyProfit = localStorage.getItem('dailyProfit') || '2 $';
-
-    // تنظيف وعرض البيانات
-    packageName = packageName.replace(/[🟢🔴🟡⭐]/g, '').trim();
-    packagePrice = packagePrice.replace('USDT', '').trim();
-    
-    document.getElementById('packageName').innerText = packageName;
-    document.getElementById('packagePrice').innerHTML = `${packagePrice} <span style="color:#aaa;">USDT</span>`;
-    document.getElementById('dailyProfit').innerHTML = `${dailyProfit} <span style="color:#aaa;">/ يومياً</span>`;
-
-    // رقم طلب عشوائي
-    const orderNumber = 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
     document.getElementById('orderNumber').innerText = orderNumber;
 
-    // الباركود
-    JsBarcode("#barcode", orderNumber, {
-        format: "CODE128",
-        lineColor: "#000",
-        width: 1.5,
-        height: 50,
-        displayValue: true,
-        fontSize: 14,
-        margin: 10
-    });
-
-    // العد التنازلي (24 ساعة)
-    let timeLeft = 24 * 60 * 60;
-    const timerElement = document.getElementById('timer');
-    const timerInterval = setInterval(() => {
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            timerElement.innerHTML = "00:00:00";
-            timerElement.style.color = "#ff4444";
-        } else {
-            timeLeft--;
-            const hours = Math.floor(timeLeft / 3600);
-            const minutes = Math.floor((timeLeft % 3600) / 60);
-            const seconds = timeLeft % 60;
-            timerElement.innerHTML = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-        }
-    }, 1000);
-
-    // إدارة المحفظة
-    const walletAddresses = {
-        BEP20: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0',
-        TRC20: 'TXLAq9Y2Xr8hGQ5qZkLp3xVnRwJmY7cFbD'
+    document.getElementById('goToPayment').onclick = () => {
+        window.location.href = 'payment.html';
     };
-    let currentNetwork = 'BEP20';
-    const walletAddressSpan = document.getElementById('walletAddress');
-    const networkBtns = document.querySelectorAll('.network-btn');
-
-    function updateWalletDisplay() {
-        walletAddressSpan.innerText = walletAddresses[currentNetwork];
-        networkBtns.forEach(btn => {
-            if (btn.getAttribute('data-network') === currentNetwork) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-    networkBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            currentNetwork = btn.getAttribute('data-network');
-            updateWalletDisplay();
-        });
-    });
-    updateWalletDisplay();
-
-    // نسخ العنوان
-    document.getElementById('copyBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(walletAddressSpan.innerText);
-        const btn = document.getElementById('copyBtn');
-        btn.innerHTML = '<i class="fas fa-check"></i> تم';
-        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> نسخ', 2000);
-    });
-
-    // معاينة رفع الإيصال
-    const fileInput = document.getElementById('fileInput');
-    const preview = document.getElementById('preview');
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                preview.innerHTML = `<img src="${event.target.result}" alt="الإيصال">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // تأكيد الطلب
-    document.getElementById('confirmBtn').addEventListener('click', () => {
-        const transactionId = document.getElementById('transactionId').value;
-        const hasReceipt = fileInput.files.length > 0;
-        
-        if (!transactionId) {
-            alert("⚠️ الرجاء إدخال رقم العملية (Transaction ID)");
-            return;
-        }
-        if (!hasReceipt) {
-            alert("⚠️ الرجاء رفع إيصال الدفع");
-            return;
-        }
-        
-        alert(`✅ تم استلام طلبك بنجاح!\n\n📦 الباقة: ${packageName}\n💰 المبلغ: ${packagePrice} USDT\n💵 الربح اليومي: ${dailyProfit}\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${currentNetwork}\n🆔 رقم العملية: ${transactionId}\n\nسيتم مراجعة إيصالك وتفعيل الباقة خلال 24 ساعة.`);
-        
-        // هنا تقدر ترسل البيانات للخادم
-    });
-
-    // رجوع
-    document.getElementById('backBtn').addEventListener('click', () => {
-        window.location.href = 'packages.html';
-    });
 </script>
 </body>
-                </html>
+</html>
