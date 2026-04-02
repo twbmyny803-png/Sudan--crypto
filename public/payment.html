@@ -152,37 +152,31 @@
             padding: 14px;
             border-radius: 15px;
             border: 1px solid rgba(245,176,66,0.4);
-            background: rgba(0,0,0,0.3);
-            color: #888;
-            margin: 15px 0;
-            direction: ltr;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        .transaction-input.active {
             background: rgba(0,0,0,0.5);
             color: white;
-            cursor: text;
-            opacity: 1;
+            margin: 15px 0;
+            direction: ltr;
+        }
+        .transaction-input:disabled {
+            background: rgba(0,0,0,0.3);
+            color: #888;
+            cursor: not-allowed;
         }
         .file-label {
             display: block;
-            background: rgba(245,176,66,0.1);
-            border: 1px dashed #888;
+            background: rgba(245,176,66,0.15);
+            border: 1px dashed #f5b042;
             border-radius: 20px;
             padding: 20px;
             text-align: center;
-            cursor: not-allowed;
-            transition: 0.2s;
-            opacity: 0.6;
-        }
-        .file-label.active {
-            background: rgba(245,176,66,0.15);
-            border-color: #f5b042;
             cursor: pointer;
-            opacity: 1;
+            transition: 0.2s;
         }
-        .file-label.active:hover {
+        .file-label.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .file-label:hover:not(.disabled) {
             background: rgba(245,176,66,0.25);
         }
         .upload-success {
@@ -273,11 +267,11 @@
             <div id="qrcode"></div>
         </div>
 
-        <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID)" disabled>
+        <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID)">
         
         <label class="file-label" id="fileLabel">
             <i class="fas fa-cloud-upload-alt"></i> اضغط لرفع إيصال الدفع
-            <input type="file" id="fileInput" accept="image/*" disabled>
+            <input type="file" id="fileInput" accept="image/*">
         </label>
         <div id="uploadStatus"></div>
         <div class="preview-image" id="preview"></div>
@@ -342,38 +336,46 @@
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     const statusDiv = document.getElementById('statusMessage');
     
-    // حالة الدفع
+    // حالة الدفع من localStorage
     let paymentStatus = localStorage.getItem('paymentStatus') || 'pending';
     
-    function unlockFields(message, isError = true) {
+    // دالة لقفل الحقول
+    function lockFields() {
+        transactionInput.disabled = true;
+        fileInput.disabled = true;
+        fileLabel.classList.add('disabled');
+    }
+    
+    // دالة لفتح الحقول
+    function unlockFields() {
         transactionInput.disabled = false;
-        transactionInput.classList.add('active');
         fileInput.disabled = false;
-        fileLabel.classList.add('active');
-        
-        if (message) {
-            statusDiv.style.display = 'block';
-            statusDiv.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i> ${message}`;
-            statusDiv.className = `status-message ${isError ? 'status-rejected' : 'status-warning'}`;
+        fileLabel.classList.remove('disabled');
+    }
+    
+    // دالة لعرض رسالة
+    function showMessage(message, type) {
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = message;
+        if (type === 'success') {
+            statusDiv.className = 'status-message status-success';
+        } else if (type === 'rejected') {
+            statusDiv.className = 'status-message status-rejected';
+        } else if (type === 'warning') {
+            statusDiv.className = 'status-message status-warning';
         }
     }
     
-    function lockFields() {
-        transactionInput.disabled = true;
-        transactionInput.classList.remove('active');
-        fileInput.disabled = true;
-        fileLabel.classList.remove('active');
-    }
-    
-    // ✅ حفظ وقت البدء في localStorage (لأول مرة)
+    // حفظ وقت بدء العد (لأول مرة)
     let startTime = localStorage.getItem('paymentStartTime');
     if (!startTime || paymentStatus !== 'pending') {
-        // إذا ما فيه وقت بدء أو الحالة مش pending، نبدأ وقت جديد
         startTime = Date.now();
         localStorage.setItem('paymentStartTime', startTime);
     }
     
-    const TOTAL_SECONDS = 15 * 60; // 15 دقيقة
+    const TOTAL_SECONDS = 15 * 60;
+    let timerFinished = false;
+    const timerEl = document.getElementById('timer');
     
     function getRemainingSeconds() {
         const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
@@ -382,69 +384,66 @@
         return remaining;
     }
     
-    function updateTimerDisplay() {
+    function updateTimerAndCheck() {
         let remaining = getRemainingSeconds();
         const mins = Math.floor(remaining / 60);
         const secs = remaining % 60;
         timerEl.innerHTML = (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
         
-        if (remaining <= 0) {
-            timerEl.style.color = "#ff0000";
-            return true; // انتهى الوقت
-        }
-        return false;
-    }
-    
-    const timerEl = document.getElementById('timer');
-    let timerFinished = false;
-    
-    // التحقق من الوقت أول مرة
-    let remainingInit = getRemainingSeconds();
-    if (remainingInit <= 0) {
-        timerFinished = true;
-        timerEl.innerHTML = "00:00";
-        timerEl.style.color = "#ff0000";
-        if (paymentStatus === 'pending') {
-            unlockFields("⏰ انتهى وقت الدفع. يمكنك الآن رفع إيصال الدفع لتأكيد طلبك.", false);
-        }
-    }
-    
-    // تشغيل العداد كل ثانية
-    const interval = setInterval(() => {
-        if (paymentStatus === 'paid') {
-            return;
-        }
-        
-        let remaining = getRemainingSeconds();
         if (remaining <= 0 && !timerFinished) {
             timerFinished = true;
-            timerEl.innerHTML = "00:00";
             timerEl.style.color = "#ff0000";
-            if (paymentStatus !== 'paid' && paymentStatus !== 'rejected') {
-                unlockFields("⏰ انتهى وقت الدفع. يمكنك الآن رفع إيصال الدفع لتأكيد طلبك.", false);
+            
+            // إذا انتهى الوقت والحالة pending أو pending_review ولم يتم الرفض أو القبول بعد
+            if (paymentStatus === 'pending' || paymentStatus === 'pending_review') {
+                // نفتح الحقول
+                unlockFields();
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('disabled');
+                showMessage("⏰ انتهى وقت الدفع. يمكنك الآن رفع إيصال الدفع لتأكيد طلبك.", 'warning');
+                // تغيير الحالة إلى timeout عشان ما نعيد الفتح مرة ثانية
+                paymentStatus = 'timeout';
+                localStorage.setItem('paymentStatus', 'timeout');
             }
-        } else if (remaining > 0) {
-            const mins = Math.floor(remaining / 60);
-            const secs = remaining % 60;
-            timerEl.innerHTML = (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
         }
-    }, 1000);
+    }
     
-    // إذا كان مرفوض، افتح الحقول
-    if (paymentStatus === 'rejected') {
-        unlockFields("❌ طلبك السابق تم رفضه. الرجاء إعادة رفع إيصال جديد مع رقم عملية صحيح.", true);
-    } else if (paymentStatus === 'paid') {
+    // تحديث العداد كل ثانية
+    updateTimerAndCheck();
+    const timerInterval = setInterval(updateTimerAndCheck, 1000);
+    
+    // تطبيق الحالة عند تحميل الصفحة
+    if (paymentStatus === 'paid') {
         lockFields();
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✓ تم تأكيد دفعتك بنجاح. سيتم تفعيل الباقة قريباً.';
-        statusDiv.className = 'status-message status-success';
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-    } else {
-        // pending: إذا الوقت لسا ما انتهى، الحقول مقفولة
-        if (getRemainingSeconds() > 0) {
-            lockFields();
-        }
+        showMessage('✓ تم تأكيد دفعتك بنجاح. سيتم تفعيل الباقة قريباً.', 'success');
+        clearInterval(timerInterval);
+    } 
+    else if (paymentStatus === 'rejected') {
+        unlockFields();
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('disabled');
+        showMessage('❌ طلبك السابق تم رفضه. الرجاء إعادة رفع إيصال جديد مع رقم عملية صحيح.', 'rejected');
+    }
+    else if (paymentStatus === 'timeout') {
+        unlockFields();
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('disabled');
+        showMessage("⏰ انتهى وقت الدفع. يمكنك الآن رفع إيصال الدفع لتأكيد طلبك.", 'warning');
+    }
+    else if (paymentStatus === 'pending_review') {
+        // تحت المراجعة: الحقول مقفولة
+        lockFields();
+        confirmBtn.disabled = true;
+        confirmBtn.classList.add('disabled');
+        showMessage('✓ جاري مراجعة طلبك... سيتم الرد خلال 24 ساعة.', 'success');
+    }
+    else {
+        // pending: الحقول شغالة من البداية
+        unlockFields();
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('disabled');
     }
     
     // رفع الإيصال
@@ -461,23 +460,14 @@
             reader.onload = function(ev) {
                 preview.innerHTML = `<img src="${ev.target.result}" alt="الإيصال">`;
                 uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-check-circle"></i> ✓ تم رفع الإيصال بنجاح</div>';
-                const label = document.getElementById('fileLabel');
-                label.style.background = 'rgba(76, 175, 80, 0.2)';
-                label.style.borderColor = '#4caf50';
-                setTimeout(() => {
-                    if (!fileInput.disabled) {
-                        label.style.background = 'rgba(245,176,66,0.15)';
-                        label.style.borderColor = '#f5b042';
-                    }
-                }, 2000);
             };
             reader.readAsDataURL(file);
         }
     });
     
-    // تأكيد الدفع
+    // تأكيد الدفع - يقفل الحقول بعد الضغط
     document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
-        const txId = document.getElementById('transactionId').value;
+        const txId = transactionInput.value;
         if (!txId) {
             alert("⚠️ الرجاء إدخال رقم العملية");
             return;
@@ -487,19 +477,20 @@
             return;
         }
         
-        localStorage.setItem('paymentStatus', 'paid');
+        // حفظ البيانات
+        localStorage.setItem('paymentStatus', 'pending_review');
         localStorage.setItem('transactionId', txId);
         localStorage.setItem('paymentTime', new Date().toISOString());
+        paymentStatus = 'pending_review';
         
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✓ تم استلام طلبك بنجاح! سيتم مراجعة إيصالك وتفعيل الباقة خلال 24 ساعة.';
-        statusDiv.className = 'status-message status-success';
-        
+        // قفل الحقول
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
         
-        alert(`✅ تم استلام طلبك بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\nسيتم مراجعة إيصالك وتفعيل الباقة خلال 24 ساعة.`);
+        showMessage('✓ تم استلام طلبك بنجاح! جاري مراجعة إيصالك...', 'success');
+        
+        alert(`✅ تم استلام طلبك بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\nسيتم مراجعة إيصالك خلال 24 ساعة.`);
     });
     
     // رجوع
@@ -507,25 +498,24 @@
         window.location.href = 'create-order.html';
     });
     
-    // دوال للمسؤول
+    // ✅ دوال للمسؤول (من console)
     window.rejectPayment = function(reason) {
         localStorage.setItem('paymentStatus', 'rejected');
         paymentStatus = 'rejected';
-        unlockFields(`❌ تم رفض طلبك. السبب: ${reason || 'بيانات الدفع غير صحيحة'}. الرجاء إعادة رفع إيصال جديد.`, true);
+        unlockFields();
         confirmBtn.disabled = false;
         confirmBtn.classList.remove('disabled');
+        showMessage(`❌ تم رفض طلبك. السبب: ${reason || 'بيانات الدفع غير صحيحة'}. الرجاء إعادة رفع إيصال جديد.`, 'rejected');
     };
     
     window.approvePayment = function() {
         localStorage.setItem('paymentStatus', 'paid');
         paymentStatus = 'paid';
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> ✓ تم قبول طلبك. سيتم تفعيل الباقة فوراً.';
-        statusDiv.className = 'status-message status-success';
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
+        showMessage('✓ تم قبول طلبك. سيتم تفعيل الباقة فوراً.', 'success');
     };
 </script>
 </body>
-</html>
+                </html>
