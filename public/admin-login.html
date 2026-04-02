@@ -1,327 +1,65 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>دخول الأدمن | سودان كربتو</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: radial-gradient(circle at 30% 20%, #0a0f2a, #030617);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* نجوم متحركة */
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .star {
-      position: absolute;
-      background-color: #fff;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: twinkle 3s infinite alternate;
-    }
-
-    @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(1);}
-      100% { opacity: 1; transform: scale(1.2);}
-    }
-
-    /* الكارد الرئيسي */
-    .login-container {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 420px;
-      margin: 20px;
-    }
-
-    .glass-card {
-      background: rgba(15, 25, 45, 0.75);
-      backdrop-filter: blur(16px);
-      border-radius: 32px;
-      border: 1px solid rgba(240, 185, 11, 0.3);
-      padding: 40px 32px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-    }
-
-    /* الهيدر */
-    .logo {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .logo h1 {
-      color: #F0B90B;
-      font-size: 28px;
-      letter-spacing: 1px;
-    }
-
-    .logo p {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 14px;
-      margin-top: 8px;
-    }
-
-    /* الحقول */
-    .input-group {
-      margin-bottom: 20px;
-    }
-
-    .input-group label {
-      display: block;
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 14px;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .input-group input {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 40px;
-      border: 1px solid rgba(240, 185, 11, 0.3);
-      background: rgba(10, 20, 35, 0.8);
-      color: white;
-      font-size: 16px;
-      font-family: 'Cairo', sans-serif;
-      transition: 0.3s;
-      outline: none;
-    }
-
-    .input-group input:focus {
-      border-color: #F0B90B;
-      box-shadow: 0 0 10px rgba(240, 185, 11, 0.2);
-    }
-
-    .input-group input::placeholder {
-      color: rgba(255, 255, 255, 0.4);
-    }
-
-    /* زر الدخول */
-    .login-btn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 40px;
-      border: none;
-      background: linear-gradient(95deg, #F0B90B, #FFD966);
-      color: #0a0f2a;
-      font-weight: bold;
-      font-size: 18px;
-      font-family: 'Cairo', sans-serif;
-      cursor: pointer;
-      transition: 0.3s;
-      margin-top: 10px;
-    }
-
-    .login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(240, 185, 11, 0.3);
-    }
-
-    /* خط فاصل */
-    .divider {
-      text-align: center;
-      margin: 25px 0 15px;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 13px;
-    }
-
-    /* روابط */
-    .links {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .links a {
-      color: #F0B90B;
-      text-decoration: none;
-      font-size: 13px;
-    }
-
-    .links a:hover {
-      text-decoration: underline;
-    }
-
-    /* رسالة الخطأ */
-    .error-message {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid #ef4444;
-      border-radius: 40px;
-      padding: 10px 15px;
-      margin-bottom: 20px;
-      color: #ef4444;
-      font-size: 13px;
-      text-align: center;
-      display: none;
-    }
-
-    /* تنسيق التوست */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 14px;
-      z-index: 2000;
-      display: none;
-      font-weight: bold;
-    }
-
-    .toast.error {
-      background: #ef4444;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<style>
+body{
+  background:#0b1220;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:Arial;
+}
+.box{
+  background:#111827;
+  padding:30px;
+  border-radius:20px;
+  width:300px;
+  text-align:center;
+}
+input{
+  width:100%;
+  padding:10px;
+  margin:10px 0;
+  border:none;
+  border-radius:10px;
+}
+button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#f0b90b;
+  font-weight:bold;
+}
+</style>
 </head>
+
 <body>
 
-<div class="stars" id="starsContainer"></div>
-
-<div class="login-container">
-  <div class="glass-card">
-    <div class="logo">
-      <h1>سودان كربتو</h1>
-      <p>لوحة تحكم المدير</p>
-    </div>
-
-    <div id="errorBox" class="error-message">
-      <span>⚠️ اسم المستخدم أو كلمة المرور غير صحيحة</span>
-    </div>
-
-    <div class="input-group">
-      <label>اسم المستخدم</label>
-      <input type="text" id="username" placeholder="أدخل اسم المستخدم">
-    </div>
-
-    <div class="input-group">
-      <label>كلمة المرور</label>
-      <input type="password" id="password" placeholder="أدخل كلمة المرور">
-    </div>
-
-    <button class="login-btn" onclick="adminLogin()">دخول</button>
-
-    <div class="divider">
-      <span>🔐 منطقة آمنة</span>
-    </div>
-
-    <div class="links">
-      <a href="login.html">العودة إلى صفحة المستخدمين</a>
-    </div>
-  </div>
+<div class="box">
+  <h2>دخول الأدمن</h2>
+  <input type="text" id="user" placeholder="Username">
+  <input type="password" id="pass" placeholder="Password">
+  <button onclick="login()">دخول</button>
 </div>
 
-<div id="toast" class="toast"></div>
-
 <script>
-  // دالة عرض التوست
-  function showToast(msg, isError = true) {
-    const t = document.getElementById('toast');
-    t.innerText = msg;
-    t.className = 'toast ' + (isError ? 'error' : 'success');
-    t.style.display = 'flex';
-    setTimeout(() => {
-      t.style.display = 'none';
-    }, 3000);
+function login(){
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
+
+  if(u === "admain" && p === "admain_2030"){
+    localStorage.setItem("admin","true");
+    window.location.href = "admin-users.html";
+  }else{
+    alert("خطأ في البيانات");
   }
-
-  // دالة تسجيل دخول الأدمن
-  function adminLogin() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const errorBox = document.getElementById('errorBox');
-
-    // التحقق من الحقول الفارغة
-    if (!username || !password) {
-      errorBox.style.display = 'block';
-      showToast('يرجى إدخال اسم المستخدم وكلمة المرور', true);
-      return;
-    }
-
-    // بيانات الدخول الصحيحة
-    if (username === "admain" && password === "admain_2030") {
-      // حفظ حالة الدخول
-      localStorage.setItem("adminLoggedIn", "true");
-      localStorage.setItem("adminUsername", username);
-      
-      // عرض رسالة نجاح
-      showToast('تم تسجيل الدخول بنجاح، جاري التحويل...', false);
-      
-      // إخفاء رسالة الخطأ إن وجدت
-      errorBox.style.display = 'none';
-      
-      // التحويل إلى صفحة الأدمن بعد نصف ثانية
-      setTimeout(() => {
-        window.location.href = "admin.html";
-      }, 500);
-    } else {
-      errorBox.style.display = 'block';
-      showToast('اسم المستخدم أو كلمة المرور غير صحيحة', true);
-      
-      // تفريغ الحقول
-      document.getElementById('password').value = '';
-    }
-  }
-
-  // دالة إنشاء النجوم
-  function createStars() {
-    const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 120; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      star.style.width = (Math.random() * 3 + 1) + 'px';
-      star.style.height = star.style.width;
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 5 + 's';
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      container.appendChild(star);
-    }
-  }
-
-  // منع دخول الأدمن إذا كان مسجل دخوله بالفعل
-  if (localStorage.getItem("adminLoggedIn") === "true") {
-    window.location.href = "admin.html";
-  }
-
-  // إضافة حدث Enter للضغط على زر الدخول
-  document.getElementById('password').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      adminLogin();
-    }
-  });
-  
-  document.getElementById('username').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      adminLogin();
-    }
-  });
-
-  // تشغيل النجوم
-  createStars();
+}
 </script>
 
 </body>
-  </html>
+</html>
