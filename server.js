@@ -184,6 +184,24 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+app.post("/user-data", async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.json({ success: false });
+  }
+
+  res.json({
+    success: true,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    isVerified: user.isVerified || false
+  });
+});
+
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
