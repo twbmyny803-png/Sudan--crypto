@@ -2,7 +2,10 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>باقات الاستثمار</title>
+    <!-- Font Awesome للأيقونات البرمجية -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -11,206 +14,443 @@
         }
 
         body {
-            background: #eef2f7;
-            font-family: 'Segoe UI', Tahoma, system-ui, sans-serif;
+            background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
+            font-family: 'Segoe UI', 'Tahoma', system-ui, sans-serif;
             padding: 40px 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* النجوم المتحركة في الخلفية */
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star-bg {
+            position: absolute;
+            background: radial-gradient(white, rgba(255,255,255,0.3));
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8);}
+            50% { opacity: 1; transform: scale(1.2);}
         }
 
         .container {
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
-        /* زر الباقات العلوي */
-        .main-btn {
+        /* زر باقات الاستثمار العلوي */
+        .main-invest-btn {
             width: 100%;
-            background: #0a2b3e;
-            color: white;
-            text-align: center;
-            padding: 18px;
-            font-size: 26px;
-            font-weight: bold;
+            background: linear-gradient(95deg, #f5b042, #ffd966);
             border: none;
-            border-radius: 50px;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #1a1f2f;
+            text-align: center;
+            border-radius: 60px;
             cursor: pointer;
-            margin-bottom: 40px;
+            margin-bottom: 45px;
             transition: 0.2s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             font-family: inherit;
         }
 
-        .main-btn:hover {
-            background: #124b66;
+        .main-invest-btn i {
+            margin-left: 12px;
         }
 
-        /* قائمة الباقات العمودية */
+        .main-invest-btn:hover {
+            transform: scale(1.01);
+            box-shadow: 0 15px 30px rgba(245,176,66,0.3);
+        }
+
+        /* قائمة الباقات */
         .packages-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 22px;
         }
 
         /* بطاقة الباقة الواحدة */
         .package-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px 24px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            transition: 0.2s;
-            border: 1px solid #dee4ec;
+            background: rgba(15, 22, 40, 0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 24px 28px;
+            border: 1px solid rgba(245, 176, 66, 0.3);
+            transition: 0.25s;
+            cursor: pointer;
         }
 
         .package-card:hover {
-            transform: translateX(-5px);
-            box-shadow: 0 10px 22px rgba(0,0,0,0.1);
+            border-color: #f5b042;
+            transform: translateY(-4px);
+            box-shadow: 0 18px 35px rgba(0,0,0,0.4);
         }
 
-        .package-info {
-            flex: 2;
-        }
-
-        .price {
-            font-size: 28px;
-            font-weight: 800;
-            color: #1e4a6b;
-        }
-
-        .price small {
-            font-size: 14px;
-            font-weight: normal;
-            color: #6c7a8e;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
         }
 
         .package-name {
-            font-size: 20px;
+            font-size: 26px;
             font-weight: bold;
-            color: #1f2f3e;
-            margin: 5px 0 4px;
+            background: linear-gradient(90deg, #f5b042, #ffdd88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
-        .stars {
+        .package-name i {
+            background: none;
+            -webkit-background-clip: unset;
+            background-clip: unset;
             color: #f5b042;
-            font-size: 16px;
-            letter-spacing: 2px;
-            margin: 5px 0;
+            margin-left: 10px;
+            font-size: 24px;
+        }
+
+        .package-price {
+            font-size: 32px;
+            font-weight: 800;
+            color: #ffdd88;
+        }
+
+        .package-price i {
+            font-size: 24px;
+            margin-left: 6px;
+            color: #ffdd88;
+        }
+
+        .package-price small {
+            font-size: 15px;
+            color: #aaa;
+        }
+
+        /* نجوم التقييم المتحركة */
+        .stars-rating {
+            font-size: 18px;
+            color: #f5b042;
+            letter-spacing: 4px;
+            margin: 10px 0;
+            animation: starPulse 1.8s infinite;
+        }
+
+        @keyframes starPulse {
+            0%, 100% { text-shadow: 0 0 0px #f5b042; opacity: 0.8;}
+            50% { text-shadow: 0 0 8px #f5b042; opacity: 1;}
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 18px 0 12px;
+        }
+
+        .daily-profit {
+            background: rgba(0,0,0,0.55);
+            padding: 6px 16px;
+            border-radius: 50px;
+            text-align: center;
+        }
+
+        .daily-profit i {
+            margin-left: 8px;
+            color: #4caf50;
+        }
+
+        .daily-profit span:last-child {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4caf50;
+            margin-right: 8px;
+        }
+
+        .duration {
+            font-size: 14px;
+            color: #ccc;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 14px;
+            border-radius: 50px;
+        }
+
+        .duration i {
+            margin-left: 8px;
+            color: #f5b042;
         }
 
         .desc {
-            font-size: 13px;
-            color: #5a6b7c;
+            font-size: 14px;
+            color: #ccd6f0;
+            margin: 12px 0;
         }
 
-        .buy-btn {
-            background: #1e4a6b;
+        .desc i {
+            margin-left: 8px;
+            color: #f5b042;
+        }
+
+        .buy-now-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #f5b042, #ffd966);
             border: none;
-            color: white;
-            padding: 10px 24px;
-            font-size: 16px;
+            padding: 14px;
+            font-size: 18px;
             font-weight: bold;
+            color: #111827;
             border-radius: 40px;
             cursor: pointer;
+            margin-top: 18px;
             transition: 0.2s;
             font-family: inherit;
         }
 
-        .buy-btn:hover {
-            background: #0f334b;
+        .buy-now-btn i {
+            margin-left: 10px;
+        }
+
+        .buy-now-btn:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
         }
 
         @media (max-width: 550px) {
             .package-card {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
+                padding: 18px;
             }
-            .buy-btn {
-                width: 100%;
-                text-align: center;
+            .package-price {
+                font-size: 26px;
+            }
+            .package-name {
+                font-size: 22px;
             }
         }
     </style>
 </head>
 <body>
+<div class="stars-bg" id="starsContainer"></div>
+
 <div class="container">
-    <button class="main-btn" id="mainPackagesBtn">باقات الاستثمار</button>
+    <button class="main-invest-btn" id="mainPackagesBtn">
+        <i class="fas fa-chart-line"></i> باقات الاستثمار
+    </button>
 
     <div class="packages-list" id="packagesList">
-        <!-- باقة 50 -->
-        <div class="package-card">
-            <div class="package-info">
-                <div class="price">50 $ <small>شهرياً</small></div>
-                <div class="package-name">الباقة البرونزية</div>
-                <div class="stars">★★★☆☆</div>
-                <div class="desc">بداية ذكية - عائد 4%</div>
+        <!-- 1. الباقة البرونزية 50$ -->
+        <div class="package-card" data-package="bronze">
+            <div class="card-header">
+                <div class="package-name">
+                    <i class="fas fa-medal"></i> الباقة البرونزية
+                </div>
+                <div class="package-price">
+                    <i class="fas fa-dollar-sign"></i> 50 <small>USDT</small>
+                </div>
             </div>
-            <button class="buy-btn" data-price="50">شراء الآن</button>
+            <div class="stars-rating">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i>
+            </div>
+            <div class="info-row">
+                <div class="daily-profit">
+                    <i class="fas fa-chart-simple"></i>
+                    <span>ربح يومي</span>
+                    <span>4%</span>
+                </div>
+                <div class="duration">
+                    <i class="fas fa-calendar-alt"></i> مدّة الباقة 280 يوم
+                </div>
+            </div>
+            <div class="desc">
+                <i class="fas fa-rocket"></i> بداية ذكية - عائد ثابت ومناسب للمبتدئين
+            </div>
+            <button class="buy-now-btn">
+                <i class="fas fa-cart-shopping"></i> شراء الآن
+            </button>
         </div>
 
-        <!-- باقة 100 -->
-        <div class="package-card">
-            <div class="package-info">
-                <div class="price">100 $ <small>شهرياً</small></div>
-                <div class="package-name">الباقة الفضية</div>
-                <div class="stars">★★★★☆</div>
-                <div class="desc">نمو متوازن - عائد 6%</div>
+        <!-- 2. الباقة الفضية 100$ -->
+        <div class="package-card" data-package="silver">
+            <div class="card-header">
+                <div class="package-name">
+                    <i class="fas fa-gem"></i> الباقة الفضية
+                </div>
+                <div class="package-price">
+                    <i class="fas fa-dollar-sign"></i> 100 <small>USDT</small>
+                </div>
             </div>
-            <button class="buy-btn" data-price="100">شراء الآن</button>
+            <div class="stars-rating">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <div class="info-row">
+                <div class="daily-profit">
+                    <i class="fas fa-chart-simple"></i>
+                    <span>ربح يومي</span>
+                    <span>6%</span>
+                </div>
+                <div class="duration">
+                    <i class="fas fa-calendar-alt"></i> مدّة الباقة 280 يوم
+                </div>
+            </div>
+            <div class="desc">
+                <i class="fas fa-bolt"></i> نمو سريع - دعم فوري وأرباح متزايدة
+            </div>
+            <button class="buy-now-btn">
+                <i class="fas fa-cart-shopping"></i> شراء الآن
+            </button>
         </div>
 
-        <!-- باقة 250 -->
-        <div class="package-card">
-            <div class="package-info">
-                <div class="price">250 $ <small>شهرياً</small></div>
-                <div class="package-name">الباقة الذهبية</div>
-                <div class="stars">★★★★★</div>
-                <div class="desc">أرباح متوسطة - عائد 9%</div>
+        <!-- 3. الباقة الذهبية 250$ -->
+        <div class="package-card" data-package="gold">
+            <div class="card-header">
+                <div class="package-name">
+                    <i class="fas fa-crown"></i> الباقة الذهبية
+                </div>
+                <div class="package-price">
+                    <i class="fas fa-dollar-sign"></i> 250 <small>USDT</small>
+                </div>
             </div>
-            <button class="buy-btn" data-price="250">شراء الآن</button>
+            <div class="stars-rating">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <div class="info-row">
+                <div class="daily-profit">
+                    <i class="fas fa-chart-simple"></i>
+                    <span>ربح يومي</span>
+                    <span>5%</span>
+                </div>
+                <div class="duration">
+                    <i class="fas fa-calendar-alt"></i> مدّة الباقة 280 يوم
+                </div>
+            </div>
+            <div class="desc">
+                <i class="fas fa-chart-line"></i> أرباح متوسطة - استثمارات أسبوعية آمنة
+            </div>
+            <button class="buy-now-btn">
+                <i class="fas fa-cart-shopping"></i> شراء الآن
+            </button>
         </div>
 
-        <!-- باقة 500 -->
-        <div class="package-card">
-            <div class="package-info">
-                <div class="price">500 $ <small>شهرياً</small></div>
-                <div class="package-name">الباقة البلاتينية</div>
-                <div class="stars">★★★★★</div>
-                <div class="desc">أولوية السحب - عائد 12%</div>
+        <!-- 4. الباقة البلاتينية 500$ -->
+        <div class="package-card" data-package="platinum">
+            <div class="card-header">
+                <div class="package-name">
+                    <i class="fas fa-star-of-life"></i> الباقة البلاتينية
+                </div>
+                <div class="package-price">
+                    <i class="fas fa-dollar-sign"></i> 500 <small>USDT</small>
+                </div>
             </div>
-            <button class="buy-btn" data-price="500">شراء الآن</button>
+            <div class="stars-rating">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <div class="info-row">
+                <div class="daily-profit">
+                    <i class="fas fa-chart-simple"></i>
+                    <span>ربح يومي</span>
+                    <span>12%</span>
+                </div>
+                <div class="duration">
+                    <i class="fas fa-calendar-alt"></i> مدّة الباقة 280 يوم
+                </div>
+            </div>
+            <div class="desc">
+                <i class="fas fa-tachometer-alt"></i> أولوية السحب - أعلى عائد للاستثمار المتوسط
+            </div>
+            <button class="buy-now-btn">
+                <i class="fas fa-cart-shopping"></i> شراء الآن
+            </button>
         </div>
 
-        <!-- باقة 1000 -->
-        <div class="package-card">
-            <div class="package-info">
-                <div class="price">1000 $ <small>شهرياً</small></div>
-                <div class="package-name">الباقة الماسية</div>
-                <div class="stars">★★★★★</div>
-                <div class="desc">VIP - أرباح يومية + محفظة خاصة</div>
+        <!-- 5. الباقة الماسية 1000$ -->
+        <div class="package-card" data-package="diamond">
+            <div class="card-header">
+                <div class="package-name">
+                    <i class="fas fa-diamond"></i> الباقة الماسية
+                </div>
+                <div class="package-price">
+                    <i class="fas fa-dollar-sign"></i> 1000 <small>USDT</small>
+                </div>
             </div>
-            <button class="buy-btn" data-price="1000">شراء الآن</button>
+            <div class="stars-rating">
+                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+            </div>
+            <div class="info-row">
+                <div class="daily-profit">
+                    <i class="fas fa-crown"></i>
+                    <span>ربح يومي</span>
+                    <span>VIP</span>
+                </div>
+                <div class="duration">
+                    <i class="fas fa-calendar-alt"></i> مدّة الباقة 280 يوم
+                </div>
+            </div>
+            <div class="desc">
+                <i class="fas fa-user-tie"></i> VIP - أرباح يومية + محفظة استثمارية خاصة
+            </div>
+            <button class="buy-now-btn">
+                <i class="fas fa-cart-shopping"></i> شراء الآن
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    // زر الشراء يحول إلى order.html
-    const btns = document.querySelectorAll('.buy-btn');
-    btns.forEach(btn => {
+    // توليد النجوم المتحركة في الخلفية
+    function createStars() {
+        const starsContainer = document.getElementById('starsContainer');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star-bg');
+            const size = Math.random() * 3 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            star.style.animationDuration = Math.random() * 3 + 2 + 's';
+            starsContainer.appendChild(star);
+        }
+    }
+    createStars();
+
+    // زر شراء الآن - يخزن البيانات ويحول لـ order.html
+    const buyBtns = document.querySelectorAll('.buy-now-btn');
+    buyBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
-            const price = this.getAttribute('data-price');
-            localStorage.setItem('selectedPackagePrice', price);
+            const card = this.closest('.package-card');
+            const packageName = card.querySelector('.package-name').innerText.trim();
+            const packagePrice = card.querySelector('.package-price').innerText.trim();
+            localStorage.setItem('selectedPackage', packageName);
+            localStorage.setItem('selectedPrice', packagePrice);
             window.location.href = 'order.html';
         });
     });
 
-    // زر باقات الاستثمار العلوي (سكرول سلس للباقات)
+    // زر باقات الاستثمار العلوي - سكرول سلس للباقات
     const mainBtn = document.getElementById('mainPackagesBtn');
     mainBtn.addEventListener('click', () => {
-        document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 </script>
 </body>
