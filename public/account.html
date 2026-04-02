@@ -412,27 +412,16 @@
         throw new Error(data.message || 'فشل تحميل البيانات');
       }
 
-      // 6️⃣ التحقق من وجود بيانات المستخدم
-      if (!data.user) {
-        throw new Error('لم يتم العثور على بيانات المستخدم');
-      }
-
       // 7️⃣ عرض بيانات المستخدم
-      document.getElementById('userName').innerText = data.user.name || 'غير مسجل';
-      document.getElementById('userEmail').innerText = data.user.email || 'غير مسجل';
-      document.getElementById('userPhone').innerText = data.user.phone || 'غير مسجل';
+      document.getElementById('userName').innerText = data.name || '-';
+      document.getElementById('userEmail').innerText = data.email || '-';
+      document.getElementById('userPhone').innerText = data.phone || '-';
 
       // 8️⃣ تحديث حالة التوثيق
-      updateVerificationStatus(data.user);
+      updateVerificationStatus(data);
 
     } catch (err) {
       console.error('❌ خطأ في loadUserData:', err);
-      
-      // عرض رسالة خطأ في الواجهة
-      document.getElementById('userName').innerText = '❌ خطأ';
-      document.getElementById('userEmail').innerText = '❌ خطأ';
-      document.getElementById('userPhone').innerText = '❌ خطأ';
-      
       // عرض رسالة للمستخدم
       showToast('فشل تحميل البيانات. يرجى تحديث الصفحة', true);
     }
@@ -652,4 +641,4 @@
 </script>
 
 </body>
-</html>
+    </html>
