@@ -242,6 +242,68 @@
     .toast.success { background: #10b981; }
     .toast.error { background: #ef4444; }
 
+    /* مودال نسيان كلمة السر */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .modal-content {
+      max-width: 450px;
+      width: 90%;
+      background: rgba(15, 25, 45, 0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 48px;
+      padding: 28px 24px;
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      text-align: center;
+    }
+    .modal-content h3 {
+      color: #F0B90B;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+    .modal-content input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 14px;
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(10,20,35,0.8);
+      color: white;
+      font-size: 16px;
+    }
+    .modal-content button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border-radius: 40px;
+      background: #F0B90B;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .modal-content button:hover {
+      background: #ffcc33;
+    }
+    .close-modal {
+      background: #ef4444 !important;
+      color: white;
+    }
+    .close-modal:hover {
+      background: #dc2626 !important;
+    }
+
     footer {
       text-align: center;
       margin-top: 28px;
@@ -291,6 +353,30 @@
   <footer>© 2025 سودان كربتو – استثمر بثقة</footer>
 </div>
 
+<!-- مودال نسيان كلمة السر -->
+<div id="forgotModal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fa-solid fa-key"></i> استعادة كلمة المرور</h3>
+    <div id="resetStep1">
+      <p style="color:#ccc; margin-bottom:10px;">أدخل بريدك الإلكتروني</p>
+      <input type="email" id="resetEmail" placeholder="البريد الإلكتروني">
+      <button id="sendResetCodeBtn">إرسال كود التحقق</button>
+    </div>
+    <div id="resetStep2" style="display:none;">
+      <p style="color:#ccc; margin-bottom:10px;">أدخل كود التحقق</p>
+      <input type="text" id="resetCode" placeholder="كود من 6 أرقام" maxlength="6">
+      <button id="verifyResetCodeBtn">التحقق من الكود</button>
+    </div>
+    <div id="resetStep3" style="display:none;">
+      <p style="color:#ccc; margin-bottom:10px;">كلمة المرور الجديدة</p>
+      <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة (8 أحرف على الأقل)">
+      <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة المرور">
+      <button id="resetPasswordBtn">تغيير كلمة المرور</button>
+    </div>
+    <button class="close-modal" onclick="closeResetModal()">إلغاء</button>
+  </div>
+</div>
+
 <div class="toast" id="toastMessage">
   <i class="fa-solid fa-circle-check"></i>
   <span id="toastText"></span>
@@ -300,6 +386,7 @@
   // ======================= التهيئة =======================
   const API_BASE = "https://sudan-crypto-4mgt.onrender.com"; // رابط السيرفر الفعلي
   let toastTimeout = null;
+  let resetEmail = "";
 
   // إنشاء النجوم
   function createStars() {
@@ -383,21 +470,111 @@
     }
   }
 
-  // رابط "هل نسيت كلمة السر؟" (سيتم تفعيله لاحقاً)
-  function forgotPassword() {
-    showToast('📧 سيتم تفعيل استعادة كلمة المرور قريباً');
-    // يمكن توجيه المستخدم لصفحة مستقبلية: window.location.href = 'forgot.html';
+  // ======================= نافذة نسيان كلمة السر =======================
+  function openResetModal() {
+    document.getElementById('forgotModal').style.display = 'flex';
+    document.getElementById('resetStep1').style.display = 'block';
+    document.getElementById('resetStep2').style.display = 'none';
+    document.getElementById('resetStep3').style.display = 'none';
+    document.getElementById('resetEmail').value = '';
+    document.getElementById('resetCode').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+  }
+
+  function closeResetModal() {
+    document.getElementById('forgotModal').style.display = 'none';
+  }
+
+  // الخطوة 1: إرسال كود إعادة التعيين
+  async function sendResetCode() {
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) {
+      showToast('أدخل البريد الإلكتروني', true);
+      return;
+    }
+    resetEmail = email;
+    showToast('جاري إرسال الكود...');
+    try {
+      const res = await fetch(`${API_BASE}/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showToast('✅ تم إرسال كود التحقق إلى بريدك');
+      document.getElementById('resetStep1').style.display = 'none';
+      document.getElementById('resetStep2').style.display = 'block';
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  // الخطوة 2: التحقق من الكود
+  async function verifyResetCode() {
+    const code = document.getElementById('resetCode').value.trim();
+    if (!code || code.length !== 6) {
+      showToast('أدخل الكود المكون من 6 أرقام', true);
+      return;
+    }
+    showToast('جاري التحقق...');
+    try {
+      const res = await fetch(`${API_BASE}/verify-reset-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail, code })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showToast('✅ تم التحقق من الكود');
+      document.getElementById('resetStep2').style.display = 'none';
+      document.getElementById('resetStep3').style.display = 'block';
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  // الخطوة 3: تعيين كلمة سر جديدة
+  async function resetPassword() {
+    const newPass = document.getElementById('newPassword').value.trim();
+    const confirmPass = document.getElementById('confirmNewPassword').value.trim();
+    if (!newPass || newPass.length < 8) {
+      showToast('كلمة المرور يجب أن تكون 8 أحرف أو أكثر', true);
+      return;
+    }
+    if (newPass !== confirmPass) {
+      showToast('كلمتا المرور غير متطابقتين', true);
+      return;
+    }
+    showToast('جاري تغيير كلمة المرور...');
+    try {
+      const res = await fetch(`${API_BASE}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: resetEmail, newPassword: newPass })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showToast('✅ تم تغيير كلمة المرور بنجاح');
+      closeResetModal();
+    } catch (err) {
+      showToast(err.message, true);
+    }
   }
 
   // ربط الأحداث
   document.getElementById('loginBtn').addEventListener('click', login);
   document.getElementById('forgotPassBtn').addEventListener('click', (e) => {
     e.preventDefault();
-    forgotPassword();
+    openResetModal();
   });
+  document.getElementById('sendResetCodeBtn').addEventListener('click', sendResetCode);
+  document.getElementById('verifyResetCodeBtn').addEventListener('click', verifyResetCode);
+  document.getElementById('resetPasswordBtn').addEventListener('click', resetPassword);
 
   // السماح بتسجيل الدخول بالضغط على Enter
-  const inputs = document.querySelectorAll('input');
+  const inputs = document.querySelectorAll('#email, #password');
   inputs.forEach(input => {
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') login();
