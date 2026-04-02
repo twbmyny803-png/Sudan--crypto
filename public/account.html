@@ -365,7 +365,9 @@
   const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
   const email = localStorage.getItem("userEmail");
 
-  if (!email) window.location.href = "login.html";
+  if (!email) {
+    window.location.replace("login.html");
+  }
 
   function showToast(message, isError = false) {
     const toast = document.getElementById('toastMessage');
@@ -387,27 +389,42 @@
 
   // جلب بيانات المستخدم
   async function loadUserData() {
+    if (!email) {
+      window.location.replace("login.html");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/user-data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
+
       const data = await res.json();
-      if (data.success) {
-        document.getElementById('userName').innerText = data.name || '-';
-        document.getElementById('userEmail').innerText = data.email || '-';
-        document.getElementById('userPhone').innerText = data.phone || '-';
-        
-        const verifyStatus = document.getElementById('verificationStatus');
-        if (data.isVerified) {
-          verifyStatus.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> موثق</span>';
-        } else {
-          verifyStatus.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
-        }
+
+      if (!data.success) {
+        localStorage.clear(); // 🔥 يمسح الحالة الغلط
+        window.location.replace("login.html");
+        return;
       }
+
+      document.getElementById('userName').innerText = data.name || '-';
+      document.getElementById('userEmail').innerText = data.email || '-';
+      document.getElementById('userPhone').innerText = data.phone || '-';
+
+      const verifyStatus = document.getElementById('verificationStatus');
+
+      if (data.isVerified) {
+        verifyStatus.innerHTML = '<span class="verified-badge">✔ موثق</span>';
+      } else {
+        verifyStatus.innerHTML = '<span class="unverified-badge">❌ غير موثق</span>';
+      }
+
     } catch (err) {
-      console.error(err);
+      console.log(err);
+      localStorage.clear();
+      window.location.replace("login.html");
     }
   }
 
@@ -570,8 +587,8 @@
 
   // تسجيل الخروج
   function logout() {
-    localStorage.removeItem('userEmail');
-    window.location.href = 'login.html';
+    localStorage.clear(); // 🔥 مهم جداً
+    window.location.replace('login.html');
   }
 
   // إنشاء النجوم
@@ -594,4 +611,4 @@
 </script>
 
 </body>
-        </html>
+</html>
