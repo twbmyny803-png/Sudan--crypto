@@ -2,8 +2,8 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إتمام الدفع - باقات الاستثمار</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>إتمام الدفع - سودان كربتو</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
@@ -11,7 +11,7 @@
         body {
             background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            padding: 40px 20px;
+            padding: 20px;
             min-height: 100vh;
             position: relative;
         }
@@ -36,7 +36,7 @@
             50% { opacity: 1; transform: scale(1.2);}
         }
         .container {
-            max-width: 650px;
+            max-width: 550px;
             margin: 0 auto;
             position: relative;
             z-index: 2;
@@ -45,89 +45,89 @@
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(245,176,66,0.4);
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 10px 20px;
+            font-size: 14px;
             font-weight: bold;
             color: #f5b042;
             border-radius: 50px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
         .payment-card {
             background: rgba(15, 22, 40, 0.95);
             backdrop-filter: blur(12px);
-            border-radius: 32px;
+            border-radius: 28px;
             border: 1px solid rgba(245,176,66,0.5);
-            padding: 32px;
+            padding: 24px;
         }
         .title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             text-align: center;
             background: linear-gradient(90deg, #f5b042, #ffd966);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
         .timer-box {
             text-align: center;
             background: rgba(0,0,0,0.5);
             border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 25px;
+            padding: 16px;
+            margin-bottom: 20px;
             border: 1px solid rgba(245,176,66,0.3);
         }
-        .timer-label { color: #f5b042; font-size: 16px; margin-bottom: 10px; }
-        .timer-value { font-size: 48px; font-weight: bold; color: #ff6666; font-family: monospace; letter-spacing: 5px; }
+        .timer-label { color: #f5b042; font-size: 14px; margin-bottom: 8px; }
+        .timer-value { font-size: 42px; font-weight: bold; color: #ff6666; font-family: monospace; letter-spacing: 3px; }
         .timer-value.expired { color: #ff0000; }
         .info-box {
             background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 25px;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
         }
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(245,176,66,0.2);
         }
-        .info-label { color: #f5b042; }
-        .info-value { color: white; font-weight: bold; }
+        .info-label { color: #f5b042; font-size: 14px; }
+        .info-value { color: white; font-weight: bold; font-size: 14px; }
         .qr-box {
             text-align: center;
-            margin: 20px 0;
-            padding: 20px;
+            margin: 16px 0;
+            padding: 16px;
             background: rgba(255,255,255,0.05);
             border-radius: 20px;
         }
-        .qr-title { color: #f5b042; margin-bottom: 15px; }
+        .qr-title { color: #f5b042; margin-bottom: 12px; font-size: 14px; }
         #qrcode {
             display: flex;
             justify-content: center;
             background: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 16px;
             display: inline-block;
             margin: 0 auto;
         }
         .address-box {
             background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 15px;
-            margin: 15px 0;
+            border-radius: 16px;
+            padding: 12px;
+            margin: 16px 0;
         }
         .address-value {
             background: #1a1f2f;
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             color: #ffd966;
             font-family: monospace;
-            font-size: 13px;
+            font-size: 12px;
             word-break: break-all;
             direction: ltr;
             text-align: left;
@@ -135,36 +135,32 @@
         .copy-btn {
             background: #f5b042;
             border: none;
-            padding: 8px 18px;
+            padding: 6px 16px;
             border-radius: 40px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 8px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 13px;
         }
         .transaction-input {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border-radius: 15px;
             border: 1px solid rgba(245,176,66,0.4);
             background: rgba(0,0,0,0.5);
             color: white;
-            margin: 15px 0;
+            margin: 12px 0;
             direction: ltr;
-        }
-        .transaction-input:disabled {
-            background: rgba(0,0,0,0.3);
-            color: #888;
-            cursor: not-allowed;
         }
         .file-label {
             display: block;
             background: rgba(245,176,66,0.15);
             border: 1px dashed #f5b042;
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 14px;
             text-align: center;
             cursor: pointer;
             transition: 0.2s;
@@ -178,50 +174,33 @@
         }
         .upload-success {
             color: #4caf50;
-            margin-top: 10px;
-            font-size: 14px;
+            margin-top: 8px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
         .status-message {
-            margin-top: 15px;
+            margin-top: 16px;
             padding: 12px;
             border-radius: 16px;
             text-align: center;
             font-weight: bold;
+            font-size: 14px;
         }
-        .status-success {
-            background: rgba(76,175,80,0.2);
-            border: 1px solid #4caf50;
-            color: #4caf50;
-        }
-        .status-rejected {
-            background: rgba(255,0,0,0.2);
-            border: 1px solid #ff4444;
-            color: #ff8888;
-        }
-        .status-warning {
-            background: rgba(255,193,7,0.2);
-            border: 1px solid #ffc107;
-            color: #ffc107;
-        }
-        .status-expired {
-            background: rgba(255,0,0,0.3);
-            border: 1px solid #ff0000;
-            color: #ff6666;
-            font-size: 18px;
-            font-weight: bold;
-        }
+        .status-success { background: rgba(76,175,80,0.2); border: 1px solid #4caf50; color: #4caf50; }
+        .status-rejected { background: rgba(255,0,0,0.2); border: 1px solid #ff4444; color: #ff8888; }
+        .status-warning { background: rgba(255,193,7,0.2); border: 1px solid #ffc107; color: #ffc107; }
+        .status-expired { background: rgba(255,0,0,0.3); border: 1px solid #ff0000; color: #ff6666; font-size: 16px; font-weight: bold; }
         .preview-image { text-align: center; margin-top: 10px; }
-        .preview-image img { max-width: 100%; max-height: 150px; border-radius: 12px; }
+        .preview-image img { max-width: 100%; max-height: 120px; border-radius: 12px; }
         .confirm-btn {
             width: 100%;
             background: linear-gradient(90deg, #f5b042, #ffd966);
             border: none;
-            padding: 16px;
-            font-size: 20px;
+            padding: 14px;
+            font-size: 18px;
             font-weight: bold;
             color: #1a1f2f;
             border-radius: 50px;
@@ -230,43 +209,42 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
         }
         .confirm-btn.disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        #fileInput { display: none; }
         .new-order-btn {
             width: 100%;
             background: transparent;
             border: 2px solid #f5b042;
-            padding: 14px;
-            font-size: 18px;
+            padding: 12px;
+            font-size: 16px;
             font-weight: bold;
             color: #f5b042;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 15px;
+            margin-top: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             transition: 0.2s;
         }
         .new-order-btn:hover {
             background: rgba(245,176,66,0.1);
         }
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
 <div class="stars-bg" id="starsContainer"></div>
-
 <div class="container">
     <button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i> رجوع للطلب</button>
     <div class="payment-card">
         <div class="title"><i class="fas fa-credit-card"></i> إتمام الدفع</div>
-
+        
         <div class="timer-box">
             <div class="timer-label"><i class="fas fa-hourglass-half"></i> الوقت المتبقي لإتمام الدفع</div>
             <div class="timer-value" id="timer">--:--</div>
@@ -278,6 +256,10 @@
             <div class="info-row">
                 <div class="info-label"><i class="fas fa-network-wired"></i> الشبكة المختارة</div>
                 <div class="info-value" id="selectedNetwork">-</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="fas fa-hashtag"></i> رقم الطلب</div>
+                <div class="info-value" id="orderNumber">-</div>
             </div>
         </div>
 
@@ -291,7 +273,7 @@
             <div id="qrcode"></div>
         </div>
 
-        <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID)">
+        <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID / TXID)">
         
         <label class="file-label" id="fileLabel">
             <i class="fas fa-cloud-upload-alt"></i> اضغط لرفع إيصال الدفع
@@ -328,12 +310,25 @@
 
     // قراءة البيانات
     let selectedNetwork = localStorage.getItem('selectedNetwork') || 'BEP20';
-    let walletAddress = localStorage.getItem('selectedWalletAddress') || '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
-    let orderNumber = localStorage.getItem('orderNumber') || 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
+    let orderNumber = localStorage.getItem('orderId') || ('ORD' + Date.now());
+    let walletAddress = selectedNetwork === 'TRC20' ? 'TLPZEoW71BNe6mHPK8XRJ5PkN5Agqqpa5n' : '0x990635c24b47a3ebbc14efadf0355e26ec706385';
     
-    document.getElementById('selectedNetwork').innerHTML = `<i class="fab ${selectedNetwork === 'TRC20' ? 'fa-tron' : 'fa-bitcoin'}"></i> USDT ${selectedNetwork}`;
+    document.getElementById('selectedNetwork').innerHTML = `<i class="fab ${selectedNetwork === 'TRC20' ? 'fa-tron' : 'fa-ethereum'}"></i> USDT ${selectedNetwork}`;
+    document.getElementById('orderNumber').innerText = orderNumber;
     document.getElementById('walletAddress').innerText = walletAddress;
     
+    // QR Code
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), {
+        text: walletAddress,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // نسخ العنوان
     document.getElementById('copyBtn').addEventListener('click', () => {
         navigator.clipboard.writeText(walletAddress);
         const btn = document.getElementById('copyBtn');
@@ -341,42 +336,31 @@
         setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> نسخ العنوان', 2000);
     });
 
-    try {
-        document.getElementById('qrcode').innerHTML = '';
-        new QRCode(document.getElementById('qrcode'), {
-            text: walletAddress,
-            width: 180,
-            height: 180,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    } catch(e) {}
-
     const transactionInput = document.getElementById('transactionId');
-    const fileLabel = document.getElementById('fileLabel');
     const fileInput = document.getElementById('fileInput');
+    const fileLabel = document.getElementById('fileLabel');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     const statusDiv = document.getElementById('statusMessage');
     const timerEl = document.getElementById('timer');
     const newOrderBtn = document.getElementById('newOrderBtn');
-    
+    const preview = document.getElementById('preview');
+    const uploadStatus = document.getElementById('uploadStatus');
+
     let paymentStatus = localStorage.getItem('paymentStatus') || 'pending';
     let timerInterval = null;
-    
-    // دوال القفل والفتح
+
     function lockFields() {
         transactionInput.disabled = true;
         fileInput.disabled = true;
         fileLabel.classList.add('disabled');
     }
-    
+
     function unlockFields() {
         transactionInput.disabled = false;
         fileInput.disabled = false;
         fileLabel.classList.remove('disabled');
     }
-    
+
     function showMessage(message, type) {
         statusDiv.style.display = 'block';
         statusDiv.innerHTML = message;
@@ -385,15 +369,14 @@
         else if (type === 'warning') statusDiv.className = 'status-message status-warning';
         else if (type === 'expired') statusDiv.className = 'status-message status-expired';
     }
-    
+
     function stopTimer() {
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
         }
     }
-    
-    // بدء العداد من الوقت المتبقي
+
     function startTimer(remainingSeconds) {
         stopTimer();
         let remaining = remainingSeconds;
@@ -412,12 +395,11 @@
         updateDisplay();
         
         if (remaining <= 0) {
-            // الوقت انتهى
             timerEl.classList.add('expired');
             lockFields();
             confirmBtn.disabled = true;
             confirmBtn.classList.add('disabled');
-            showMessage("⚠️ لا يمكن الدفع بعد انتهاء الوقت. الرجاء عمل طلب جديد.", 'expired');
+            showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
             newOrderBtn.style.display = 'flex';
             return;
         }
@@ -430,9 +412,8 @@
                 lockFields();
                 confirmBtn.disabled = true;
                 confirmBtn.classList.add('disabled');
-                showMessage("⚠️ لا يمكن الدفع بعد انتهاء الوقت. الرجاء عمل طلب جديد.", 'expired');
+                showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
                 newOrderBtn.style.display = 'flex';
-                // حفظ الحالة منتهي
                 localStorage.setItem('paymentStatus', 'expired');
             } else {
                 remaining--;
@@ -442,80 +423,74 @@
             }
         }, 1000);
     }
-    
-    // حساب الوقت المتبقي من localStorage
+
+    // حساب الوقت المتبقي
     let startTime = localStorage.getItem('paymentStartTime');
     let remainingSeconds = 15 * 60;
-    let isExpired = false;
     
-    if (startTime && (paymentStatus === 'pending' || paymentStatus === 'pending_review')) {
-        const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
-        remainingSeconds = Math.max(0, 15 * 60 - elapsed);
-        if (remainingSeconds <= 0) {
-            isExpired = true;
-        }
-    } else if (paymentStatus === 'expired') {
-        isExpired = true;
-        remainingSeconds = 0;
-    } else if (paymentStatus !== 'pending' && paymentStatus !== 'pending_review') {
-        remainingSeconds = 0;
-    }
-    
-    // تطبيق الحالة حسب paymentStatus
     if (paymentStatus === 'pending_review') {
         timerEl.innerHTML = "00:00";
         timerEl.classList.add('expired');
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-        showMessage('✓ جاري مراجعة طلبك... سيتم الرد خلال 24 ساعة.', 'success');
+        showMessage('✓ تم استلام طلبك بنجاح! جاري مراجعة إيصالك... سيتم الرد خلال 24 ساعة.', 'success');
     } 
-    else if (paymentStatus === 'paid') {
+    else if (paymentStatus === 'approved') {
         timerEl.innerHTML = "00:00";
         timerEl.classList.add('expired');
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-        showMessage('✓ تم تأكيد دفعتك بنجاح. سيتم تفعيل الباقة قريباً.', 'success');
+        showMessage('✓ تم قبول طلبك! سيتم تفعيل الباقة فوراً.', 'success');
     }
     else if (paymentStatus === 'rejected') {
         unlockFields();
         confirmBtn.disabled = false;
         confirmBtn.classList.remove('disabled');
         showMessage('❌ طلبك السابق تم رفضه. الرجاء إعادة رفع إيصال جديد مع رقم عملية صحيح.', 'rejected');
-        // نبدأ عداد جديد
-        startTime = Date.now();
-        localStorage.setItem('paymentStartTime', startTime);
+        let newStartTime = Date.now();
+        localStorage.setItem('paymentStartTime', newStartTime);
         localStorage.setItem('paymentStatus', 'pending');
         paymentStatus = 'pending';
         startTimer(15 * 60);
     }
-    else if (paymentStatus === 'expired' || isExpired) {
+    else if (paymentStatus === 'expired') {
         timerEl.innerHTML = "00:00";
         timerEl.classList.add('expired');
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-        showMessage("⚠️ لا يمكن الدفع بعد انتهاء الوقت. الرجاء عمل طلب جديد.", 'expired');
+        showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
         newOrderBtn.style.display = 'flex';
     }
     else {
-        // pending: نبدأ العداد من الوقت المحفوظ
         if (!startTime) {
             startTime = Date.now();
             localStorage.setItem('paymentStartTime', startTime);
             remainingSeconds = 15 * 60;
+        } else {
+            const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+            remainingSeconds = Math.max(0, 15 * 60 - elapsed);
+            if (remainingSeconds <= 0) {
+                localStorage.setItem('paymentStatus', 'expired');
+                timerEl.innerHTML = "00:00";
+                timerEl.classList.add('expired');
+                lockFields();
+                confirmBtn.disabled = true;
+                confirmBtn.classList.add('disabled');
+                showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
+                newOrderBtn.style.display = 'flex';
+            } else {
+                unlockFields();
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('disabled');
+                startTimer(remainingSeconds);
+            }
         }
-        unlockFields();
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('disabled');
-        startTimer(remainingSeconds);
     }
-    
-    // رفع الإيصال
-    const preview = document.getElementById('preview');
-    const uploadStatus = document.getElementById('uploadStatus');
-    
+
+    // معاينة الصورة
     fileInput.addEventListener('change', function(e) {
         if (fileInput.disabled) return;
         const file = e.target.files[0];
@@ -529,12 +504,12 @@
             reader.readAsDataURL(file);
         }
     });
-    
+
     // تأكيد الدفع
     document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
-        const txId = transactionInput.value;
+        const txId = transactionInput.value.trim();
         if (!txId) {
-            alert("⚠️ الرجاء إدخال رقم العملية");
+            alert("⚠️ الرجاء إدخال رقم العملية (TXID)");
             return;
         }
         if (!fileInput.files.length) {
@@ -553,57 +528,30 @@
         stopTimer();
         timerEl.innerHTML = "00:00";
         timerEl.classList.add('expired');
-        showMessage('✓ تم استلام طلبك بنجاح! جاري مراجعة إيصالك...', 'success');
+        showMessage('✓ تم استلام طلبك بنجاح! جاري مراجعة إيصالك... سيتم الرد خلال 24 ساعة.', 'success');
         
         alert(`✅ تم استلام طلبك بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\nسيتم مراجعة إيصالك خلال 24 ساعة.`);
     });
-    
+
     // رجوع للطلب
     document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'create-order.html';
     });
-    
-    // طلب جديد - مسح البيانات والعودة للباقات
+
+    // طلب جديد
     document.getElementById('newOrderBtn').addEventListener('click', () => {
         localStorage.removeItem('paymentStartTime');
         localStorage.removeItem('paymentStatus');
         localStorage.removeItem('transactionId');
         localStorage.removeItem('paymentTime');
         localStorage.removeItem('selectedNetwork');
-        localStorage.removeItem('selectedWalletAddress');
+        localStorage.removeItem('orderId');
         localStorage.removeItem('selectedPackage');
         localStorage.removeItem('selectedPrice');
-        localStorage.removeItem('dailyProfit');
+        localStorage.removeItem('selectedDailyProfit');
+        localStorage.removeItem('selectedDuration');
         window.location.href = 'packages.html';
     });
-    
-    // دوال للمسؤول
-    window.rejectPayment = function(reason) {
-        localStorage.setItem('paymentStatus', 'rejected');
-        paymentStatus = 'rejected';
-        unlockFields();
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('disabled');
-        showMessage(`❌ تم رفض طلبك. السبب: ${reason || 'بيانات الدفع غير صحيحة'}. الرجاء إعادة رفع إيصال جديد.`, 'rejected');
-        // نبدأ عداد جديد
-        let newStartTime = Date.now();
-        localStorage.setItem('paymentStartTime', newStartTime);
-        startTimer(15 * 60);
-        newOrderBtn.style.display = 'none';
-    };
-    
-    window.approvePayment = function() {
-        localStorage.setItem('paymentStatus', 'paid');
-        paymentStatus = 'paid';
-        lockFields();
-        confirmBtn.disabled = true;
-        confirmBtn.classList.add('disabled');
-        stopTimer();
-        timerEl.innerHTML = "00:00";
-        timerEl.classList.add('expired');
-        showMessage('✓ تم قبول طلبك. سيتم تفعيل الباقة فوراً.', 'success');
-        newOrderBtn.style.display = 'none';
-    };
 </script>
 </body>
-                                                                                                         </html>
+</html>
