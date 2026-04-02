@@ -384,17 +384,17 @@
     </div>
 
     <div id="resetStep2" style="display:none;">
-      <p style="color:#ccc; margin-bottom:10px;">أدخل الكود المرسل لبريدك</p>
-      <input type="text" id="resetCode" placeholder="كود التحقق (6 أرقام)">
+      <p style="color:#ccc; margin-bottom:10px;">أدخل كود التحقق المرسل لبريدك</p>
+      <input type="text" id="resetCode" placeholder="كود التحقق (6 أرقام)" maxlength="6">
       <button id="verifyResetCodeBtn">تحقق من الكود</button>
       <div id="resetStep2Msg" class="modal-message"></div>
     </div>
 
     <div id="resetStep3" style="display:none;">
-      <p style="color:#ccc; margin-bottom:10px;">أدخل كلمة السر الجديدة</p>
-      <input type="password" id="newPassword" placeholder="كلمة السر الجديدة">
-      <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة السر">
-      <button id="resetPasswordBtn">تغيير كلمة السر</button>
+      <p style="color:#ccc; margin-bottom:10px;">أدخل كلمة المرور الجديدة</p>
+      <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة">
+      <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة المرور">
+      <button id="resetPasswordBtn">تغيير كلمة المرور</button>
       <div id="resetStep3Msg" class="modal-message"></div>
     </div>
 
@@ -472,7 +472,7 @@
       if (data.success) {
         // 🔥 نخزن الاسم والبريد
         localStorage.setItem("name", data.name);
-        localStorage.setItem("email", data.email);
+        localStorage.setItem("userEmail", data.email || email);
 
         showToast('تم تسجيل الدخول بنجاح');
         
@@ -606,4 +606,4 @@
   });
 </script>
 </body>
-  </html>
+</html>
