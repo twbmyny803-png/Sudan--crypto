@@ -92,6 +92,17 @@
       font-weight: bold;
       font-size: 14px;
     }
+    .loading-skeleton {
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      height: 16px;
+      min-width: 100px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
     .btn {
       width: 100%;
       padding: 14px;
@@ -179,7 +190,7 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.7);
-      z-index: 99999; /* 🔥 مهم جداً */
+      z-index: 99999;
       align-items: center;
       justify-content: center;
       backdrop-filter: blur(8px);
@@ -193,7 +204,7 @@
       padding: 24px;
       border: 1px solid rgba(240,185,11,0.3);
       position: relative;
-      z-index: 100000; /* 🔥 أعلى حاجة */
+      z-index: 100000;
     }
     .modal-content h3 {
       color: #F0B90B;
@@ -232,7 +243,7 @@
       padding: 12px 24px;
       border-radius: 50px;
       font-size: 14px;
-      z-index: 1000;
+      z-index: 200000;
       display: none;
       align-items: center;
       gap: 8px;
@@ -253,15 +264,15 @@
     <h2><i class="fa-solid fa-user-circle"></i> المعلومات الشخصية</h2>
     <div class="info-row">
       <div class="info-label"><i class="fa-regular fa-user"></i> الاسم</div>
-      <div class="info-value" id="userName">-</div>
+      <div class="info-value" id="userName"><div class="loading-skeleton"></div></div>
     </div>
     <div class="info-row">
       <div class="info-label"><i class="fa-regular fa-envelope"></i> البريد الإلكتروني</div>
-      <div class="info-value" id="userEmail">-</div>
+      <div class="info-value" id="userEmail"><div class="loading-skeleton"></div></div>
     </div>
     <div class="info-row">
       <div class="info-label"><i class="fa-solid fa-phone"></i> رقم الهاتف</div>
-      <div class="info-value" id="userPhone">-</div>
+      <div class="info-value" id="userPhone"><div class="loading-skeleton"></div></div>
     </div>
   </div>
 
@@ -353,13 +364,20 @@
 <div id="toast" class="toast"></div>
 
 <script>
+  // ============================================
+  // 🔧 إعدادات API والمتغيرات العامة
+  // ============================================
   const API_BASE = 'https://sudan-crypto.onrender.com';
   const email = localStorage.getItem('userEmail');
 
+  // إعادة توجيه إذا لم يكن المستخدم مسجل دخول
   if (!email) {
     window.location.replace('login.html');
   }
 
+  // ============================================
+  // 📢 دالة عرض الرسائل (Toast)
+  // ============================================
   function showToast(msg, isError = false) {
     const t = document.getElementById('toast');
     t.innerText = msg;
@@ -368,29 +386,78 @@
     setTimeout(() => { t.style.display = 'none'; }, 3000);
   }
 
+  // ============================================
+  // 👤 دالة تحميل بيانات المستخدم (محسّنة)
+  // ============================================
   async function loadUserData() {
     try {
-      const res = await fetch(`${API_BASE}/user-data?email=${email}`);
-      const data = await res.json();
-      if (data.success) {
-        document.getElementById('userName').innerText = data.user.name;
-        document.getElementById('userEmail').innerText = data.user.email;
-        document.getElementById('userPhone').innerText = data.user.phone || 'غير مسجل';
-        
-        const statusDiv = document.getElementById('verificationStatus');
-        if (data.user.isVerified) {
-          statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
-        } else if (data.user.verificationStatus === 'pending') {
-          statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
-        } else {
-          statusDiv.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
-        }
+      // 1️⃣ عرض حالة التحميل
+      document.getElementById('userName').innerHTML = '<div class="loading-skeleton"></div>';
+      document.getElementById('userEmail').innerHTML = '<div class="loading-skeleton"></div>';
+      document.getElementById('userPhone').innerHTML = '<div class="loading-skeleton"></div>';
+
+      // 2️⃣ جلب البيانات من السيرفر
+      const res = await fetch(`${API_BASE}/user-data?email=${encodeURIComponent(email)}`);
+      
+      // 3️⃣ التحقق من حالة الاستجابة
+      if (!res.ok) {
+        throw new Error(`خطأ في الاتصال: ${res.status}`);
       }
+
+      // 4️⃣ تحويل الاستجابة إلى JSON
+      const data = await res.json();
+
+      // 5️⃣ التحقق من نجاح الطلب
+      if (!data.success) {
+        throw new Error(data.message || 'فشل تحميل البيانات');
+      }
+
+      // 6️⃣ التحقق من وجود بيانات المستخدم
+      if (!data.user) {
+        throw new Error('لم يتم العثور على بيانات المستخدم');
+      }
+
+      // 7️⃣ عرض بيانات المستخدم
+      document.getElementById('userName').innerText = data.user.name || 'غير مسجل';
+      document.getElementById('userEmail').innerText = data.user.email || 'غير مسجل';
+      document.getElementById('userPhone').innerText = data.user.phone || 'غير مسجل';
+
+      // 8️⃣ تحديث حالة التوثيق
+      updateVerificationStatus(data.user);
+
     } catch (err) {
-      console.error(err);
+      console.error('❌ خطأ في loadUserData:', err);
+      
+      // عرض رسالة خطأ في الواجهة
+      document.getElementById('userName').innerText = '❌ خطأ';
+      document.getElementById('userEmail').innerText = '❌ خطأ';
+      document.getElementById('userPhone').innerText = '❌ خطأ';
+      
+      // عرض رسالة للمستخدم
+      showToast('فشل تحميل البيانات. يرجى تحديث الصفحة', true);
     }
   }
 
+  // ============================================
+  // 🔐 دالة تحديث حالة التوثيق
+  // ============================================
+  function updateVerificationStatus(user) {
+    const statusDiv = document.getElementById('verificationStatus');
+    
+    if (!statusDiv) return;
+
+    if (user.isVerified) {
+      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
+    } else if (user.verificationStatus === 'pending') {
+      statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
+    } else {
+      statusDiv.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
+    }
+  }
+
+  // ============================================
+  // 🎯 دوال إدارة النوافذ المنبثقة
+  // ============================================
   function toggleFileInputs() {
     const type = document.getElementById('docType').value;
     document.getElementById('idFiles').style.display = (type === 'بطاقة قومية') ? 'block' : 'none';
@@ -400,6 +467,24 @@
   function openPasswordModal() { document.getElementById('passwordModal').style.display = 'flex'; }
   function closePasswordModal() { document.getElementById('passwordModal').style.display = 'none'; }
 
+  function openWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'flex'; }
+  function closeWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'none'; }
+
+  function openVerificationModal() { 
+    document.getElementById('verificationModal').style.display = 'flex';
+    document.getElementById('fullName').value = '';
+    document.getElementById('docType').value = '';
+    document.getElementById('docNumber').value = '';
+    document.getElementById('frontFile').value = '';
+    document.getElementById('backFile').value = '';
+    document.getElementById('passportFile').value = '';
+    toggleFileInputs();
+  }
+  function closeVerificationModal() { document.getElementById('verificationModal').style.display = 'none'; }
+
+  // ============================================
+  // 🔑 دالة تغيير كلمة المرور
+  // ============================================
   async function changePassword() {
     const oldPass = document.getElementById('currentPassword').value;
     const newPass = document.getElementById('newPassword').value;
@@ -428,17 +513,22 @@
       if (data.success) {
         showToast('تم تغيير كلمة المرور بنجاح');
         closePasswordModal();
+        // مسح الحقول
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmNewPassword').value = '';
       } else {
         showToast(data.message || 'فشل تغيير كلمة المرور', true);
       }
     } catch (err) {
+      console.error(err);
       showToast('خطأ في الاتصال', true);
     }
   }
 
-  function openWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'flex'; }
-  function closeWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'none'; }
-
+  // ============================================
+  // 🔐 دالة تعيين كلمة السحب
+  // ============================================
   async function setWithdrawPassword() {
     const pass = document.getElementById('withdrawPass').value;
     const confirm = document.getElementById('confirmWithdrawPass').value;
@@ -462,26 +552,21 @@
       if (data.success) {
         showToast('تم تعيين كلمة السحب بنجاح');
         closeWithdrawPasswordModal();
+        // مسح الحقول
+        document.getElementById('withdrawPass').value = '';
+        document.getElementById('confirmWithdrawPass').value = '';
       } else {
         showToast(data.message || 'فشل تعيين كلمة السحب', true);
       }
     } catch (err) {
+      console.error(err);
       showToast('خطأ في الاتصال', true);
     }
   }
 
-  function openVerificationModal() { 
-    document.getElementById('verificationModal').style.display = 'flex';
-    document.getElementById('fullName').value = '';
-    document.getElementById('docType').value = '';
-    document.getElementById('docNumber').value = '';
-    document.getElementById('frontFile').value = '';
-    document.getElementById('backFile').value = '';
-    document.getElementById('passportFile').value = '';
-    toggleFileInputs();
-  }
-  function closeVerificationModal() { document.getElementById('verificationModal').style.display = 'none'; }
-
+  // ============================================
+  // 📋 دالة إرسال طلب التوثيق
+  // ============================================
   async function submitVerification() {
     const fullName = document.getElementById('fullName').value.trim();
     const docType = document.getElementById('docType').value;
@@ -527,15 +612,22 @@
         showToast(data.message || 'فشل إرسال الطلب', true);
       }
     } catch (err) {
+      console.error(err);
       showToast('خطأ في الاتصال', true);
     }
   }
 
+  // ============================================
+  // 🚪 دالة تسجيل الخروج
+  // ============================================
   function logout() {
     localStorage.removeItem('userEmail');
     window.location.replace('login.html');
   }
 
+  // ============================================
+  // ⭐ دالة إنشاء النجوم المتحركة
+  // ============================================
   function createStars() {
     const container = document.getElementById('starsContainer');
     for (let i = 0; i < 150; i++) {
@@ -550,8 +642,13 @@
       container.appendChild(star);
     }
   }
+
+  // ============================================
+  // 🚀 تشغيل الدوال عند تحميل الصفحة
+  // ============================================
   createStars();
   loadUserData();
+
 </script>
 
 </body>
