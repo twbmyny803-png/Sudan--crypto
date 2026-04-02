@@ -5,15 +5,53 @@
 <title>لوحة الأدمن</title>
 <style>
 body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
+
+.nav {
+  margin-bottom:20px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.nav button {
+  padding:10px 15px;
+  background:#F0B90B;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
 table { width:100%; border-collapse:collapse; margin-top:20px }
 td, th { padding:10px; border:1px solid #444 }
-button { padding:5px 10px; margin:2px; cursor:pointer }
+button.action { padding:5px 10px; margin:2px; cursor:pointer }
 </style>
 </head>
 
 <body>
 
 <h2>لوحة تحكم الأدمن 🔥</h2>
+
+<!-- 🔥 القائمة -->
+<div class="nav">
+
+  <a href="admin.html">
+    <button>👤 المستخدمين</button>
+  </a>
+
+  <a href="admin-withdraws.html">
+    <button>💸 السحب</button>
+  </a>
+
+  <a href="admin-deposits.html">
+    <button>💰 الإيداع</button>
+  </a>
+
+  <a href="admin-packages.html">
+    <button>📦 الباقات</button>
+  </a>
+
+</div>
 
 <table id="usersTable">
 <thead>
@@ -48,9 +86,9 @@ async function loadUsers() {
       <td>${u.balance}</td>
       <td>${u.isVerified ? "✅" : "❌"}</td>
       <td>
-        <button onclick="verify('${u.email}')">توثيق</button>
-        <button onclick="block('${u.email}')">حظر</button>
-        <button onclick="del('${u.email}')">حذف</button>
+        <button class="action" onclick="verify('${u.email}')">توثيق</button>
+        <button class="action" onclick="block('${u.email}')">حظر</button>
+        <button class="action" onclick="del('${u.email}')">حذف</button>
       </td>
     </tr>
     `;
@@ -59,17 +97,29 @@ async function loadUsers() {
 }
 
 async function verify(email){
-  await fetch(API+"/admin-verify",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  await fetch(API+"/admin-verify",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
   loadUsers();
 }
 
 async function block(email){
-  await fetch(API+"/admin-block",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  await fetch(API+"/admin-block",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
   loadUsers();
 }
 
 async function del(email){
-  await fetch(API+"/admin-delete",{method:"POST",headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  await fetch(API+"/admin-delete",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
   loadUsers();
 }
 
