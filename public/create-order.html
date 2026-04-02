@@ -44,7 +44,7 @@
         }
 
         .container {
-            max-width: 650px;
+            max-width: 600px;
             margin: 0 auto;
             position: relative;
             z-index: 2;
@@ -129,7 +129,7 @@
             border-right: 4px solid #f5b042;
         }
 
-        /* اختيار الشبكة */
+        /* اختيار الشبكة - عمودي تحت بعض */
         .network-section {
             margin: 25px 0;
         }
@@ -145,19 +145,20 @@
 
         .network-options {
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .network-option {
-            flex: 1;
             background: rgba(0,0,0,0.4);
             border: 2px solid rgba(245,176,66,0.3);
-            border-radius: 24px;
-            padding: 18px;
+            border-radius: 20px;
+            padding: 16px 20px;
             cursor: pointer;
-            text-align: center;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .network-option.active {
@@ -166,54 +167,15 @@
         }
 
         .network-option i {
-            font-size: 32px;
-            margin-bottom: 8px;
-            display: block;
+            font-size: 28px;
+            width: 40px;
+            text-align: center;
         }
 
         .network-option span {
             font-size: 18px;
             font-weight: bold;
             color: #ffd966;
-        }
-
-        /* عنوان الدفع */
-        .address-box {
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-
-        .address-label {
-            color: #f5b042;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .address-value {
-            background: #1a1f2f;
-            padding: 15px;
-            border-radius: 16px;
-            color: #ffd966;
-            font-family: monospace;
-            font-size: 14px;
-            word-break: break-all;
-            direction: ltr;
-            text-align: left;
-        }
-
-        .copy-btn {
-            background: #f5b042;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .pay-btn {
@@ -226,7 +188,7 @@
             color: #1a1f2f;
             border-radius: 50px;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 25px;
             transition: 0.2s;
             display: flex;
             align-items: center;
@@ -278,30 +240,21 @@
             <span id="orderNumber">-</span>
         </div>
 
-        <!-- اختيار الشبكة -->
+        <!-- اختيار الشبكة فقط (عمودي) -->
         <div class="network-section">
             <div class="network-title">
                 <i class="fas fa-network-wired"></i> اختر شبكة الدفع
             </div>
             <div class="network-options" id="networkOptions">
-                <div class="network-option" data-network="TRC20">
-                    <i class="fab fa-tron"></i>
-                    <span>TRC20</span>
-                </div>
                 <div class="network-option" data-network="BEP20">
                     <i class="fab fa-bitcoin"></i>
-                    <span>BEP20</span>
+                    <span>USDT BEP20</span>
+                </div>
+                <div class="network-option" data-network="TRC20">
+                    <i class="fab fa-tron"></i>
+                    <span>USDT TRC20</span>
                 </div>
             </div>
-        </div>
-
-        <!-- عنوان الدفع -->
-        <div class="address-box">
-            <div class="address-label"><i class="fas fa-wallet"></i> عنوان الدفع</div>
-            <div class="address-value" id="walletAddress">-</div>
-            <button class="copy-btn" id="copyBtn">
-                <i class="fas fa-copy"></i> نسخ العنوان
-            </button>
         </div>
 
         <button class="pay-btn" id="goToPaymentBtn">
@@ -326,18 +279,17 @@
         starsContainer.appendChild(star);
     }
 
-    // عناوين الدفع
+    // عناوين الدفع (ستستخدم في الصفحة التالية)
     const walletAddresses = {
-        TRC20: 'TXLAq9Y2Xr8hGQ5qZkLp3xVnRwJmY7cFbD',
-        BEP20: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0'
+        BEP20: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0',
+        TRC20: 'TXLAq9Y2Xr8hGQ5qZkLp3xVnRwJmY7cFbD'
     };
 
-    // قراءة بيانات الباقة من localStorage
+    // قراءة بيانات الباقة
     let packageName = localStorage.getItem('selectedPackage') || 'الباقة البرونزية';
     let packagePrice = localStorage.getItem('selectedPrice') || '50 $';
     let dailyProfit = localStorage.getItem('dailyProfit') || '2 $';
 
-    // تنظيف البيانات
     packageName = packageName.replace(/[🟢🔴🟡⭐]/g, '').trim();
     packagePrice = packagePrice.replace('USDT', '').trim();
 
@@ -345,7 +297,7 @@
     document.getElementById('packagePrice').innerHTML = `${packagePrice} <span style="color:#aaa;">USDT</span>`;
     document.getElementById('dailyProfit').innerHTML = `${dailyProfit} <span style="color:#aaa;">/ يومياً</span>`;
 
-    // رقم طلب عشوائي
+    // رقم طلب
     let orderNumber = localStorage.getItem('orderNumber');
     if (!orderNumber) {
         orderNumber = 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
@@ -354,12 +306,10 @@
     document.getElementById('orderNumber').innerText = orderNumber;
 
     // اختيار الشبكة
-    let currentNetwork = 'TRC20';
+    let currentNetwork = 'BEP20';
     const networkOptions = document.querySelectorAll('.network-option');
-    const walletAddressSpan = document.getElementById('walletAddress');
 
-    function updateNetwork() {
-        walletAddressSpan.innerText = walletAddresses[currentNetwork];
+    function updateNetworkSelection() {
         networkOptions.forEach(opt => {
             if (opt.getAttribute('data-network') === currentNetwork) {
                 opt.classList.add('active');
@@ -367,7 +317,6 @@
                 opt.classList.remove('active');
             }
         });
-        // حفظ الشبكة المختارة في localStorage
         localStorage.setItem('selectedNetwork', currentNetwork);
         localStorage.setItem('selectedWalletAddress', walletAddresses[currentNetwork]);
     }
@@ -375,35 +324,22 @@
     networkOptions.forEach(opt => {
         opt.addEventListener('click', () => {
             currentNetwork = opt.getAttribute('data-network');
-            updateNetwork();
+            updateNetworkSelection();
         });
     });
-    updateNetwork();
-
-    // نسخ العنوان
-    document.getElementById('copyBtn').addEventListener('click', () => {
-        const address = walletAddressSpan.innerText;
-        navigator.clipboard.writeText(address);
-        const btn = document.getElementById('copyBtn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-        }, 2000);
-    });
+    updateNetworkSelection();
 
     // رجوع
     document.getElementById('backBtn').addEventListener('click', () => {
         window.location.href = 'packages.html';
     });
 
-    // إتمام الدفع - الانتقال للصفحة التالية مع حفظ البيانات
+    // إتمام الدفع
     document.getElementById('goToPaymentBtn').addEventListener('click', () => {
-        // حفظ الشبكة والعنوان مرة أخرى قبل الانتقال
         localStorage.setItem('selectedNetwork', currentNetwork);
         localStorage.setItem('selectedWalletAddress', walletAddresses[currentNetwork]);
         window.location.href = 'payment.html';
     });
 </script>
 </body>
-</html>
+                </html>
