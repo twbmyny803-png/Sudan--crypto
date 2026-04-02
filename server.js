@@ -42,6 +42,16 @@ app.post("/send-code", async (req, res) => {
     return res.json({ success: false, message: "أدخل الإيميل" });
   }
 
+  // 🔥 أهم سطر (الحل)
+  const exists = await User.findOne({ email });
+
+  if (exists) {
+    return res.json({
+      success: false,
+      message: "هذا البريد مسجل بالفعل"
+    });
+  }
+
   const code = Math.floor(100000 + Math.random() * 900000);
   codes[email] = code;
 
