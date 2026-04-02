@@ -387,43 +387,31 @@
   }
 
   // ============================================
-  // 👤 دالة تحميل بيانات المستخدم (محسّنة)
+  // 👤 دالة تحميل بيانات المستخدم (المحدثة)
   // ============================================
   async function loadUserData() {
     try {
-      // 1️⃣ عرض حالة التحميل
-      document.getElementById('userName').innerHTML = '<div class="loading-skeleton"></div>';
-      document.getElementById('userEmail').innerHTML = '<div class="loading-skeleton"></div>';
-      document.getElementById('userPhone').innerHTML = '<div class="loading-skeleton"></div>';
+      const res = await fetch(`${API_BASE}/user-data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: localStorage.getItem("userEmail") })
+      });
 
-      // 2️⃣ جلب البيانات من السيرفر
-      const res = await fetch(`${API_BASE}/user-data?email=${encodeURIComponent(email)}`);
-      
-      // 3️⃣ التحقق من حالة الاستجابة
-      if (!res.ok) {
-        throw new Error(`خطأ في الاتصال: ${res.status}`);
-      }
-
-      // 4️⃣ تحويل الاستجابة إلى JSON
       const data = await res.json();
 
-      // 5️⃣ التحقق من نجاح الطلب
-      if (!data.success) {
-        throw new Error(data.message || 'فشل تحميل البيانات');
+      if (data.success) {
+        document.getElementById('userName').innerText = data.name;
+        document.getElementById('userEmail').innerText = data.email;
+        document.getElementById('userPhone').innerText = data.phone;
+        
+        // تحديث حالة التوثيق إذا كانت موجودة في الاستجابة
+        if (typeof updateVerificationStatus === 'function') {
+          updateVerificationStatus(data);
+        }
       }
 
-      // 7️⃣ عرض بيانات المستخدم
-      document.getElementById('userName').innerText = data.name || '-';
-      document.getElementById('userEmail').innerText = data.email || '-';
-      document.getElementById('userPhone').innerText = data.phone || '-';
-
-      // 8️⃣ تحديث حالة التوثيق
-      updateVerificationStatus(data);
-
     } catch (err) {
-      console.error('❌ خطأ في loadUserData:', err);
-      // عرض رسالة للمستخدم
-      showToast('فشل تحميل البيانات. يرجى تحديث الصفحة', true);
+      console.log(err);
     }
   }
 
@@ -641,4 +629,4 @@
 </script>
 
 </body>
-    </html>
+</html>
