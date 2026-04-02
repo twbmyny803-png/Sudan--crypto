@@ -454,10 +454,13 @@
             const packageName = card.querySelector('.package-name').innerText.trim();
             const packagePrice = card.querySelector('.package-price').innerText.trim();
             const dailyProfit = card.querySelector('.profit-value')?.innerText || '0 $';
+            
             localStorage.setItem('selectedPackage', packageName);
             localStorage.setItem('selectedPrice', packagePrice);
             localStorage.setItem('dailyProfit', dailyProfit);
-            window.location.href = 'order.html';
+            
+            // ✅ تم التعديل هنا: الرابط الصحيح هو create-order.html
+            window.location.href = 'create-order.html';
         });
     });
 
@@ -470,4 +473,4 @@
     });
 </script>
 </body>
-</html>
+                </html>
