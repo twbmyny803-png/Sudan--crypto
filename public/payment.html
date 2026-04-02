@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إتمام الدفع - باقات الاستثمار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
+            font-family: 'Segoe UI', 'Tahoma', system-ui, sans-serif;
+            padding: 40px 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star-bg {
+            position: absolute;
+            background: radial-gradient(white, rgba(255,255,255,0.3));
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8);}
+            50% { opacity: 1; transform: scale(1.2);}
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(245,176,66,0.4);
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #f5b042;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .payment-card {
+            background: rgba(15, 22, 40, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            border: 1px solid rgba(245, 176, 66, 0.5);
+            padding: 32px;
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(90deg, #f5b042, #ffd966);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 28px;
+        }
+
+        /* عداد 15 دقيقة */
+        .timer-box {
+            text-align: center;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(245,176,66,0.3);
+        }
+
+        .timer-label {
+            color: #f5b042;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .timer-value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff6666;
+            font-family: monospace;
+            letter-spacing: 5px;
+        }
+
+        /* عنوان الدفع */
+        .payment-address-box {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .network-badge {
+            display: inline-block;
+            background: rgba(245,176,66,0.2);
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: #f5b042;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .address {
+            background: #1a1f2f;
+            padding: 15px;
+            border-radius: 16px;
+            color: #ffd966;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            direction: ltr;
+            text-align: left;
+            margin: 15px 0;
+        }
+
+        .copy-btn {
+            background: #f5b042;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .barcode-box {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+
+        .transaction-input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 15px;
+            border: 1px solid rgba(245,176,66,0.4);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 16px;
+            margin: 15px 0;
+            direction: ltr;
+        }
+
+        .file-label {
+            display: block;
+            background: rgba(245,176,66,0.15);
+            border: 1px dashed #f5b042;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin: 15px 0;
+        }
+
+        .preview-image {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .preview-image img {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 12px;
+        }
+
+        .confirm-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #f5b042, #ffd966);
+            border: none;
+            padding: 16px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1f2f;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="stars-bg" id="starsContainer"></div>
+
+<div class="container">
+    <button class="back-btn" id="backBtn">
+        <i class="fas fa-arrow-right"></i> رجوع للطلب
+    </button>
+
+    <div class="payment-card">
+        <div class="title">
+            <i class="fas fa-credit-card"></i> إتمام الدفع
+        </div>
+
+        <!-- عداد 15 دقيقة -->
+        <div class="timer-box">
+            <div class="timer-label"><i class="fas fa-hourglass-half"></i> الوقت المتبقي لإتمام الدفع</div>
+            <div class="timer-value" id="timer">15:00</div>
+        </div>
+
+        <!-- عنوان الدفع (شبكة واحدة محددة) -->
+        <div class="payment-address-box">
+            <div class="network-badge">
+                <i class="fab fa-tron"></i> USDT TRC20
+            </div>
+            <div class="address" id="walletAddress">
+                TXLAq9Y2Xr8hGQ5qZkLp3xVnRwJmY7cFbD
+            </div>
+            <button class="copy-btn" id="copyBtn">
+                <i class="fas fa-copy"></i> نسخ العنوان
+            </button>
+        </div>
+
+        <!-- باركود الطلب -->
+        <div class="barcode-box">
+            <div><i class="fas fa-barcode"></i> باركود الطلب</div>
+            <div id="barcode" style="margin-top: 10px;"></div>
+        </div>
+
+        <!-- رقم العملية -->
+        <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID)">
+
+        <!-- رفع الإيصال -->
+        <label class="file-label" id="fileLabel">
+            <i class="fas fa-cloud-upload-alt"></i> اضغط لرفع إيصال الدفع
+            <input type="file" id="fileInput" accept="image/*">
+        </label>
+        <div class="preview-image" id="preview"></div>
+
+        <button class="confirm-btn" id="confirmPaymentBtn">
+            <i class="fas fa-check-circle"></i> تأكيد الدفع
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+    // نجوم
+    for (let i = 0; i < 150; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star-bg');
+        star.style.width = (Math.random() * 3 + 1) + 'px';
+        star.style.height = star.style.width;
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 5 + 's';
+        star.style.animationDuration = Math.random() * 3 + 2 + 's';
+        document.getElementById('starsContainer').appendChild(star);
+    }
+
+    // قراءة رقم الطلب من localStorage
+    let orderNumber = localStorage.getItem('orderNumber');
+    if (!orderNumber) {
+        orderNumber = 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
+        localStorage.setItem('orderNumber', orderNumber);
+    }
+
+    // الباركود
+    JsBarcode("#barcode", orderNumber, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 1.5,
+        height: 50,
+        displayValue: true
+    });
+
+    // عداد 15 دقيقة (900 ثانية)
+    let timeLeft = 15 * 60;
+    const timerEl = document.getElementById('timer');
+    const interval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            timerEl.innerHTML = "00:00";
+            timerEl.style.color = "#ff0000";
+            alert("انتهى الوقت المخصص للدفع. سيتم إلغاء الطلب.");
+        } else {
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            timerEl.innerHTML = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+        }
+    }, 1000);
+
+    // نسخ العنوان
+    document.getElementById('copyBtn').addEventListener('click', () => {
+        const address = document.getElementById('walletAddress').innerText;
+        navigator.clipboard.writeText(address);
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> نسخ العنوان', 2000);
+    });
+
+    // معاينة الإيصال
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                preview.innerHTML = `<img src="${ev.target.result}" alt="الإيصال">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // تأكيد الدفع
+    document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
+        const txId = document.getElementById('transactionId').value;
+        if (!txId) {
+            alert("⚠️ الرجاء إدخال رقم العملية");
+            return;
+        }
+        if (!fileInput.files.length) {
+            alert("⚠️ الرجاء رفع إيصال الدفع");
+            return;
+        }
+        alert(`✅ تم استلام إيصال الدفع بنجاح!\n\nرقم الطلب: ${orderNumber}\nرقم العملية: ${txId}\nسيتم مراجعة طلبك وتفعيل الباقة خلال 24 ساعة.`);
+        // هنا ترسل البيانات للخادم
+    });
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = 'create-order.html';
+    });
+</script>
+</body>
+  </html>
