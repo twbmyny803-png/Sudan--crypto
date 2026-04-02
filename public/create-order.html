@@ -1,250 +1,435 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>سودان كربتو | إنشاء الطلب</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
-      min-height: 100vh;
-      padding: 20px;
-      position: relative;
-    }
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .star {
-      position: absolute;
-      background-color: #fff;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: twinkle 3s infinite alternate;
-    }
-    @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(1);}
-      100% { opacity: 1; transform: scale(1.2);}
-    }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(240,185,11,0.15);
-      border: 1px solid rgba(240,185,11,0.3);
-      border-radius: 40px;
-      padding: 8px 20px;
-      color: #F0B90B;
-      text-decoration: none;
-      font-size: 14px;
-      margin-bottom: 16px;
-      transition: 0.2s;
-    }
-    .glass-card {
-      background: rgba(15, 25, 45, 0.65);
-      backdrop-filter: blur(16px);
-      border-radius: 32px;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 24px;
-      margin-bottom: 16px;
-    }
-    h2 {
-      color: #F0B90B;
-      font-size: 22px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      color: #ddd;
-    }
-    .order-id {
-      background: rgba(240,185,11,0.15);
-      border-radius: 20px;
-      padding: 16px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .order-id-value {
-      font-size: 20px;
-      font-weight: bold;
-      color: #F0B90B;
-      font-family: monospace;
-      letter-spacing: 1px;
-    }
-    .network-buttons {
-      display: flex;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .network-btn {
-      flex: 1;
-      background: rgba(240,185,11,0.15);
-      border: 1px solid rgba(240,185,11,0.3);
-      border-radius: 40px;
-      padding: 14px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .network-btn i {
-      font-size: 28px;
-      color: #F0B90B;
-      display: block;
-      margin-bottom: 8px;
-    }
-    .network-btn:hover {
-      background: rgba(240,185,11,0.3);
-      transform: translateY(-2px);
-    }
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 14px;
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-    .toast.success { background: #10b981; color: white; }
-    .toast.error { background: #ef4444; color: white; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل الطلب - باقات الاستثمار</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
+            font-family: 'Segoe UI', 'Tahoma', system-ui, sans-serif;
+            padding: 40px 20px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* نجوم متحركة */
+        .stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .star-bg {
+            position: absolute;
+            background: radial-gradient(white, rgba(255,255,255,0.3));
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8);}
+            50% { opacity: 1; transform: scale(1.2);}
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* زر رجوع */
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(245,176,66,0.4);
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #f5b042;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .back-btn:hover {
+            background: rgba(245,176,66,0.2);
+            transform: translateX(-3px);
+        }
+
+        /* بطاقة الطلب الرئيسية */
+        .order-card {
+            background: rgba(15, 22, 40, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            border: 1px solid rgba(245, 176, 66, 0.5);
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            background: linear-gradient(90deg, #f5b042, #ffd966);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 28px;
+        }
+
+        /* جدول التفاصيل */
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .details-table tr {
+            border-bottom: 1px solid rgba(245,176,66,0.2);
+        }
+
+        .details-table td {
+            padding: 14px 8px;
+            font-size: 18px;
+        }
+
+        .details-table td:first-child {
+            font-weight: bold;
+            color: #f5b042;
+            width: 40%;
+        }
+
+        .details-table td:last-child {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .highlight {
+            color: #4caf50;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* رقم الطلب */
+        .order-number {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+            border-right: 4px solid #f5b042;
+        }
+
+        .order-number span:first-child {
+            color: #f5b042;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .order-number span:last-child {
+            color: #ffd966;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* قسم المحفظة */
+        .wallet-section {
+            margin: 25px 0;
+        }
+
+        .wallet-title {
+            color: #f5b042;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-right: 3px solid #f5b042;
+            padding-right: 12px;
+        }
+
+        .network-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .network-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(245,176,66,0.4);
+            padding: 12px 20px;
+            border-radius: 50px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .network-btn i {
+            color: #f5b042;
+            font-size: 18px;
+        }
+
+        .network-btn.active {
+            background: rgba(245,176,66,0.25);
+            border-color: #f5b042;
+            color: #f5b042;
+        }
+
+        .network-btn:hover {
+            background: rgba(245,176,66,0.15);
+        }
+
+        .address-box {
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(245,176,66,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .address-text {
+            color: #ffd966;
+            font-size: 14px;
+            word-break: break-all;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+            flex: 1;
+        }
+
+        .copy-btn {
+            background: #f5b042;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        /* زر تأكيد الطلب */
+        .confirm-btn {
+            width: 100%;
+            background: linear-gradient(90deg, #f5b042, #ffd966);
+            border: none;
+            padding: 16px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1f2f;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .confirm-btn:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 550px) {
+            .order-card {
+                padding: 20px;
+            }
+            .details-table td {
+                font-size: 14px;
+                padding: 10px 5px;
+            }
+            .address-text {
+                font-size: 11px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="stars" id="starsContainer"></div>
+<div class="stars-bg" id="starsContainer"></div>
 
 <div class="container">
+    <button class="back-btn" id="backBtn">
+        <i class="fas fa-arrow-right"></i> رجوع للباقات
+    </button>
 
-  <a href="packages.html" class="back-btn"><i class="fa-solid fa-arrow-right"></i> العودة للباقات</a>
+    <div class="order-card">
+        <div class="title">
+            <i class="fas fa-clipboard-list"></i> تفاصيل الطلب
+        </div>
 
-  <div class="glass-card">
-    <h2><i class="fa-solid fa-file-invoice"></i> تفاصيل الطلب</h2>
-    <div class="info-row">
-      <span><i class="fa-solid fa-box"></i> الباقة</span>
-      <span id="packageName">-</span>
-    </div>
-    <div class="info-row">
-      <span><i class="fa-solid fa-dollar-sign"></i> المبلغ</span>
-      <span id="price">- USDT</span>
-    </div>
-    <div class="info-row">
-      <span><i class="fa-solid fa-chart-line"></i> الربح اليومي</span>
-      <span id="dailyProfit">- USDT</span>
-    </div>
-    <div class="info-row">
-      <span><i class="fa-regular fa-clock"></i> المدة</span>
-      <span id="duration">- يوم</span>
-    </div>
-  </div>
+        <table class="details-table" id="orderDetailsTable">
+            <tr>
+                <td><i class="fas fa-gem"></i> الباقة</td>
+                <td id="packageName">-</td>
+            </tr>
+            <tr>
+                <td><i class="fas fa-dollar-sign"></i> المبلغ</td>
+                <td id="packagePrice">- <span style="color:#aaa;">USDT</span></td>
+            </tr>
+            <tr>
+                <td><i class="fas fa-chart-line"></i> الربح اليومي</td>
+                <td id="dailyProfit" class="highlight">-</td>
+            </tr>
+            <tr>
+                <td><i class="fas fa-calendar-alt"></i> مدة الباقة</td>
+                <td id="duration">280 يوم</td>
+            </tr>
+        </table>
 
-  <div class="glass-card">
-    <div class="order-id">
-      <i class="fa-solid fa-hashtag"></i> رقم الطلب
-      <div class="order-id-value" id="orderId">-</div>
-    </div>
-    <h2><i class="fa-solid fa-network-wired"></i> اختر الشبكة</h2>
-    <div class="network-buttons">
-      <div class="network-btn" onclick="selectNetwork('TRC20')">
-        <i class="fa-brands fa-tron"></i>
-        <span>USDT TRC20</span>
-      </div>
-      <div class="network-btn" onclick="selectNetwork('BEP20')">
-        <i class="fa-brands fa-ethereum"></i>
-        <span>USDT BEP20</span>
-      </div>
-    </div>
-  </div>
+        <div class="order-number">
+            <span><i class="fas fa-hashtag"></i> رقم الطلب</span>
+            <span id="orderNumber">-</span>
+        </div>
 
-</div>
+        <div class="wallet-section">
+            <div class="wallet-title">
+                <i class="fas fa-wallet"></i> عنوان المحفظة
+            </div>
+            <div class="network-options" id="networkOptions">
+                <button class="network-btn" data-network="BEP20">
+                    <i class="fab fa-bitcoin"></i> USDT BEP20
+                </button>
+                <button class="network-btn" data-network="TRC20">
+                    <i class="fab fa-tron"></i> USDT TRC20
+                </button>
+            </div>
+            <div class="address-box" id="addressBox">
+                <span class="address-text" id="walletAddress">0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0</span>
+                <button class="copy-btn" id="copyBtn">
+                    <i class="fas fa-copy"></i> نسخ
+                </button>
+            </div>
+        </div>
 
-<div id="toastMessage" class="toast">
-  <i class="fa-solid fa-circle-check"></i>
-  <span id="toastText"></span>
+        <button class="confirm-btn" id="confirmBtn">
+            <i class="fas fa-check-circle"></i> تأكيد الطلب
+        </button>
+    </div>
 </div>
 
 <script>
-  const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
-  const email = localStorage.getItem("userEmail");
-
-  const packageName = localStorage.getItem("selectedPackage");
-  const price = localStorage.getItem("selectedPrice");
-  const dailyProfit = localStorage.getItem("selectedDailyProfit");
-  const duration = localStorage.getItem("selectedDuration");
-
-  if (!email) window.location.href = "login.html";
-  if (!packageName || !price) window.location.href = "packages.html";
-
-  document.getElementById('packageName').innerText = packageName;
-  document.getElementById('price').innerText = price + " USDT";
-  document.getElementById('dailyProfit').innerText = dailyProfit + " USDT";
-  document.getElementById('duration').innerText = duration + " يوم";
-
-  const orderId = "ORD" + Date.now();
-  document.getElementById('orderId').innerText = orderId;
-
-  function showToast(message, isError = false) {
-    const toast = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
-    const icon = toast.querySelector('i');
-    toastText.innerText = message;
-    if (isError) {
-      icon.className = 'fa-solid fa-circle-exclamation';
-      toast.className = 'toast error';
-    } else {
-      icon.className = 'fa-solid fa-circle-check';
-      toast.className = 'toast success';
+    // توليد النجوم
+    function createStars() {
+        const starsContainer = document.getElementById('starsContainer');
+        for (let i = 0; i < 150; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star-bg');
+            const size = Math.random() * 3 + 1;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            star.style.animationDuration = Math.random() * 3 + 2 + 's';
+            starsContainer.appendChild(star);
+        }
     }
-    toast.style.display = 'flex';
-    setTimeout(() => toast.style.display = 'none', 3000);
-  }
+    createStars();
 
-  function selectNetwork(network) {
-    localStorage.setItem("selectedNetwork", network);
-    localStorage.setItem("orderId", orderId);
-    window.location.href = "deposit.html";
-  }
+    // قراءة البيانات من localStorage
+    let packageName = localStorage.getItem('selectedPackage') || 'الباقة الماسية';
+    let packagePrice = localStorage.getItem('selectedPrice') || '1000 $';
+    let dailyProfit = localStorage.getItem('dailyProfit') || '20 $';
 
-  function createStars() {
-    const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 150; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      star.style.width = (Math.random() * 3 + 1) + 'px';
-      star.style.height = star.style.width;
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 5 + 's';
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      container.appendChild(star);
+    // تنظيف البيانات
+    packageName = packageName.replace(/[🟢🔴🟡⭐]/g, '').trim();
+    packagePrice = packagePrice.replace('USDT', '').trim();
+    
+    // عرض البيانات في الجدول
+    document.getElementById('packageName').innerHTML = `<i class="fas fa-tag"></i> ${packageName}`;
+    document.getElementById('packagePrice').innerHTML = `${packagePrice} <span style="color:#aaa;">USDT</span>`;
+    document.getElementById('dailyProfit').innerHTML = `<i class="fas fa-dollar-sign"></i> ${dailyProfit} <span style="color:#aaa;">/ يومياً</span>`;
+    document.getElementById('duration').innerHTML = `<i class="fas fa-calendar-check"></i> 280 يوم`;
+
+    // توليد رقم طلب عشوائي
+    const orderNumber = 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
+    document.getElementById('orderNumber').innerText = orderNumber;
+
+    // إدارة الشبكات والعناوين
+    const walletAddresses = {
+        BEP20: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0',
+        TRC20: 'TXLAq9Y2Xr8hGQ5qZkLp3xVnRwJmY7cFbD'
+    };
+
+    let currentNetwork = 'BEP20';
+    const walletAddressSpan = document.getElementById('walletAddress');
+    const networkBtns = document.querySelectorAll('.network-btn');
+
+    function updateWalletDisplay() {
+        walletAddressSpan.innerText = walletAddresses[currentNetwork];
+        networkBtns.forEach(btn => {
+            if (btn.getAttribute('data-network') === currentNetwork) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
     }
-  }
-  createStars();
+
+    networkBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentNetwork = btn.getAttribute('data-network');
+            updateWalletDisplay();
+        });
+    });
+    updateWalletDisplay();
+
+    // زر نسخ العنوان
+    document.getElementById('copyBtn').addEventListener('click', () => {
+        const address = walletAddressSpan.innerText;
+        navigator.clipboard.writeText(address);
+        const copyBtn = document.getElementById('copyBtn');
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    });
+
+    // زر رجوع
+    document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = 'packages.html';
+    });
+
+    // زر تأكيد الطلب
+    document.getElementById('confirmBtn').addEventListener('click', () => {
+        alert(`✅ تم استلام طلبك بنجاح!\n\n📦 الباقة: ${packageName}\n💰 المبلغ: ${packagePrice} USDT\n📅 مدة الباقة: 280 يوم\n🔗 الشبكة: ${currentNetwork}\n🆔 رقم الطلب: ${orderNumber}\n\nسيتم التواصل معك قريباً لإتمام الدفع.`);
+        // هنا تقدر ترسل البيانات للخادم
+    });
 </script>
-
 </body>
-  </html>
+                  </html>
