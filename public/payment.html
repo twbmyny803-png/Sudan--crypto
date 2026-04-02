@@ -308,6 +308,9 @@
         starsContainer.appendChild(star);
     }
 
+    // 🔥 مسح الحالة القديمة مؤقتاً للتجربة
+    localStorage.removeItem('paymentStatus');
+
     // قراءة البيانات
     let selectedNetwork = localStorage.getItem('selectedNetwork') || 'BEP20';
     let orderNumber = localStorage.getItem('orderId') || ('ORD' + Date.now());
@@ -399,7 +402,7 @@
             lockFields();
             confirmBtn.disabled = true;
             confirmBtn.classList.add('disabled');
-            showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
+            showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
             newOrderBtn.style.display = 'flex';
             return;
         }
@@ -412,7 +415,7 @@
                 lockFields();
                 confirmBtn.disabled = true;
                 confirmBtn.classList.add('disabled');
-                showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
+                showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
                 newOrderBtn.style.display = 'flex';
                 localStorage.setItem('paymentStatus', 'expired');
             } else {
@@ -434,7 +437,7 @@
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-        showMessage('✓ تم استلام طلبك بنجاح! جاري مراجعة إيصالك... سيتم الرد خلال 24 ساعة.', 'success');
+        showMessage('<i class="fas fa-check-circle"></i> تم الإرسال! جاري المراجعة... سيتم مراجعة طلبك خلال دقائق.', 'success');
     } 
     else if (paymentStatus === 'approved') {
         timerEl.innerHTML = "00:00";
@@ -442,13 +445,13 @@
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-        showMessage('✓ تم قبول طلبك! سيتم تفعيل الباقة فوراً.', 'success');
+        showMessage('<i class="fas fa-check-circle"></i> تم قبول طلبك! سيتم تفعيل الباقة فوراً.', 'success');
     }
     else if (paymentStatus === 'rejected') {
         unlockFields();
         confirmBtn.disabled = false;
         confirmBtn.classList.remove('disabled');
-        showMessage('❌ طلبك السابق تم رفضه. الرجاء إعادة رفع إيصال جديد مع رقم عملية صحيح.', 'rejected');
+        showMessage('<i class="fas fa-times-circle"></i> طلبك السابق تم رفضه. الرجاء إعادة رفع إيصال جديد مع رقم عملية صحيح.', 'rejected');
         let newStartTime = Date.now();
         localStorage.setItem('paymentStartTime', newStartTime);
         localStorage.setItem('paymentStatus', 'pending');
@@ -461,7 +464,7 @@
         lockFields();
         confirmBtn.disabled = true;
         confirmBtn.classList.add('disabled');
-        showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
+        showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
         newOrderBtn.style.display = 'flex';
     }
     else {
@@ -479,7 +482,7 @@
                 lockFields();
                 confirmBtn.disabled = true;
                 confirmBtn.classList.add('disabled');
-                showMessage("⚠️ انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.", 'expired');
+                showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
                 newOrderBtn.style.display = 'flex';
             } else {
                 unlockFields();
@@ -488,6 +491,11 @@
                 startTimer(remainingSeconds);
             }
         }
+        // ✅ تأكيد فتح الحقول عند البداية
+        unlockFields();
+        confirmBtn.disabled = false;
+        confirmBtn.classList.remove('disabled');
+        startTimer(remainingSeconds);
     }
 
     // معاينة الصورة
@@ -499,7 +507,7 @@
             const reader = new FileReader();
             reader.onload = function(ev) {
                 preview.innerHTML = `<img src="${ev.target.result}" alt="الإيصال">`;
-                uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-check-circle"></i> ✓ تم رفع الإيصال بنجاح</div>';
+                uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-check-circle"></i> تم رفع الإيصال بنجاح</div>';
             };
             reader.readAsDataURL(file);
         }
@@ -528,9 +536,9 @@
         stopTimer();
         timerEl.innerHTML = "00:00";
         timerEl.classList.add('expired');
-        showMessage('✓ تم استلام طلبك بنجاح! جاري مراجعة إيصالك... سيتم الرد خلال 24 ساعة.', 'success');
+        showMessage('<i class="fas fa-check-circle"></i> تم الإرسال! جاري المراجعة... سيتم مراجعة طلبك خلال دقائق.', 'success');
         
-        alert(`✅ تم استلام طلبك بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\nسيتم مراجعة إيصالك خلال 24 ساعة.`);
+        alert(`✅ تم الإرسال بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\n⏳ سيتم مراجعة طلبك خلال دقائق.`);
     });
 
     // رجوع للطلب
