@@ -86,20 +86,21 @@
       color: #F0B90B;
     }
 
+    /* شبكة الأزرار الرئيسية (زر واحد فقط) */
     .main-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      display: flex;
+      justify-content: center;
       margin-bottom: 16px;
     }
     .main-btn {
       background: rgba(240, 185, 11, 0.15);
       border: 1px solid rgba(240, 185, 11, 0.3);
       border-radius: 20px;
-      padding: 12px 6px;
+      padding: 12px 24px;
       text-align: center;
       cursor: pointer;
       transition: 0.2s;
+      width: 50%;
     }
     .main-btn i {
       font-size: 24px;
@@ -108,7 +109,7 @@
       display: block;
     }
     .main-btn span {
-      font-size: 12px;
+      font-size: 14px;
       color: white;
     }
     .main-btn:hover {
@@ -116,6 +117,7 @@
       transform: translateY(-2px);
     }
 
+    /* أزرار إضافية */
     .extra-buttons {
       display: flex;
       gap: 12px;
@@ -141,6 +143,7 @@
       transform: translateY(-2px);
     }
 
+    /* بطاقة الباقة */
     .package-card {
       background: linear-gradient(135deg, rgba(240,185,11,0.2), rgba(255,217,102,0.1));
       border: 1px solid rgba(240,185,11,0.4);
@@ -209,6 +212,7 @@
       font-family: monospace;
     }
 
+    /* إحصائيات */
     .stats-row {
       display: flex;
       gap: 12px;
@@ -231,6 +235,7 @@
       color: #aaa;
     }
 
+    /* الشريط السفلي */
     .bottom-nav {
       display: flex;
       justify-content: space-around;
@@ -275,9 +280,8 @@
     .toast.error { background: #ef4444; }
 
     @media (max-width: 500px) {
-      .main-grid { gap: 8px; }
+      .main-btn { padding: 10px 16px; }
       .main-btn i { font-size: 20px; }
-      .main-btn span { font-size: 10px; }
       .extra-btn { font-size: 12px; padding: 10px; }
     }
   </style>
@@ -301,17 +305,9 @@
     </div>
   </div>
 
-  <!-- الأزرار الرئيسية (3 أزرار فقط) -->
+  <!-- الزر الرئيسي الوحيد: عن المنصة -->
   <div class="glass-card">
     <div class="main-grid">
-      <div class="main-btn" onclick="location.href='transactions.html'">
-        <i class="fa-solid fa-list"></i>
-        <span>سجل العمليات</span>
-      </div>
-      <div class="main-btn" onclick="location.href='packages.html'">
-        <i class="fa-solid fa-sack-dollar"></i>
-        <span>الباقات</span>
-      </div>
       <div class="main-btn" onclick="location.href='about.html'">
         <i class="fa-solid fa-circle-info"></i>
         <span>عن المنصة</span>
@@ -370,12 +366,12 @@
     </div>
   </div>
 
-  <!-- الشريط السفلي -->
+  <!-- الشريط السفلي (5 أزرار) -->
   <div class="bottom-nav">
     <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
     <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i><span>الباقات</span></a>
-    <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل</span></a>
-    <a href="assets.html"><i class="fa-solid fa-briefcase"></i><span>الأصول</span></a>
+    <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل اليومي</span></a>
+    <a href="transactions.html"><i class="fa-solid fa-list"></i><span>سجل العمليات</span></a>
     <a href="account.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
   </div>
 
@@ -539,4 +535,4 @@
   loadUserData();
 </script>
 </body>
-          </html>
+</html>
