@@ -122,7 +122,11 @@ app.post("/login", async (req, res) => {
     return res.json({ success: false, message: "بيانات غلط" });
   }
 
-  res.json({ success: true });
+  res.json({
+    success: true,
+    name: user.name,
+    email: user.email
+  });
 });
 
 // ================== نسيت كلمة السر ==================
