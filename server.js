@@ -16,7 +16,7 @@ mongoose.connect("mongodb+srv://maynwsmanswy_db_user:hOrkK68kCma6kJB5@cluster0.w
 .then(() => console.log("✅ MongoDB connected"))
 .catch(err => console.log("❌ MongoDB error:", err));
 
-// 🔼 المتغيرات العامة
+// ================== إضافات فوق ==================
 let codes = {};
 let resetCodes = {};
 let deposits = [];
@@ -33,18 +33,18 @@ const userSchema = new mongoose.Schema({
   incomeBalance: { type: Number, default: 0 },
 
   isVerified: { type: Boolean, default: false },
+  verificationStatus: { type: String, default: 'none' },
+
   isBlocked: { type: Boolean, default: false },
   isFrozen: { type: Boolean, default: false },
 
   withdrawBlocked: { type: Boolean, default: false },
+  withdrawPassword: { type: String, default: null },
 
   packageName: String,
   packageStart: Date,
   packageDurationDays: Number,
-  dailyProfit: Number,
-  
-  verificationStatus: { type: String, default: 'none' }, // 'none', 'pending', 'verified', 'rejected'
-  withdrawPassword: { type: String, default: null } // حقل كلمة سر السحب
+  dailyProfit: Number
 });
 
 const User = mongoose.model("User", userSchema);
@@ -217,12 +217,12 @@ app.post("/user-data", async (req, res) => {
     email: user.email,
     phone: user.phone,
     isVerified: user.isVerified || false,
-    isBlocked: user.isBlocked || false,
-    isFrozen: user.isFrozen || false,
-    withdrawBlocked: user.withdrawBlocked || false,
     verificationStatus: user.verificationStatus || 'none',
     balance: user.balance || 0,
     incomeBalance: user.incomeBalance || 0,
+    isBlocked: user.isBlocked || false,
+    isFrozen: user.isFrozen || false,
+    withdrawBlocked: user.withdrawBlocked || false,
     packageName: user.packageName || null
   });
 });
@@ -248,60 +248,59 @@ app.post("/set-withdraw-password", async (req, res) => {
 });
 
 // ============================================
-// 🔽 ADMIN APIs & NEW FEATURES 🔽
+// 👤 الأدمن - المستخدمين
 // ============================================
-
-// ✅ 2. عرض كل المستخدمين (مع كل البيانات)
 app.get("/admin-users", async (req, res) => {
   const users = await User.find({});
   res.json({ success: true, users });
 });
 
-// ✅ 3. توثيق المستخدم
+// ✅ توثيق
 app.post("/admin-verify", async (req, res) => {
   const { email } = req.body;
-  await User.updateOne({ email }, { isVerified: true, verificationStatus: 'verified' });
+  await User.updateOne({ email }, { isVerified: true, verificationStatus: "verified" });
   res.json({ success: true });
 });
 
-// ✅ 4. تجميد الحساب
+// ❄️ تجميد
 app.post("/admin-freeze", async (req, res) => {
   const { email } = req.body;
   await User.updateOne({ email }, { isFrozen: true });
   res.json({ success: true });
 });
 
-// ✅ 5. حظر الحساب
+// 🚫 حظر
 app.post("/admin-block", async (req, res) => {
   const { email } = req.body;
   await User.updateOne({ email }, { isBlocked: true });
   res.json({ success: true });
 });
 
-// ✅ 6. فك الحظر / التجميد
+// 🔓 فك الحظر
 app.post("/admin-unblock", async (req, res) => {
   const { email } = req.body;
   await User.updateOne({ email }, { isBlocked: false, isFrozen: false });
   res.json({ success: true });
 });
 
-// ✅ 7. حذف المستخدم
+// ❌ حذف مستخدم
 app.post("/admin-delete", async (req, res) => {
   const { email } = req.body;
   await User.deleteOne({ email });
   res.json({ success: true });
 });
 
-// ✅ 8. منع السحب
+// 🔒 منع السحب
 app.post("/admin-block-withdraw", async (req, res) => {
   const { email } = req.body;
   await User.updateOne({ email }, { withdrawBlocked: true });
   res.json({ success: true });
 });
 
-// ✅ 9. إضافة باقة للمستخدم
+// 📦 إضافة باقة
 app.post("/admin-add-package", async (req, res) => {
   const { email, packageName, dailyProfit, durationDays } = req.body;
+
   await User.updateOne(
     { email },
     {
@@ -311,12 +310,13 @@ app.post("/admin-add-package", async (req, res) => {
       packageStart: new Date()
     }
   );
+
   res.json({ success: true });
 });
 
-// ✅ 10. طلبات الإيداع
+// 💰 الإيداع
 app.post("/deposit-request", (req, res) => {
-  deposits.push({ ...req.body, date: new Date() });
+  deposits.push(req.body);
   res.json({ success: true });
 });
 
@@ -324,32 +324,72 @@ app.get("/admin-deposits", (req, res) => {
   res.json({ success: true, deposits });
 });
 
-// ✅ 11. طلبات السحب
-app.post("/withdraw-request", (req, res) => {
-  withdrawRequests.push({ ...req.body, status: 'pending', date: new Date() });
+// 💸 السحب
+app.post("/withdraw-request", async (req, res) => {
+  const { email, amount } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) return res.json({ success: false });
+
+  if (user.withdrawBlocked) {
+    return res.json({ success: false, message: "السحب موقوف" });
+  }
+
+  if (amount > user.balance) {
+    return res.json({ success: false, message: "رصيد غير كافي" });
+  }
+
+  withdrawRequests.push({
+    id: Date.now(),
+    email,
+    amount,
+    status: "pending"
+  });
+
   res.json({ success: true });
 });
 
+// عرض السحب
 app.get("/admin-withdraws", (req, res) => {
-  res.json({ success: true, withdraws: withdrawRequests });
+  res.json({ success: true, requests: withdrawRequests });
 });
 
-app.post("/admin-approve-withdraw", (req, res) => {
+// قبول السحب
+app.post("/admin-approve-withdraw", async (req, res) => {
   const { id } = req.body;
-  // منطق بسيط للتحديث في المصفوفة (في الإنتاج يفضل استخدام DB)
-  const reqIdx = withdrawRequests.findIndex(r => r.id === id);
-  if (reqIdx > -1) withdrawRequests[reqIdx].status = 'approved';
+
+  const request = withdrawRequests.find(r => r.id == id);
+  if (!request) return res.json({ success: false });
+
+  const user = await User.findOne({ email: request.email });
+
+  if (!user || user.balance < request.amount) {
+    return res.json({ success: false });
+  }
+
+  user.balance -= request.amount;
+  await user.save();
+
+  request.status = "approved";
+
   res.json({ success: true });
 });
 
+// رفض السحب
 app.post("/admin-reject-withdraw", (req, res) => {
   const { id } = req.body;
-  const reqIdx = withdrawRequests.findIndex(r => r.id === id);
-  if (reqIdx > -1) withdrawRequests[reqIdx].status = 'rejected';
+
+  const request = withdrawRequests.find(r => r.id == id);
+  if (!request) return res.json({ success: false });
+
+  request.status = "rejected";
+
   res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 10000;
+
 app.listen(PORT, () => {
   console.log("Server running on " + PORT);
 });
