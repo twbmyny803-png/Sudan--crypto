@@ -25,6 +25,7 @@ body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
 table { width:100%; border-collapse:collapse; margin-top:20px }
 td, th { padding:10px; border:1px solid #444 }
 button.action { padding:5px 10px; margin:2px; cursor:pointer }
+img { border-radius:5px }
 </style>
 </head>
 
@@ -32,39 +33,27 @@ button.action { padding:5px 10px; margin:2px; cursor:pointer }
 
 <h2>لوحة تحكم الأدمن 🔥</h2>
 
-<!-- 🔥 القائمة -->
 <div class="nav">
-
-  <a href="admin.html">
-    <button>👤 المستخدمين</button>
-  </a>
-
-  <a href="admin-withdraws.html">
-    <button>💸 السحب</button>
-  </a>
-
-  <a href="admin-deposits.html">
-    <button>💰 الإيداع</button>
-  </a>
-
-  <a href="admin-packages.html">
-    <button>📦 الباقات</button>
-  </a>
-
+  <a href="admin.html"><button>👤 المستخدمين</button></a>
+  <a href="admin-withdraws.html"><button>💸 السحب</button></a>
+  <a href="admin-deposits.html"><button>💰 الإيداع</button></a>
+  <a href="admin-packages.html"><button>📦 الباقات</button></a>
 </div>
 
-<table id="usersTable">
+<table>
 <thead>
 <tr>
 <th>الاسم</th>
 <th>البريد</th>
 <th>الهاتف</th>
 <th>الرصيد</th>
-<th>توثيق</th>
+<th>الصور</th>
+<th>الحالة</th>
 <th>تحكم</th>
 </tr>
 </thead>
-<tbody></tbody>
+
+<tbody id="usersTable"></tbody>
 </table>
 
 <script>
@@ -74,30 +63,56 @@ async function loadUsers() {
   const res = await fetch(API + "/admin-users");
   const data = await res.json();
 
-  const tbody = document.querySelector("tbody");
-  tbody.innerHTML = "";
+  const table = document.getElementById("usersTable");
+  table.innerHTML = "";
 
   data.users.forEach(u => {
+    const images = u.verificationImages && u.verificationImages.length > 0
+      ? u.verificationImages.map(img => `<img src="${API + img}" width="50">`).join("")
+      : "❌";
+
     const row = `
     <tr>
       <td>${u.name}</td>
       <td>${u.email}</td>
       <td>${u.phone}</td>
       <td>${u.balance}</td>
-      <td>${u.isVerified ? "✅" : "❌"}</td>
+
+      <td>${images}</td>
+
       <td>
-        <button class="action" onclick="verify('${u.email}')">توثيق</button>
+        ${
+          u.isVerified
+          ? "✅ موثق"
+          : u.verificationStatus === "pending"
+          ? "⏳ قيد المراجعة"
+          : "❌ غير موثق"
+        }
+      </td>
+
+      <td>
+        <button class="action" onclick="verify('${u.email}')">قبول</button>
+        <button class="action" onclick="reject('${u.email}')">رفض</button>
         <button class="action" onclick="block('${u.email}')">حظر</button>
         <button class="action" onclick="del('${u.email}')">حذف</button>
       </td>
     </tr>
     `;
-    tbody.innerHTML += row;
+    table.innerHTML += row;
   });
 }
 
 async function verify(email){
   await fetch(API+"/admin-verify",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
+  loadUsers();
+}
+
+async function reject(email){
+  await fetch(API+"/admin-reject-verification",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({email})
