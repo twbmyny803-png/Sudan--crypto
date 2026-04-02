@@ -1,271 +1,178 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>سودان كربتو | الباقات الاستثمارية</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
-      min-height: 100vh;
-      padding: 20px;
-      position: relative;
-    }
-    .stars {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .star {
-      position: absolute;
-      background-color: #fff;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: twinkle 3s infinite alternate;
-    }
-    @keyframes twinkle {
-      0% { opacity: 0.2; transform: scale(1);}
-      100% { opacity: 1; transform: scale(1.2);}
-    }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(240,185,11,0.15);
-      border: 1px solid rgba(240,185,11,0.3);
-      border-radius: 40px;
-      padding: 8px 20px;
-      color: #F0B90B;
-      text-decoration: none;
-      font-size: 14px;
-      margin-bottom: 16px;
-      transition: 0.2s;
-    }
-    .back-btn:hover {
-      background: rgba(240,185,11,0.3);
-    }
-    h1 {
-      color: #F0B90B;
-      font-size: 24px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .package-card {
-      background: rgba(15, 25, 45, 0.65);
-      backdrop-filter: blur(16px);
-      border-radius: 28px;
-      border: 1px solid rgba(240,185,11,0.3);
-      padding: 20px;
-      margin-bottom: 16px;
-      transition: 0.2s;
-      cursor: pointer;
-    }
-    .package-card:hover {
-      transform: translateY(-3px);
-      border-color: #F0B90B;
-    }
-    .package-name {
-      font-size: 24px;
-      font-weight: bold;
-      color: #F0B90B;
-    }
-    .package-price {
-      font-size: 28px;
-      font-weight: bold;
-      margin: 8px 0;
-    }
-    .package-profit {
-      color: #10b981;
-      font-size: 16px;
-    }
-    .package-duration {
-      color: #aaa;
-      font-size: 13px;
-    }
-    .disabled-card {
-      opacity: 0.5;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-    .active-package-info {
-      background: rgba(240,185,11,0.1);
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 16px;
-      text-align: center;
-      border: 1px solid rgba(240,185,11,0.3);
-    }
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 14px;
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-    .toast.success { background: #10b981; color: white; }
-    .toast.error { background: #ef4444; color: white; }
-    .toast.warning { background: #f59e0b; color: #0a0f2a; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>باقات الاستثمار</title>
+    <style>
+        body {
+            font-family: 'Tahoma', 'Segoe UI', system-ui, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
+            padding: 24px 20px 32px 20px;
+            text-align: center;
+        }
+        /* زر الباقات الرئيسي */
+        .main-investment-btn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 18px 20px;
+            border: none;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 40px;
+            transition: 0.3s;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+            letter-spacing: 1px;
+        }
+        .main-investment-btn:hover {
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
+            transform: scale(1.01);
+        }
+        /* شبكة الباقات الخمسة */
+        .packages-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .package-card {
+            background: #ffffff;
+            border-right: 8px solid #2a5298;
+            border-radius: 24px;
+            padding: 18px 24px;
+            text-align: right;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .package-card:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+            background: #fefefe;
+        }
+        .package-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .package-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1e2f4e;
+        }
+        .package-desc {
+            font-size: 14px;
+            color: #5a6874;
+        }
+        .package-price {
+            background: #eef2fa;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #1e3c72;
+            font-size: 18px;
+        }
+        @media (max-width: 550px) {
+            .package-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .main-investment-btn {
+                font-size: 22px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div class="stars" id="starsContainer"></div>
-
 <div class="container">
+    <!-- زر الباقات الرئيسي (فوق) -->
+    <button class="main-investment-btn" id="mainPackagesBtn">
+        📦 باقات الاستثمار
+    </button>
 
-  <a href="dashboard.html" class="back-btn"><i class="fa-solid fa-arrow-right"></i> العودة</a>
-
-  <h1><i class="fa-solid fa-sack-dollar"></i> باقات الاستثمار</h1>
-
-  <div id="activePackageInfo" class="active-package-info" style="display: none;">
-    <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 20px;"></i>
-    <p>لديك باقة نشطة حالياً: <strong id="activePackageName">-</strong></p>
-    <p>المدة المتبقية: <span id="remainingDays">0</span> يوم</p>
-    <p>الربح اليومي: <span id="activeDailyProfit">0</span> USDT</p>
-    <p style="font-size: 12px; margin-top: 8px;">لا يمكنك شراء باقة جديدة حتى انتهاء الباقة الحالية</p>
-  </div>
-
-  <div id="packagesList"></div>
-
-</div>
-
-<div id="toastMessage" class="toast">
-  <i class="fa-solid fa-circle-check"></i>
-  <span id="toastText"></span>
+    <!-- الـ 5 باقات تحت بعض -->
+    <div class="packages-grid" id="packagesList">
+        <!-- باقة 1 -->
+        <div class="package-card" data-package="basic">
+            <div class="package-info">
+                <div class="package-name">🥉 الباقة الأساسية</div>
+                <div class="package-desc">مناسبة للمبتدئين – عائد شهري 5%</div>
+            </div>
+            <div class="package-price">$ 499</div>
+        </div>
+        <!-- باقة 2 -->
+        <div class="package-card" data-package="silver">
+            <div class="package-info">
+                <div class="package-name">🥈 الباقة الفضية</div>
+                <div class="package-desc">الأكثر طلباً – دعم فوري + عائد 8%</div>
+            </div>
+            <div class="package-price">$ 1,199</div>
+        </div>
+        <!-- باقة 3 -->
+        <div class="package-card" data-package="gold">
+            <div class="package-info">
+                <div class="package-name">🥇 الباقة الذهبية</div>
+                <div class="package-desc">أرباح متزايدة – استشارات أسبوعية</div>
+            </div>
+            <div class="package-price">$ 2,499</div>
+        </div>
+        <!-- باقة 4 -->
+        <div class="package-card" data-package="platinum">
+            <div class="package-info">
+                <div class="package-name">💎 الباقة البلاتينية</div>
+                <div class="package-desc">أولوية السحب + نسبة 12%</div>
+            </div>
+            <div class="package-price">$ 4,999</div>
+        </div>
+        <!-- باقة 5 -->
+        <div class="package-card" data-package="diamond">
+            <div class="package-info">
+                <div class="package-name">👑 الباقة الماسية</div>
+                <div class="package-desc">VIP – أرباح يومية ومحفظة خاصة</div>
+            </div>
+            <div class="package-price">$ 9,999</div>
+        </div>
+    </div>
 </div>
 
 <script>
-  const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
-  const email = localStorage.getItem("userEmail");
-  let hasActivePackage = false;
-  let activePackageData = null;
-
-  if (!email) window.location.href = "login.html";
-
-  function showToast(message, isError = false, isWarning = false) {
-    const toast = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
-    const icon = toast.querySelector('i');
-    toastText.innerText = message;
-    if (isWarning) {
-      icon.className = 'fa-solid fa-triangle-exclamation';
-      toast.className = 'toast warning';
-    } else if (isError) {
-      icon.className = 'fa-solid fa-circle-exclamation';
-      toast.className = 'toast error';
-    } else {
-      icon.className = 'fa-solid fa-circle-check';
-      toast.className = 'toast success';
-    }
-    toast.style.display = 'flex';
-    setTimeout(() => toast.style.display = 'none', 4000);
-  }
-
-  const packages = [
-    { name: "Starter", price: 50, dailyProfit: 2.5, duration: 180, icon: "fa-seedling" },
-    { name: "Silver", price: 100, dailyProfit: 5, duration: 180, icon: "fa-star" },
-    { name: "Gold", price: 250, dailyProfit: 8, duration: 180, icon: "fa-crown" },
-    { name: "Diamond", price: 500, dailyProfit: 12, duration: 180, icon: "fa-gem" },
-    { name: "Platinum", price: 1000, dailyProfit: 25, duration: 180, icon: "fa-trophy" }
-  ];
-
-  function renderPackages() {
-    const container = document.getElementById('packagesList');
-    let html = '';
-    packages.forEach(pkg => {
-      const disabled = hasActivePackage ? 'disabled-card' : '';
-      html += `
-        <div class="package-card ${disabled}" onclick="selectPackage('${pkg.name}', ${pkg.price}, ${pkg.dailyProfit}, ${pkg.duration})">
-          <div class="package-name"><i class="fa-solid ${pkg.icon}"></i> ${pkg.name}</div>
-          <div class="package-price">${pkg.price} USDT</div>
-          <div class="package-profit"><i class="fa-solid fa-chart-line"></i> ربح يومي: ${pkg.dailyProfit} USDT</div>
-          <div class="package-duration"><i class="fa-regular fa-calendar"></i> المدة: ${pkg.duration} يوم</div>
-        </div>
-      `;
+    // عند الضغط على أي بطاقة باقة - يمكنك تخصيص الإجراء
+    const cards = document.querySelectorAll('.package-card');
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            const packageName = card.querySelector('.package-name').innerText;
+            alert(`✅ تم اختيار: ${packageName}\nسيتم نقلك لصفحة الدفع أو التفاصيل.`);
+            // هنا تقدر تضيف رابط أو إجراء حقيقي:
+            // window.location.href = `/packages?type=${card.dataset.package}`;
+        });
     });
-    container.innerHTML = html;
-  }
 
-  function selectPackage(name, price, dailyProfit, duration) {
-    if (hasActivePackage) {
-      showToast(`⚠️ لديك باقة نشطة (${activePackageData?.packageName || 'باقة'})، لا يمكنك شراء باقة جديدة حتى انتهاء المدة`, false, true);
-      return;
-    }
-    localStorage.setItem("selectedPackage", name);
-    localStorage.setItem("selectedPrice", price);
-    localStorage.setItem("selectedDailyProfit", dailyProfit);
-    localStorage.setItem("selectedDuration", duration);
-    window.location.href = "create-order.html";
-  }
-
-  async function checkActivePackage() {
-    try {
-      const res = await fetch(`${API_BASE}/user-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      if (data.success && data.packageName && data.packageName !== "" && data.packageName !== "لا توجد") {
-        hasActivePackage = true;
-        activePackageData = {
-          packageName: data.packageName,
-          dailyProfit: data.dailyProfit,
-          remainingDays: data.packageDurationDays || 180
-        };
-        document.getElementById('activePackageInfo').style.display = 'block';
-        document.getElementById('activePackageName').innerText = data.packageName;
-        document.getElementById('activeDailyProfit').innerText = data.dailyProfit;
-        document.getElementById('remainingDays').innerText = data.packageDurationDays || 180;
-      } else {
-        hasActivePackage = false;
-        document.getElementById('activePackageInfo').style.display = 'none';
-      }
-      renderPackages();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function createStars() {
-    const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 150; i++) {
-      const star = document.createElement('div');
-      star.classList.add('star');
-      star.style.width = (Math.random() * 3 + 1) + 'px';
-      star.style.height = star.style.width;
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 5 + 's';
-      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      container.appendChild(star);
-    }
-  }
-  createStars();
-  checkActivePackage();
+    // عند الضغط على زر "باقات الاستثمار" العلوي (اختياري: تمرير سلس للباقات)
+    const mainBtn = document.getElementById('mainPackagesBtn');
+    mainBtn.addEventListener('click', () => {
+        document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // أو ممكن يخفي/يظهر الباقات لو تحب، لكن الأفضل يمرر لها.
+    });
 </script>
-
 </body>
 </html>
