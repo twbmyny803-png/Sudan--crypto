@@ -16,6 +16,12 @@ mongoose.connect("mongodb+srv://maynwsmanswy_db_user:hOrkK68kCma6kJB5@cluster0.w
 .then(() => console.log("✅ MongoDB connected"))
 .catch(err => console.log("❌ MongoDB error:", err));
 
+// 🔼 المتغيرات العامة
+let codes = {};
+let resetCodes = {};
+let deposits = [];
+let withdrawRequests = [];
+
 // 📦 Schema (Updated)
 const userSchema = new mongoose.Schema({
   name: String,
@@ -24,7 +30,19 @@ const userSchema = new mongoose.Schema({
   password: String,
   ref: String,
   balance: { type: Number, default: 0 },
-  isVerified: { type: Boolean, default: false }, // 🔥 إضافة حقل حالة التوثيق
+  incomeBalance: { type: Number, default: 0 },
+
+  isVerified: { type: Boolean, default: false },
+  isBlocked: { type: Boolean, default: false },
+  isFrozen: { type: Boolean, default: false },
+
+  withdrawBlocked: { type: Boolean, default: false },
+
+  packageName: String,
+  packageStart: Date,
+  packageDurationDays: Number,
+  dailyProfit: Number,
+  
   verificationStatus: { type: String, default: 'none' }, // 'none', 'pending', 'verified', 'rejected'
   withdrawPassword: { type: String, default: null } // حقل كلمة سر السحب
 });
@@ -34,9 +52,6 @@ const User = mongoose.model("User", userSchema);
 // ملفات الموقع
 app.use(express.static(path.join(__dirname, "public")));
 
-let codes = {};
-let resetCodes = {};
-
 // ================== إرسال كود ==================
 app.post("/send-code", async (req, res) => {
   const { email } = req.body;
@@ -45,7 +60,6 @@ app.post("/send-code", async (req, res) => {
     return res.json({ success: false, message: "أدخل الإيميل" });
   }
 
-  // 🔥 أهم سطر (الحل)
   const exists = await User.findOne({ email });
 
   if (exists) {
@@ -182,7 +196,7 @@ app.post("/reset-password", async (req, res) => {
   res.json({ success: true });
 });
 
-// ==================
+// ================== الصفحة الرئيسية ==================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -203,8 +217,13 @@ app.post("/user-data", async (req, res) => {
     email: user.email,
     phone: user.phone,
     isVerified: user.isVerified || false,
+    isBlocked: user.isBlocked || false,
+    isFrozen: user.isFrozen || false,
+    withdrawBlocked: user.withdrawBlocked || false,
     verificationStatus: user.verificationStatus || 'none',
-    balance: user.balance || 0
+    balance: user.balance || 0,
+    incomeBalance: user.incomeBalance || 0,
+    packageName: user.packageName || null
   });
 });
 
@@ -228,8 +247,109 @@ app.post("/set-withdraw-password", async (req, res) => {
   res.json({ success: true });
 });
 
-const PORT = process.env.PORT || 10000;
+// ============================================
+// 🔽 ADMIN APIs & NEW FEATURES 🔽
+// ============================================
 
+// ✅ 2. عرض كل المستخدمين (مع كل البيانات)
+app.get("/admin-users", async (req, res) => {
+  const users = await User.find({});
+  res.json({ success: true, users });
+});
+
+// ✅ 3. توثيق المستخدم
+app.post("/admin-verify", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isVerified: true, verificationStatus: 'verified' });
+  res.json({ success: true });
+});
+
+// ✅ 4. تجميد الحساب
+app.post("/admin-freeze", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isFrozen: true });
+  res.json({ success: true });
+});
+
+// ✅ 5. حظر الحساب
+app.post("/admin-block", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isBlocked: true });
+  res.json({ success: true });
+});
+
+// ✅ 6. فك الحظر / التجميد
+app.post("/admin-unblock", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isBlocked: false, isFrozen: false });
+  res.json({ success: true });
+});
+
+// ✅ 7. حذف المستخدم
+app.post("/admin-delete", async (req, res) => {
+  const { email } = req.body;
+  await User.deleteOne({ email });
+  res.json({ success: true });
+});
+
+// ✅ 8. منع السحب
+app.post("/admin-block-withdraw", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { withdrawBlocked: true });
+  res.json({ success: true });
+});
+
+// ✅ 9. إضافة باقة للمستخدم
+app.post("/admin-add-package", async (req, res) => {
+  const { email, packageName, dailyProfit, durationDays } = req.body;
+  await User.updateOne(
+    { email },
+    {
+      packageName,
+      dailyProfit,
+      packageDurationDays: durationDays,
+      packageStart: new Date()
+    }
+  );
+  res.json({ success: true });
+});
+
+// ✅ 10. طلبات الإيداع
+app.post("/deposit-request", (req, res) => {
+  deposits.push({ ...req.body, date: new Date() });
+  res.json({ success: true });
+});
+
+app.get("/admin-deposits", (req, res) => {
+  res.json({ success: true, deposits });
+});
+
+// ✅ 11. طلبات السحب
+app.post("/withdraw-request", (req, res) => {
+  withdrawRequests.push({ ...req.body, status: 'pending', date: new Date() });
+  res.json({ success: true });
+});
+
+app.get("/admin-withdraws", (req, res) => {
+  res.json({ success: true, withdraws: withdrawRequests });
+});
+
+app.post("/admin-approve-withdraw", (req, res) => {
+  const { id } = req.body;
+  // منطق بسيط للتحديث في المصفوفة (في الإنتاج يفضل استخدام DB)
+  const reqIdx = withdrawRequests.findIndex(r => r.id === id);
+  if (reqIdx > -1) withdrawRequests[reqIdx].status = 'approved';
+  res.json({ success: true });
+});
+
+app.post("/admin-reject-withdraw", (req, res) => {
+  const { id } = req.body;
+  const reqIdx = withdrawRequests.findIndex(r => r.id === id);
+  if (reqIdx > -1) withdrawRequests[reqIdx].status = 'rejected';
+  res.json({ success: true });
+});
+
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server running on " + PORT);
 });
