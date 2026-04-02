@@ -208,13 +208,11 @@
     <div class="payment-card">
         <div class="title"><i class="fas fa-credit-card"></i> إتمام الدفع</div>
 
-        <!-- عداد 15 دقيقة -->
         <div class="timer-box">
             <div class="timer-label"><i class="fas fa-hourglass-half"></i> الوقت المتبقي لإتمام الدفع</div>
             <div class="timer-value" id="timer">15:00</div>
         </div>
 
-        <!-- الشبكة المختارة -->
         <div class="info-box">
             <div class="info-row">
                 <div class="info-label"><i class="fas fa-network-wired"></i> الشبكة المختارة</div>
@@ -222,22 +220,18 @@
             </div>
         </div>
 
-        <!-- عنوان الدفع -->
         <div class="address-box">
             <div class="address-value" id="walletAddress">-</div>
             <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> نسخ العنوان</button>
         </div>
 
-        <!-- QR Code للدفع -->
         <div class="qr-box">
             <div class="qr-title"><i class="fas fa-qrcode"></i> رمز QR للدفع</div>
             <div id="qrcode"></div>
         </div>
 
-        <!-- رقم العملية -->
         <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID)">
         
-        <!-- رفع الإيصال مع رسالة تأكيد -->
         <label class="file-label" id="fileLabel">
             <i class="fas fa-cloud-upload-alt"></i> اضغط لرفع إيصال الدفع
             <input type="file" id="fileInput" accept="image/*">
@@ -267,16 +261,15 @@
         starsContainer.appendChild(star);
     }
 
-    // قراءة البيانات من localStorage
+    // قراءة البيانات
     let selectedNetwork = localStorage.getItem('selectedNetwork') || 'BEP20';
     let walletAddress = localStorage.getItem('selectedWalletAddress') || '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
     let orderNumber = localStorage.getItem('orderNumber') || 'ORD' + Math.floor(Math.random() * 1000000000000) + Date.now().toString().slice(-6);
     
-    // عرض الشبكة والعنوان
     document.getElementById('selectedNetwork').innerHTML = `<i class="fab ${selectedNetwork === 'TRC20' ? 'fa-tron' : 'fa-bitcoin'}"></i> USDT ${selectedNetwork}`;
     document.getElementById('walletAddress').innerText = walletAddress;
     
-    // نسخ العنوان
+    // نسخ
     document.getElementById('copyBtn').addEventListener('click', () => {
         navigator.clipboard.writeText(walletAddress);
         const btn = document.getElementById('copyBtn');
@@ -284,35 +277,44 @@
         setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> نسخ العنوان', 2000);
     });
 
-    // توليد QR Code حقيقي حسب عنوان الدفع
-    document.getElementById('qrcode').innerHTML = '';
-    new QRCode(document.getElementById('qrcode'), {
-        text: walletAddress,
-        width: 180,
-        height: 180,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    // QR Code
+    try {
+        document.getElementById('qrcode').innerHTML = '';
+        new QRCode(document.getElementById('qrcode'), {
+            text: walletAddress,
+            width: 180,
+            height: 180,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    } catch(e) {
+        console.log("QR error:", e);
+    }
 
-    // عداد تنازلي 15 دقيقة
-    let timeLeft = 15 * 60;
+    // ⏰ العداد التنازلي - شغال 100%
+    let timeLeft = 15 * 60; // 15 دقيقة = 900 ثانية
     const timerEl = document.getElementById('timer');
-    const interval = setInterval(() => {
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-            timerEl.innerHTML = "00:00";
-            timerEl.style.color = "#ff0000";
-            alert("⏰ انتهى الوقت المخصص للدفع. سيتم إلغاء الطلب.");
-        } else {
-            timeLeft--;
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            timerEl.innerHTML = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-    }, 1000);
+    
+    function startTimer() {
+        const interval = setInterval(function() {
+            if (timeLeft <= 0) {
+                clearInterval(interval);
+                timerEl.innerHTML = "00:00";
+                timerEl.style.color = "#ff0000";
+                alert("⏰ انتهى الوقت المخصص للدفع.");
+            } else {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                timerEl.innerHTML = (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
+            }
+        }, 1000);
+    }
+    
+    startTimer(); // تشغيل العداد فوراً
 
-    // رفع الإيصال مع رسالة تأكيد
+    // رفع الإيصال
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
     const uploadStatus = document.getElementById('uploadStatus');
@@ -320,15 +322,11 @@
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
-            // عرض رسالة "جاري التحميل..."
             uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-spinner fa-pulse"></i> جاري رفع الإيصال...</div>';
-            
             const reader = new FileReader();
             reader.onload = function(ev) {
                 preview.innerHTML = `<img src="${ev.target.result}" alt="الإيصال">`;
-                // رسالة نجاح التحميل
                 uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-check-circle"></i> ✓ تم رفع الإيصال بنجاح</div>';
-                // تغيير لون الخلفية مؤقتاً
                 const label = document.getElementById('fileLabel');
                 label.style.background = 'rgba(76, 175, 80, 0.2)';
                 label.style.borderColor = '#4caf50';
@@ -345,14 +343,14 @@
     document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
         const txId = document.getElementById('transactionId').value;
         if (!txId) {
-            alert("⚠️ الرجاء إدخال رقم العملية (Transaction ID)");
+            alert("⚠️ الرجاء إدخال رقم العملية");
             return;
         }
         if (!fileInput.files.length) {
             alert("⚠️ الرجاء رفع إيصال الدفع");
             return;
         }
-        alert(`✅ تم استلام طلبك بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\nسيتم مراجعة إيصالك وتفعيل الباقة خلال 24 ساعة.`);
+        alert(`✅ تم استلام طلبك بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}`);
     });
 
     // رجوع
@@ -361,4 +359,4 @@
     });
 </script>
 </body>
-    </html>
+</html>
