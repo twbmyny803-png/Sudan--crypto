@@ -3,10 +3,18 @@ const cors = require("cors");
 const path = require("path");
 const { Resend } = require("resend");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const multer = require("multer");
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // 🔐 Resend
 const resend = new Resend("re_NBwHrNvM_8V7mPxiSistfrYy1B5DXTZDg");
@@ -44,10 +52,27 @@ const userSchema = new mongoose.Schema({
   packageName: String,
   packageStart: Date,
   packageDurationDays: Number,
-  dailyProfit: Number
+  dailyProfit: Number,
+
+  verificationFullName: String,
+  verificationDocType: String,
+  verificationDocNumber: String,
+  verificationImages: [String]
 });
 
 const User = mongoose.model("User", userSchema);
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9) + path.extname(file.originalname);
+    cb(null, uniqueName);
+  }
+});
+
+const upload = multer({ storage });
 
 // ملفات الموقع
 app.use(express.static(path.join(__dirname, "public")));
@@ -386,6 +411,47 @@ app.post("/admin-reject-withdraw", (req, res) => {
   request.status = "rejected";
 
   res.json({ success: true });
+});
+
+app.post("/submit-verification", upload.fields([
+  { name: "file", maxCount: 1 },
+  { name: "file2", maxCount: 1 }
+]), async (req, res) => {
+  try {
+    const { email, fullName, docType, docNumber } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "المستخدم غير موجود" });
+    }
+
+    const images = [];
+
+    if (req.files && req.files.file && req.files.file[0]) {
+      images.push("/uploads/" + req.files.file[0].filename);
+    }
+
+    if (req.files && req.files.file2 && req.files.file2[0]) {
+      images.push("/uploads/" + req.files.file2[0].filename);
+    }
+
+    if (images.length === 0) {
+      return res.json({ success: false, message: "ارفع صور المستند" });
+    }
+
+    user.verificationFullName = fullName;
+    user.verificationDocType = docType;
+    user.verificationDocNumber = docNumber;
+    user.verificationImages = images;
+    user.verificationStatus = "pending";
+
+    await user.save();
+
+    res.json({ success: true, message: "تم إرسال طلب التوثيق" });
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false, message: "فشل إرسال التوثيق" });
+  }
 });
 
 const PORT = process.env.PORT || 10000;
