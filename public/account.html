@@ -247,7 +247,6 @@
 
   <a href="dashboard.html" class="back-btn"><i class="fa-solid fa-arrow-right"></i> العودة</a>
 
-  <!-- المعلومات الشخصية -->
   <div class="glass-card">
     <h2><i class="fa-solid fa-user-circle"></i> المعلومات الشخصية</h2>
     <div class="info-row">
@@ -264,14 +263,12 @@
     </div>
   </div>
 
-  <!-- الأمان -->
   <div class="glass-card">
     <h2><i class="fa-solid fa-shield-alt"></i> الأمان</h2>
     <button class="btn btn-gold" onclick="openPasswordModal()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
     <button class="btn btn-outline" onclick="openWithdrawPasswordModal()"><i class="fa-solid fa-lock"></i> تعيين كلمة السحب</button>
   </div>
 
-  <!-- توثيق الحساب -->
   <div class="glass-card">
     <h2><i class="fa-solid fa-id-card"></i> توثيق الحساب</h2>
     <div class="info-row">
@@ -283,7 +280,6 @@
     <button class="btn btn-outline" onclick="openVerificationModal()"><i class="fa-solid fa-upload"></i> رفع مستندات التوثيق</button>
   </div>
 
-  <!-- الدعم -->
   <div class="glass-card">
     <h2><i class="fa-solid fa-headset"></i> الدعم</h2>
     <div class="social-buttons">
@@ -292,7 +288,6 @@
     </div>
   </div>
 
-  <!-- تسجيل الخروج -->
   <div class="glass-card">
     <button class="btn btn-danger" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i> تسجيل الخروج</button>
   </div>
@@ -336,19 +331,16 @@
     </select>
     <input type="text" id="docNumber" placeholder="رقم المستند">
     
-    <!-- حقل رفع الصورة لبطاقة قومية (وجه أمامي) -->
     <div id="frontFileDiv" style="display: none;">
       <div class="file-label">الوجه الأمامي للبطاقة</div>
       <input type="file" id="frontFile" accept="image/*">
     </div>
     
-    <!-- حقل رفع الصورة لبطاقة قومية (وجه خلفي) -->
     <div id="backFileDiv" style="display: none;">
       <div class="file-label">الوجه الخلفي للبطاقة</div>
       <input type="file" id="backFile" accept="image/*">
     </div>
     
-    <!-- حقل رفع الصورة لجواز سفر (صورة واحدة) -->
     <div id="passportFileDiv" style="display: none;">
       <div class="file-label">صورة جواز السفر</div>
       <input type="file" id="passportFile" accept="image/*">
@@ -387,12 +379,9 @@
     setTimeout(() => toast.style.display = 'none', 3000);
   }
 
-  // جلب بيانات المستخدم
+  // ✅ جلب بيانات المستخدم (بدون تسجيل خروج عند الخطأ)
   async function loadUserData() {
-    if (!email) {
-      window.location.replace("login.html");
-      return;
-    }
+    if (!email) return;
 
     try {
       const res = await fetch(`${API_BASE}/user-data`, {
@@ -404,8 +393,10 @@
       const data = await res.json();
 
       if (!data.success) {
-        localStorage.clear(); // 🔥 يمسح الحالة الغلط
-        window.location.replace("login.html");
+        console.log("فشل تحميل البيانات");
+        document.getElementById('userName').innerText = '...';
+        document.getElementById('userEmail').innerText = email;
+        document.getElementById('userPhone').innerText = '...';
         return;
       }
 
@@ -414,21 +405,21 @@
       document.getElementById('userPhone').innerText = data.phone || '-';
 
       const verifyStatus = document.getElementById('verificationStatus');
-
       if (data.isVerified) {
-        verifyStatus.innerHTML = '<span class="verified-badge">✔ موثق</span>';
+        verifyStatus.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> موثق</span>';
       } else {
-        verifyStatus.innerHTML = '<span class="unverified-badge">❌ غير موثق</span>';
+        verifyStatus.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
       }
 
     } catch (err) {
-      console.log(err);
-      localStorage.clear();
-      window.location.replace("login.html");
+      console.log("خطأ في الاتصال:", err);
+      showToast("خطأ في الاتصال بالسيرفر", true);
+      document.getElementById('userName').innerText = 'خطأ';
+      document.getElementById('userEmail').innerText = email;
+      document.getElementById('userPhone').innerText = 'خطأ';
     }
   }
 
-  // تبديل حقول رفع الصور حسب نوع المستند
   function toggleFileInputs() {
     const docType = document.getElementById('docType').value;
     const frontDiv = document.getElementById('frontFileDiv');
@@ -447,7 +438,6 @@
     }
   }
 
-  // مودال كلمة المرور
   function openPasswordModal() { document.getElementById('passwordModal').style.display = 'flex'; }
   function closePasswordModal() { document.getElementById('passwordModal').style.display = 'none'; }
 
@@ -487,7 +477,6 @@
     }
   }
 
-  // مودال كلمة السحب
   function openWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'flex'; }
   function closeWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'none'; }
 
@@ -522,10 +511,8 @@
     }
   }
 
-  // مودال التوثيق
   function openVerificationModal() { 
     document.getElementById('verificationModal').style.display = 'flex';
-    // إعادة تعيين الحقول
     document.getElementById('fullName').value = '';
     document.getElementById('docType').value = '';
     document.getElementById('docNumber').value = '';
@@ -585,13 +572,11 @@
     }
   }
 
-  // تسجيل الخروج
   function logout() {
-    localStorage.clear(); // 🔥 مهم جداً
+    localStorage.removeItem('userEmail');
     window.location.replace('login.html');
   }
 
-  // إنشاء النجوم
   function createStars() {
     const container = document.getElementById('starsContainer');
     for (let i = 0; i < 150; i++) {
@@ -611,4 +596,4 @@
 </script>
 
 </body>
-</html>
+  </html>
