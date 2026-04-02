@@ -16,14 +16,17 @@ mongoose.connect("mongodb+srv://maynwsmanswy_db_user:hOrkK68kCma6kJB5@cluster0.w
 .then(() => console.log("✅ MongoDB connected"))
 .catch(err => console.log("❌ MongoDB error:", err));
 
-// 📦 Schema
+// 📦 Schema (Updated)
 const userSchema = new mongoose.Schema({
   name: String,
   email: String,
   phone: String,
   password: String,
   ref: String,
-  balance: { type: Number, default: 0 }
+  balance: { type: Number, default: 0 },
+  isVerified: { type: Boolean, default: false }, // 🔥 إضافة حقل حالة التوثيق
+  verificationStatus: { type: String, default: 'none' }, // 'none', 'pending', 'verified', 'rejected'
+  withdrawPassword: { type: String, default: null } // حقل كلمة سر السحب
 });
 
 const User = mongoose.model("User", userSchema);
@@ -184,6 +187,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// ================== جلب بيانات المستخدم ==================
 app.post("/user-data", async (req, res) => {
   const { email } = req.body;
 
@@ -198,8 +202,30 @@ app.post("/user-data", async (req, res) => {
     name: user.name,
     email: user.email,
     phone: user.phone,
-    isVerified: user.isVerified || false
+    isVerified: user.isVerified || false,
+    verificationStatus: user.verificationStatus || 'none',
+    balance: user.balance || 0
   });
+});
+
+// ================== تغيير كلمة المرور ==================
+app.post("/change-password", async (req, res) => {
+  const { email, oldPass, newPass } = req.body;
+  const user = await User.findOne({ email, password: oldPass });
+  
+  if (!user) {
+    return res.json({ success: false, message: "كلمة المرور الحالية غير صحيحة" });
+  }
+
+  await User.updateOne({ email }, { password: newPass });
+  res.json({ success: true });
+});
+
+// ================== تعيين كلمة السحب ==================
+app.post("/set-withdraw-password", async (req, res) => {
+  const { email, withdrawPassword } = req.body;
+  await User.updateOne({ email }, { withdrawPassword });
+  res.json({ success: true });
 });
 
 const PORT = process.env.PORT || 10000;
