@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>طلبات السحب</title>
+<style>
+body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
+table { width:100%; border-collapse:collapse; margin-top:20px }
+td, th { padding:10px; border:1px solid #444 }
+button { padding:5px 10px; margin:2px; cursor:pointer }
+</style>
+</head>
+
+<body>
+
+<h2>طلبات السحب 💸</h2>
+
+<table>
+<thead>
+<tr>
+<th>البريد</th>
+<th>المبلغ</th>
+<th>الحالة</th>
+<th>تحكم</th>
+</tr>
+</thead>
+<tbody id="withdrawTable"></tbody>
+</table>
+
+<script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
+
+async function loadWithdraws(){
+  const res = await fetch(API + "/admin-withdraws");
+  const data = await res.json();
+
+  const table = document.getElementById("withdrawTable");
+  table.innerHTML = "";
+
+  data.withdraws.forEach(w => {
+    const row = `
+    <tr>
+      <td>${w.email}</td>
+      <td>${w.amount}</td>
+      <td>${w.status}</td>
+      <td>
+        <button onclick="approve('${w.id}')">قبول</button>
+        <button onclick="reject('${w.id}')">رفض</button>
+      </td>
+    </tr>
+    `;
+    table.innerHTML += row;
+  });
+}
+
+async function approve(id){
+  await fetch(API + "/admin-approve-withdraw", {
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ id })
+  });
+  loadWithdraws();
+}
+
+async function reject(id){
+  await fetch(API + "/admin-reject-withdraw", {
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ id })
+  });
+  loadWithdraws();
+}
+
+loadWithdraws();
+</script>
+
+</body>
+</html>
