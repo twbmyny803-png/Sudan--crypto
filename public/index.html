@@ -381,6 +381,17 @@
     </div>
   </div>
 
+  <div class="input-group">
+    <label><i class="fa-solid fa-lock"></i> تأكيد كلمة المرور</label>
+    <div class="password-wrapper">
+      <input type="password" id="confirmPassword" placeholder="••••••••">
+      <button class="toggle-password" id="toggleConfirmPass">إظهار</button>
+    </div>
+  </div>
+
+  <div class="alert-message" id="registerSuccess"></div>
+  <div class="alert-message alert-error" id="registerError"></div>
+
   <button class="btn-register" id="registerBtn"><i class="fa-solid fa-user-check"></i> إنشاء الحساب الآن</button>
 
   <div class="links">
@@ -415,6 +426,15 @@
     togglePass.textContent = type === 'password' ? 'إظهار' : 'إخفاء';
   });
 
+  // إظهار/إخفاء تأكيد كلمة المرور
+  const toggleConfirmPass = document.getElementById('toggleConfirmPass');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
+  toggleConfirmPass.addEventListener('click', () => {
+    const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+    confirmPasswordInput.type = type;
+    toggleConfirmPass.textContent = type === 'password' ? 'إظهار' : 'إخفاء';
+  });
+
   // التعامل مع كود التحقق (الانتقال التلقائي)
   const codeInputs = document.querySelectorAll('.code-box input');
   codeInputs.forEach((input, index) => {
@@ -426,19 +446,39 @@
     });
   });
 
+  // متغير للتحكم في منع الإرسال المتكرر
+  let canSend = true;
+  let timerInterval;
+
+  // دالة التحقق من صيغة البريد الإلكتروني
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   // العداد الزمني
-  let timer;
   function startTimer() {
-    let count = 60;
-    document.getElementById('count').textContent = count;
-    document.getElementById('resendBtn').style.display = 'none';
-    clearInterval(timer);
-    timer = setInterval(() => {
-      count--;
-      document.getElementById('count').textContent = count;
-      if (count <= 0) {
-        clearInterval(timer);
-        document.getElementById('resendBtn').style.display = 'block';
+    const countSpan = document.getElementById('count');
+    const resendBtn = document.getElementById('resendBtn');
+    const btn = document.getElementById("sendCodeBtn");
+
+    let time = 60;
+    countSpan.innerText = time;
+    resendBtn.style.display = 'none';
+
+    timerInterval = setInterval(() => {
+      time--;
+      countSpan.innerText = time;
+
+      if (time <= 0) {
+        clearInterval(timerInterval);
+
+        // 🔓 فتح الزر بعد الدقيقة
+        canSend = true;
+        btn.disabled = false;
+        btn.style.opacity = "1";
+
+        resendBtn.style.display = 'block';
       }
     }, 1000);
   }
@@ -456,25 +496,46 @@
   const API_BASE = window.location.origin;
 
   async function sendCode() {
-    const email = document.getElementById('email').value;
-    if (!email) return showAlert('sendError', '❌ يرجى إدخال البريد الإلكتروني', true);
+
+    if (!canSend) return; // ❌ يمنع الإرسال قبل انتهاء الوقت
+
+    const email = document.getElementById('email').value.trim();
+
+    if (!email) return showAlert('sendError', '✏️ أدخل البريد الإلكتروني أولاً', true);
+    if (!isValidEmail(email)) return showAlert('sendError', '📧 بريد إلكتروني غير صحيح', true);
+
+    canSend = false; // 🔒 قفل الزر
+
+    const btn = document.getElementById("sendCodeBtn");
+    btn.disabled = true;
+    btn.style.opacity = "0.6";
 
     showAlert('sendSuccess', '⏳ جاري إرسال الكود...');
+
     try {
-      // ✅ استخدام المسار الكامل للـ API بدلاً من المسار النسبي
       const res = await fetch(`${API_BASE}/send-code`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
+
       const data = await res.json();
-      if (!data.success) throw new Error(data.message || 'فشل الإرسال');
-      showAlert('sendSuccess', '✅ تم إرسال الكود إلى بريدك');
+
+      if (!data.success) throw new Error(data.message);
+
+      showAlert('sendSuccess', '✅ تم إرسال الكود');
       document.getElementById('codeSection').style.display = 'block';
+
       startTimer();
       codeInputs[0].focus();
+
     } catch (err) {
-      showAlert('sendError', err.message || '❌ خطأ في الإرسال', true);
+      showAlert('sendError', err.message || '❌ خطأ', true);
+
+      // لو فشل → رجع الزر
+      canSend = true;
+      btn.disabled = false;
+      btn.style.opacity = "1";
     }
   }
 
@@ -484,13 +545,26 @@
     const phone = document.getElementById('phone').value;
     const ref = document.getElementById('referralCode').value;
     const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
     
     // تجميع الكود
     let code = "";
     codeInputs.forEach(input => code += input.value);
 
+    // ✅ التحقق من البيانات الأساسية
     if (!name || !email || !phone || !password || code.length < 6) {
-      return alert("يرجى إكمال جميع البيانات وكود التحقق");
+      return showAlert('registerError', '❌ يرجى إكمال جميع البيانات وكود التحقق', true);
+    }
+
+    // ✅ التحقق من صيغة كلمة المرور
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return showAlert('registerError', '❌ كلمة السر لازم تكون 8 حروف وأرقام على الأقل', true);
+    }
+
+    // ✅ التحقق من تطابق كلمة المرور
+    if (password !== confirmPassword) {
+      return showAlert('registerError', '❌ كلمة السر غير متطابقة', true);
     }
 
     try {
@@ -503,7 +577,7 @@
       const verifyData = await verifyRes.json();
       
       if (!verifyData.success) {
-        return showAlert('verifyError', '❌ كود التحقق غير صحيح', true);
+        return showAlert('registerError', '❌ كود التحقق غير صحيح', true);
       }
 
       // 2. إتمام التسجيل
@@ -515,14 +589,21 @@
       const regData = await regRes.json();
 
       if (regData.success) {
-        alert("✅ تم إنشاء الحساب بنجاح!");
-        window.location.href = "login.html";
+        // ✅ استخدام showAlert بدلاً من alert()
+        showAlert('registerSuccess', '✅ تم إنشاء الحساب بنجاح');
+
+        // 🔥 تحويل بعد 2 ثانية
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 2000);
       } else {
-        alert(regData.message);
+        // ✅ استخدام showAlert بدلاً من alert()
+        showAlert('registerError', regData.message || '❌ حدث خطأ أثناء التسجيل', true);
       }
     } catch (err) {
       console.error(err);
-      alert("حدث خطأ أثناء التسجيل");
+      // ✅ استخدام showAlert بدلاً من alert()
+      showAlert('registerError', '❌ حدث خطأ أثناء التسجيل', true);
     }
   }
 
@@ -537,4 +618,4 @@
 </script>
 
 </body>
-  </html>
+</html>
