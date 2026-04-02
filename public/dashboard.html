@@ -1,558 +1,538 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>سودان كربتو | الرئيسية</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>سودان كربتو | الرئيسية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    body {
+      font-family: 'Cairo', 'Tahoma', sans-serif;
+      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
 
-<style>
-/* كل الستايل كما هو، بدون تغيير */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      opacity: 0.6;
+      animation: twinkle 3s infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(1);}
+      100% { opacity: 1; transform: scale(1.2);}
+    }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Tahoma', sans-serif;
-  background: linear-gradient(135deg, #0b1f3a 0%, #1a2f4e 100%);
-  min-height: 100vh;
-}
+    .app {
+      max-width: 500px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
 
-.app {
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: #f5f7fc;
-  position: relative;
-  padding-bottom: 75px;
-}
+    .glass-card {
+      background: rgba(15, 25, 45, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: transform 0.2s;
+    }
 
-/* Header */
-.topbar {
-  background: linear-gradient(135deg, #0f4ea8 0%, #1e6fdf 100%);
-  color: white;
-  padding: 20px 20px 30px;
-  border-bottom-left-radius: 28px;
-  border-bottom-right-radius: 28px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .welcome h2 {
+      color: white;
+      font-size: 20px;
+    }
+    .welcome p {
+      color: #F0B90B;
+      font-size: 13px;
+    }
+    .social-icons {
+      display: flex;
+      gap: 12px;
+    }
+    .social-icons a {
+      color: white;
+      font-size: 22px;
+      transition: 0.2s;
+    }
+    .social-icons a:hover {
+      color: #F0B90B;
+    }
 
-.topbar-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
+    /* شبكة الأزرار الرئيسية (زر واحد فقط) */
+    .main-grid {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .main-btn {
+      background: rgba(240, 185, 11, 0.15);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      border-radius: 20px;
+      padding: 12px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 50%;
+    }
+    .main-btn i {
+      font-size: 24px;
+      color: #F0B90B;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .main-btn span {
+      font-size: 14px;
+      color: white;
+    }
+    .main-btn:hover {
+      background: rgba(240, 185, 11, 0.3);
+      transform: translateY(-2px);
+    }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+    /* أزرار إضافية */
+    .extra-buttons {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .extra-btn {
+      flex: 1;
+      background: linear-gradient(95deg, #F0B90B, #FFD966);
+      border: none;
+      border-radius: 40px;
+      padding: 12px;
+      font-weight: bold;
+      font-size: 14px;
+      color: #0a0f2a;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .extra-btn:hover {
+      transform: translateY(-2px);
+    }
 
-.brand-logo {
-  width: 48px;
-  height: 48px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  backdrop-filter: blur(4px);
-}
+    /* بطاقة الباقة */
+    .package-card {
+      background: linear-gradient(135deg, rgba(240,185,11,0.2), rgba(255,217,102,0.1));
+      border: 1px solid rgba(240,185,11,0.4);
+      border-radius: 28px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .package-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .package-name {
+      font-size: 22px;
+      font-weight: bold;
+      color: #F0B90B;
+    }
+    .package-status {
+      background: #10b981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 12px;
+    }
+    .package-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      color: #ccc;
+      font-size: 13px;
+    }
+    .timer-box {
+      background: rgba(0,0,0,0.5);
+      border-radius: 20px;
+      padding: 12px;
+      text-align: center;
+      margin-top: 12px;
+    }
+    .timer-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #F0B90B;
+      font-family: monospace;
+    }
+    .timer-label {
+      font-size: 12px;
+      color: #aaa;
+    }
+    .next-profit-timer {
+      background: rgba(240,185,11,0.2);
+      border-radius: 16px;
+      padding: 10px;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .next-profit-label {
+      font-size: 12px;
+      color: #F0B90B;
+      margin-bottom: 5px;
+    }
+    .next-profit-time {
+      font-size: 18px;
+      font-weight: bold;
+      color: #FFD966;
+      font-family: monospace;
+    }
 
-.brand-text h1 {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-}
+    /* إحصائيات */
+    .stats-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #F0B90B;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #aaa;
+    }
 
-.brand-text p {
-  font-size: 12px;
-  opacity: 0.85;
-  margin: 4px 0 0;
-}
+    /* الشريط السفلي */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      background: rgba(15,25,45,0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 40px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .bottom-nav a {
+      text-align: center;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 12px;
+      transition: 0.2s;
+    }
+    .bottom-nav a i {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .bottom-nav a.active {
+      color: #F0B90B;
+    }
 
-.top-icons {
-  display: flex;
-  gap: 10px;
-}
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .toast.success { background: #10b981; }
+    .toast.error { background: #ef4444; }
 
-.icon-btn {
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.18);
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  transition: all 0.2s;
-  backdrop-filter: blur(4px);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-btn:hover {
-  background: rgba(255,255,255,0.3);
-  transform: scale(0.95);
-}
-
-.welcome-box {
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(4px);
-  padding: 14px 18px;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.welcome-box span {
-  font-weight: 700;
-  color: #ffe484;
-}
-
-/* Content */
-.content {
-  padding: 20px;
-  margin-top: -12px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-right: 3px solid #1e6fdf;
-  padding-right: 12px;
-}
-
-/* Actions Grid */
-.actions-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  background: white;
-  padding: 20px 12px;
-  border-radius: 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  margin-bottom: 16px;
-}
-
-.action-item {
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.action-item:hover {
-  transform: translateY(-3px);
-}
-
-.action-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: white;
-  margin: 0 auto 8px;
-  transition: all 0.2s;
-}
-
-.c1 { background: linear-gradient(135deg, #a855f7, #7c3aed); }
-.c2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
-.c3 { background: linear-gradient(135deg, #10b981, #059669); }
-.c4 { background: linear-gradient(135deg, #3b82f6, #1e6fdf); }
-
-.action-item div:last-child {
-  font-size: 12px;
-  font-weight: 600;
-  color: #334155;
-}
-
-/* Stats Box */
-.stats-box {
-  background: white;
-  padding: 20px;
-  border-radius: 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.stat-item {
-  flex: 1;
-  text-align: center;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.stat-value small {
-  font-size: 12px;
-  font-weight: normal;
-  color: #64748b;
-}
-
-/* Referral Card */
-.card {
-  background: white;
-  border-radius: 24px;
-  padding: 20px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-right: 3px solid #1e6fdf;
-  padding-right: 12px;
-}
-
-.referral-box {
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 12px;
-  margin-bottom: 16px;
-}
-
-.referral-label {
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.referral-value {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px;
-  font-size: 14px;
-  font-family: monospace;
-  word-break: break-all;
-  color: #1e6fdf;
-  font-weight: 600;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.referral-value span {
-  flex: 1;
-  word-break: break-all;
-}
-
-.copy-btn {
-  background: #1e6fdf;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.copy-btn:hover {
-  background: #0f4ea8;
-  transform: scale(0.98);
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
-  background: white;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  padding: 10px 12px 20px;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
-  z-index: 100;
-}
-
-.nav-item {
-  text-align: center;
-  text-decoration: none;
-  color: #64748b;
-  font-size: 11px;
-  transition: all 0.2s;
-}
-
-.nav-item.active {
-  color: #1e6fdf;
-}
-
-.nav-icon {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 5px;
-  border-radius: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f1f5f9;
-  font-size: 18px;
-  transition: all 0.2s;
-}
-
-.nav-item.active .nav-icon {
-  background: linear-gradient(135deg, #1e6fdf, #0f4ea8);
-  color: white;
-}
-
-.nav-item span {
-  font-size: 11px;
-  font-weight: 500;
-}
-
-hr {
-  margin: 12px 0;
-  border: none;
-  border-top: 1px solid #e2e8f0;
-}
-</style>
+    @media (max-width: 500px) {
+      .main-btn { padding: 10px 16px; }
+      .main-btn i { font-size: 20px; }
+      .extra-btn { font-size: 12px; padding: 10px; }
+    }
+  </style>
 </head>
-
 <body>
+
+<div class="stars" id="starsContainer"></div>
 
 <div class="app">
 
-<div class="topbar">
+  <div class="glass-card">
+    <div class="header">
+      <div class="welcome">
+        <h2>مرحباً، <span id="userName">...</span></h2>
+        <p>أهلاً بك في منصتك الرقمية</p>
+      </div>
+      <div class="social-icons">
+        <a href="https://wa.me/16727123329" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://t.me/lool0002" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+      </div>
+    </div>
+  </div>
 
-<div class="topbar-row">
+  <!-- الزر الرئيسي الوحيد: عن المنصة -->
+  <div class="glass-card">
+    <div class="main-grid">
+      <div class="main-btn" onclick="location.href='about.html'">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>عن المنصة</span>
+      </div>
+    </div>
+  </div>
 
-<div class="brand">
-<div class="brand-logo"><i class="fa-brands fa-bitcoin"></i></div>
-<div class="brand-text">
-<h1>سودان كربتو</h1>
-<p>لوحة المستخدم</p>
-</div>
-</div>
+  <!-- الأزرار السفلية -->
+  <div class="glass-card">
+    <div class="extra-buttons">
+      <button class="extra-btn" onclick="transferIncome()">
+        <i class="fa-solid fa-exchange-alt"></i> تحويل الأرباح
+      </button>
+      <button class="extra-btn" onclick="location.href='withdraw.html'">
+        <i class="fa-solid fa-arrow-up"></i> سحب
+      </button>
+      <button class="extra-btn" onclick="location.href='income.html'">
+        <i class="fa-solid fa-chart-line"></i> الدخل اليومي
+      </button>
+    </div>
+  </div>
 
-<div class="top-icons">
-<a href="https://wa.me/16727123329" target="_blank" class="icon-btn"><i class="fa-brands fa-whatsapp"></i></a>
-<a href="https://t.me/crypto_sudanees" target="_blank" class="icon-btn"><i class="fa-brands fa-telegram"></i></a>
-</div>
+  <!-- إحصائيات -->
+  <div class="glass-card">
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="balance">0</div>
+        <div class="stat-label">الرصيد (USDT)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="income">0</div>
+        <div class="stat-label">الأرباح (USDT)</div>
+      </div>
+    </div>
+  </div>
 
-</div>
+  <!-- بطاقة الباقة -->
+  <div class="package-card" id="packageCard">
+    <div class="package-header">
+      <span class="package-name" id="packageName">لا توجد باقة</span>
+      <span class="package-status" id="packageStatus">غير مفعلة</span>
+    </div>
+    <div class="package-info">
+      <span><i class="fa-regular fa-calendar"></i> تاريخ البدء: <span id="startDate">-</span></span>
+      <span><i class="fa-solid fa-chart-simple"></i> الربح اليومي: <span id="dailyProfit">0</span> USDT</span>
+    </div>
+    <div class="timer-box">
+      <div class="timer-value" id="remainingDays">0</div>
+      <div class="timer-label">الأيام المتبقية</div>
+      <div class="timer-value" id="remainingTime" style="font-size: 18px; margin-top: 5px;">--:--:--:--</div>
+      <div class="timer-label">الوقت المتبقي (يوم - ساعة - دقيقة - ثانية)</div>
+    </div>
+    <div class="next-profit-timer" id="nextProfitTimer">
+      <div class="next-profit-label"><i class="fa-regular fa-clock"></i> الوقت المتبقي لنزول الربح اليومي</div>
+      <div class="next-profit-time" id="nextProfitTime">--:--:--</div>
+    </div>
+  </div>
 
-<div class="welcome-box">
-<i class="fa-regular fa-hand-peace"></i> مرحباً، <span id="userName">...</span>
-</div>
-
-</div>
-
-<div class="content">
-
-<div class="section-title">
-<i class="fa-solid fa-star" style="color:#f59e0b;"></i>
-الخدمات الرئيسية
-</div>
-
-<div class="actions-grid">
-
-<div class="action-item" onclick="location.href='packages.html'">
-<div class="action-icon c3"><i class="fa-solid fa-sack-dollar"></i></div>
-<div>الباقات</div>
-</div>
-
-<div class="action-item" onclick="location.href='referrals.html'">
-<div class="action-icon c2"><i class="fa-solid fa-users"></i></div>
-<div>فريقي</div>
-</div>
-
-<div class="action-item" onclick="goDeposit()">
-<div class="action-icon c1"><i class="fa-solid fa-wallet"></i></div>
-<div>إيداع</div>
-</div>
-
-<div class="action-item" onclick="location.href='about.html'">
-<div class="action-icon c4"><i class="fa-solid fa-circle-info"></i></div>
-<div>عن المنصة</div>
-</div>
-
-</div>
-
-<div class="stats-box">
-<div class="stat-item">
-<div class="stat-label"><i class="fa-solid fa-coins"></i> الرصيد</div>
-<div class="stat-value"><span id="balance">0</span> <small>USDT</small></div>
-</div>
-<div class="stat-item">
-<div class="stat-label"><i class="fa-solid fa-chart-line"></i> الأرباح</div>
-<div class="stat-value"><span id="income">0</span> <small>USDT</small></div>
-</div>
-<div class="stat-item">
-<div class="stat-label"><i class="fa-solid fa-gem"></i> الباقة</div>
-<div class="stat-value" id="package" style="font-size:16px;">-</div>
-</div>
-</div>
-
-<div class="card">
-<div class="card-title">
-<i class="fa-solid fa-link"></i>
-نظام الإحالات
-</div>
-
-<div class="referral-box">
-<div class="referral-label"><i class="fa-solid fa-qrcode"></i> رمز الإحالة</div>
-<div class="referral-value">
-<span id="myRefCode">...</span>
-<button class="copy-btn" onclick="copyRefCode()"><i class="fa-regular fa-copy"></i> نسخ</button>
-</div>
-</div>
-
-<div class="referral-box">
-<div class="referral-label"><i class="fa-solid fa-share-alt"></i> رابط الإحالة</div>
-<div class="referral-value">
-<span id="myRefLink">...</span>
-<button class="copy-btn" onclick="copyRefLink()"><i class="fa-regular fa-copy"></i> نسخ</button>
-</div>
-</div>
-
-<hr>
-
-<div class="referral-label" style="margin-top:8px;">
-<i class="fa-solid fa-chart-simple"></i> كلما زاد فريقك، زادت أرباحك!
-</div>
-</div>
+  <!-- الشريط السفلي (5 أزرار) -->
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
+    <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i><span>الباقات</span></a>
+    <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل اليومي</span></a>
+    <a href="transactions.html"><i class="fa-solid fa-list"></i><span>سجل العمليات</span></a>
+    <a href="account.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
+  </div>
 
 </div>
 
-<div class="bottom-nav">
-
-<a href="dashboard.html" class="nav-item active">
-<div class="nav-icon"><i class="fa-solid fa-house"></i></div>
-<span>الرئيسية</span>
-</a>
-
-<a href="packages.html" class="nav-item">
-<div class="nav-icon"><i class="fa-solid fa-sack-dollar"></i></div>
-<span>الباقات</span>
-</a>
-
-<a href="income.html" class="nav-item">
-<div class="nav-icon"><i class="fa-solid fa-chart-line"></i></div>
-<span>الدخل</span>
-</a>
-
-<a href="assets.html" class="nav-item">
-<div class="nav-icon"><i class="fa-solid fa-briefcase"></i></div>
-<span>الأصول</span>
-</a>
-
-<a href="account.html" class="nav-item">
-<div class="nav-icon"><i class="fa-solid fa-user"></i></div>
-<span>حسابي</span>
-</a>
-
-</div>
-
+<div class="toast" id="toastMessage">
+  <i class="fa-solid fa-circle-check"></i>
+  <span id="toastText"></span>
 </div>
 
 <script>
+  const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
+  const email = localStorage.getItem("userEmail");
+  let packageEndDate = null;
+  let lastProfitTime = null;
+  let timerInterval = null;
+  let profitTimerInterval = null;
 
-const API = "https://sudancryptomarket-api.onrender.com";
-const email = localStorage.getItem("userEmail");
+  if (!email) window.location.href = "login.html";
 
-function goDeposit(){
-  localStorage.removeItem("activeOrder");
-  localStorage.removeItem("orderId");
-  localStorage.removeItem("selectedNetwork");
-  window.location.href = "packages.html";
-}
+  function showToast(message, isError = false) {
+    const toast = document.getElementById('toastMessage');
+    const toastText = document.getElementById('toastText');
+    const icon = toast.querySelector('i');
+    toastText.innerText = message;
+    if (isError) {
+      icon.className = 'fa-solid fa-circle-exclamation';
+      toast.classList.add('error');
+      toast.classList.remove('success');
+    } else {
+      icon.className = 'fa-solid fa-circle-check';
+      toast.classList.add('success');
+      toast.classList.remove('error');
+    }
+    toast.style.display = 'flex';
+    setTimeout(() => toast.style.display = 'none', 3000);
+  }
 
-if(!email){
-  window.location.href = "login.html";
-} else {
-  fetch(API + "/user-data", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if(!data.success){
-      localStorage.removeItem("userEmail");
-      window.location.href = "login.html";
+  function updateTimer() {
+    if (!packageEndDate) return;
+    const now = new Date().getTime();
+    const diff = packageEndDate - now;
+    if (diff <= 0) {
+      document.getElementById('remainingDays').innerText = '0';
+      document.getElementById('remainingTime').innerHTML = 'انتهت';
+      if (timerInterval) clearInterval(timerInterval);
       return;
     }
-
-    document.getElementById("userName").innerText = data.name || "مستخدم";
-    document.getElementById("balance").innerText = data.balance || 0;
-    document.getElementById("income").innerText = data.incomeBalance || 0;
-    document.getElementById("package").innerText = data.packageName || "لا توجد";
-
-    document.getElementById("myRefCode").innerText = data.refCode || "";
-    const link = window.location.origin + "/index.html?ref=" + (data.refCode || "");
-    document.getElementById("myRefLink").innerText = link;
-  })
-  .catch(err => console.error(err));
-}
-
-function copyRefCode(){
-  const code = document.getElementById("myRefCode").innerText;
-  if(code && code !== "..."){
-    navigator.clipboard.writeText(code);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (86400000)) / (3600000));
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    document.getElementById('remainingDays').innerText = days;
+    document.getElementById('remainingTime').innerHTML = `${days} يوم - ${hours} س - ${minutes} د - ${seconds} ث`;
   }
-}
 
-function copyRefLink(){
-  const link = document.getElementById("myRefLink").innerText;
-  if(link && link !== "..."){
-    navigator.clipboard.writeText(link);
+  function updateProfitTimer() {
+    if (!lastProfitTime) {
+      document.getElementById('nextProfitTime').innerHTML = '--:--:--';
+      return;
+    }
+    const now = new Date().getTime();
+    const nextProfit = lastProfitTime + (24 * 60 * 60 * 1000);
+    const diff = nextProfit - now;
+    if (diff <= 0) {
+      document.getElementById('nextProfitTime').innerHTML = 'جاهز للنزول';
+      return;
+    }
+    const hours = Math.floor(diff / (3600000));
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    document.getElementById('nextProfitTime').innerHTML = `${hours} ساعة ${minutes} دقيقة ${seconds} ثانية`;
   }
-}
 
+  async function transferIncome() {
+    try {
+      const res = await fetch(`${API_BASE}/transfer-income`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      showToast('تم تحويل الأرباح إلى الرصيد');
+      setTimeout(() => location.reload(), 1500);
+    } catch (err) {
+      showToast(err.message, true);
+    }
+  }
+
+  async function loadUserData() {
+    try {
+      const res = await fetch(`${API_BASE}/user-data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error('فشل تحميل البيانات');
+
+      document.getElementById('userName').innerText = data.name || 'مستخدم';
+      document.getElementById('balance').innerText = (data.balance || 0).toFixed(2);
+      document.getElementById('income').innerText = (data.incomeBalance || 0).toFixed(2);
+
+      const packageName = data.packageName || 'لا توجد';
+      const dailyProfit = data.dailyProfit || 0;
+      const packageStart = data.packageStart;
+      const packageDuration = data.packageDurationDays || 180;
+      lastProfitTime = data.lastProfitAt ? new Date(data.lastProfitAt).getTime() : null;
+
+      document.getElementById('packageName').innerText = packageName;
+      document.getElementById('dailyProfit').innerText = dailyProfit;
+
+      if (packageStart && packageDuration > 0) {
+        const startDate = new Date(packageStart);
+        document.getElementById('startDate').innerText = startDate.toLocaleDateString('ar-EG');
+        packageEndDate = startDate.getTime() + (packageDuration * 24 * 60 * 60 * 1000);
+        document.getElementById('packageStatus').innerText = 'نشطة';
+        document.getElementById('packageStatus').style.background = '#F0B90B';
+        document.getElementById('packageStatus').style.color = '#0a0f2a';
+        if (timerInterval) clearInterval(timerInterval);
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+      } else {
+        document.getElementById('startDate').innerText = '-';
+        document.getElementById('remainingDays').innerText = '0';
+        document.getElementById('remainingTime').innerHTML = 'لا توجد باقة نشطة';
+        document.getElementById('packageStatus').innerText = 'غير مفعلة';
+        document.getElementById('packageStatus').style.background = '#ef4444';
+        document.getElementById('packageStatus').style.color = 'white';
+      }
+
+      if (lastProfitTime) {
+        if (profitTimerInterval) clearInterval(profitTimerInterval);
+        updateProfitTimer();
+        profitTimerInterval = setInterval(updateProfitTimer, 1000);
+      } else {
+        document.getElementById('nextProfitTime').innerHTML = 'لا توجد بيانات';
+      }
+    } catch (err) {
+      console.error(err);
+      showToast(err.message, true);
+    }
+  }
+
+  function createStars() {
+    const container = document.getElementById('starsContainer');
+    for (let i = 0; i < 150; i++) {
+      const star = document.createElement('div');
+      star.classList.add('star');
+      star.style.width = (Math.random() * 3 + 1) + 'px';
+      star.style.height = star.style.width;
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      container.appendChild(star);
+    }
+  }
+  createStars();
+  loadUserData();
 </script>
-
 </body>
 </html>
