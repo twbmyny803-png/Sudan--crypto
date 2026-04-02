@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>لوحة التحكم | سودان كربتو</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* الهيدر */
+    .admin-header {
+      background: rgba(240, 185, 11, 0.15);
+      backdrop-filter: blur(12px);
+      border-radius: 28px;
+      padding: 20px 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .admin-header h1 {
+      color: #F0B90B;
+      font-size: 24px;
+    }
+
+    .admin-header p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 14px;
+    }
+
+    .logout-btn {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      padding: 10px 20px;
+      border-radius: 40px;
+      color: #ef4444;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #ef4444;
+      color: white;
+    }
+
+    /* الأزرار العلوية */
+    .top-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .nav-btn.active {
+      background: #F0B90B;
+      color: #0a0f2a;
+    }
+
+    .nav-btn:hover {
+      background: rgba(240, 185, 11, 0.3);
+    }
+
+    /* الكاردات */
+    .glass-card {
+      background: rgba(15, 25, 45, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 24px;
+      margin-bottom: 25px;
+    }
+
+    .card-title {
+      color: #F0B90B;
+      font-size: 20px;
+      margin-bottom: 20px;
+      border-right: 3px solid #F0B90B;
+      padding-right: 12px;
+    }
+
+    /* البحث */
+    .search-box {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 40px;
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      background: rgba(10, 20, 35, 0.8);
+      color: white;
+      font-family: 'Cairo', sans-serif;
+      margin-bottom: 20px;
+    }
+
+    .search-box::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* الجدول */
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      color: #F0B90B;
+      font-weight: bold;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    td {
+      color: white;
+      font-size: 14px;
+    }
+
+    /* البادجات */
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .badge-verified {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+
+    .badge-pending {
+      background: rgba(240, 185, 11, 0.2);
+      color: #F0B90B;
+      border: 1px solid #F0B90B;
+    }
+
+    .badge-unverified {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    .badge-blocked {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    .badge-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+      border: 1px solid #10b981;
+    }
+
+    /* الأزرار */
+    .btn {
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 3px;
+      font-family: 'Cairo', sans-serif;
+      transition: 0.2s;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #F0B90B;
+      color: #0a0f2a;
+    }
+
+    .btn-info {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-dark {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.9;
+    }
+
+    /* المودال */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: rgba(15, 25, 45, 0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 30px;
+      width: 90%;
+      max-width: 500px;
+      border: 1px solid rgba(240, 185, 11, 0.3);
+    }
+
+    .modal-content h3 {
+      color: #F0B90B;
+      margin-bottom: 20px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 40px;
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      background: rgba(10, 20, 35, 0.8);
+      color: white;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .modal-content button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* التوست */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 14px;
+      z-index: 2000;
+      display: none;
+      font-weight: bold;
+    }
+
+    .toast.success {
+      background: #10b981;
+      color: white;
+    }
+
+    .toast.error {
+      background: #ef4444;
+      color: white;
+    }
+
+    /* إحصائيات */
+    .stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: rgba(15, 25, 45, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 20px;
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+      border: 1px solid rgba(240, 185, 11, 0.2);
+    }
+
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #F0B90B;
+    }
+
+    .stat-card .label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="admin-header">
+    <div>
+      <h1>لوحة تحكم المدير</h1>
+      <p>إدارة المستخدمين والطلبات</p>
+    </div>
+    <button class="logout-btn" onclick="adminLogout()">تسجيل الخروج</button>
+  </div>
+
+  <!-- إحصائيات سريعة -->
+  <div class="stats" id="statsContainer">
+    <div class="stat-card">
+      <div class="number" id="totalUsers">0</div>
+      <div class="label">إجمالي المستخدمين</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="verifiedUsers">0</div>
+      <div class="label">موثقين</div>
+    </div>
+    <div class="stat-card">
+      <div class="number" id="blockedUsers">0</div>
+      <div class="label">محظورين</div>
+    </div>
+  </div>
+
+  <!-- أزرار التنقل -->
+  <div class="top-buttons">
+    <button class="nav-btn active" onclick="showSection('users')">👥 المستخدمين</button>
+    <button class="nav-btn" onclick="showSection('deposits')">💰 طلبات الإيداع</button>
+    <button class="nav-btn" onclick="showSection('withdraws')">💸 طلبات السحب</button>
+    <button class="nav-btn" onclick="showSection('package')">📦 إضافة باقة</button>
+  </div>
+
+  <!-- قسم المستخدمين -->
+  <div id="usersSection" class="glass-card">
+    <div class="card-title">جميع المستخدمين</div>
+    <input type="text" class="search-box" id="searchInput" placeholder="🔍 بحث بالاسم أو البريد الإلكتروني...">
+    <div class="table-wrapper">
+      <table id="usersTable">
+        <thead>
+          <tr><th>#</th><th>الاسم</th><th>البريد</th><th>الهاتف</th><th>الرصيد</th><th>رصيد الدخل</th><th>التوثيق</th><th>الحالة</th><th>الإجراءات</th></tr>
+        </thead>
+        <tbody id="usersList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- قسم الإيداعات -->
+  <div id="depositsSection" class="glass-card" style="display:none;">
+    <div class="card-title">طلبات الإيداع</div>
+    <div class="table-wrapper">
+      <table style="width:100%">
+        <thead><tr><th>#</th><th>البريد</th><th>المبلغ</th><th>عنوان المحفظة</th><th>صورة الحوالة</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+        <tbody id="depositsList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- قسم السحوبات -->
+  <div id="withdrawsSection" class="glass-card" style="display:none;">
+    <div class="card-title">طلبات السحب</div>
+    <div class="table-wrapper">
+      <table style="width:100%">
+        <thead><tr><th>#</th><th>البريد</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+        <tbody id="withdrawsList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- قسم إضافة باقة -->
+  <div id="packageSection" class="glass-card" style="display:none;">
+    <div class="card-title">إضافة باقة استثمارية لمستخدم</div>
+    <input type="email" id="packageEmail" placeholder="البريد الإلكتروني للمستخدم" style="width:100%; padding:12px; margin-bottom:15px; border-radius:40px; background:rgba(10,20,35,0.8); border:1px solid rgba(240,185,11,0.3); color:white;">
+    <input type="text" id="packageName" placeholder="اسم الباقة (مثال: باقة ذهبية)" style="width:100%; padding:12px; margin-bottom:15px; border-radius:40px; background:rgba(10,20,35,0.8); border:1px solid rgba(240,185,11,0.3); color:white;">
+    <input type="number" id="dailyProfit" placeholder="الربح اليومي (بالدولار)" style="width:100%; padding:12px; margin-bottom:15px; border-radius:40px; background:rgba(10,20,35,0.8); border:1px solid rgba(240,185,11,0.3); color:white;">
+    <input type="number" id="durationDays" placeholder="مدة الباقة (بالأيام)" style="width:100%; padding:12px; margin-bottom:15px; border-radius:40px; background:rgba(10,20,35,0.8); border:1px solid rgba(240,185,11,0.3); color:white;">
+    <button class="btn btn-success" onclick="addPackage()" style="width:100%; padding:12px;">إضافة الباقة</button>
+  </div>
+</div>
+
+<!-- مودال عرض الصورة -->
+<div id="imageModal" class="modal">
+  <div class="modal-content">
+    <h3>صورة الحوالة</h3>
+    <img id="modalImage" src="" style="width:100%; border-radius:16px; margin:10px 0;">
+    <button onclick="closeImageModal()" style="background:#F0B90B; color:#0a0f2a;">إغلاق</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
+  let depositsData = [];
+  let withdrawsData = [];
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.className = 'toast ' + (isError ? 'error' : 'success');
+    t.style.display = 'flex';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+
+  function showSection(section) {
+    document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
+    document.getElementById('depositsSection').style.display = section === 'deposits' ? 'block' : 'none';
+    document.getElementById('withdrawsSection').style.display = section === 'withdraws' ? 'block' : 'none';
+    document.getElementById('packageSection').style.display = section === 'package' ? 'block' : 'none';
+    
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (section === 'users') loadUsers();
+    if (section === 'deposits') loadDeposits();
+    if (section === 'withdraws') loadWithdraws();
+  }
+
+  async function loadUsers() {
+    try {
+      const res = await fetch(`${API_BASE}/admin-users`);
+      const data = await res.json();
+      if (data.success) {
+        displayUsers(data.users);
+        updateStats(data.users);
+      }
+    } catch (err) {
+      showToast('خطأ في تحميل المستخدمين', true);
+    }
+  }
+
+  function updateStats(users) {
+    document.getElementById('totalUsers').innerText = users.length;
+    const verified = users.filter(u => u.isVerified === true).length;
+    const blocked = users.filter(u => u.isBlocked === true).length;
+    document.getElementById('verifiedUsers').innerText = verified;
+    document.getElementById('blockedUsers').innerText = blocked;
+  }
+
+  function displayUsers(users) {
+    const tbody = document.getElementById('usersList');
+    tbody.innerHTML = '';
+    users.forEach((user, index) => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = index + 1;
+      row.insertCell(1).innerText = user.name || '-';
+      row.insertCell(2).innerText = user.email;
+      row.insertCell(3).innerText = user.phone || '-';
+      row.insertCell(4).innerText = user.balance || 0;
+      row.insertCell(5).innerText = user.incomeBalance || 0;
+      
+      let verificationBadge = '';
+      if (user.isVerified) verificationBadge = '<span class="badge badge-verified">موثق</span>';
+      else if (user.verificationStatus === 'pending') verificationBadge = '<span class="badge badge-pending">قيد المراجعة</span>';
+      else verificationBadge = '<span class="badge badge-unverified">غير موثق</span>';
+      row.insertCell(6).innerHTML = verificationBadge;
+      
+      let statusBadge = '';
+      if (user.isBlocked) statusBadge = '<span class="badge badge-blocked">محظور</span>';
+      else if (user.isFrozen) statusBadge = '<span class="badge badge-pending">مجمّد</span>';
+      else statusBadge = '<span class="badge badge-active">نشط</span>';
+      row.insertCell(7).innerHTML = statusBadge;
+      
+      const actions = row.insertCell(8);
+      actions.innerHTML = `
+        <button class="btn btn-success" onclick="verifyUser('${user.email}')" title="توثيق">✅</button>
+        <button class="btn btn-danger" onclick="blockUser('${user.email}')" title="حظر">⛔</button>
+        <button class="btn btn-info" onclick="freezeUser('${user.email}')" title="تجميد">❄️</button>
+        <button class="btn btn-warning" onclick="unblockUser('${user.email}')" title="فك الحظر">🔓</button>
+        <button class="btn btn-dark" onclick="blockWithdraw('${user.email}')" title="منع السحب">🚫</button>
+        <button class="btn btn-danger" onclick="deleteUser('${user.email}')" title="حذف">🗑️</button>
+      `;
+    });
+  }
+
+  async function verifyUser(email) {
+    if(confirm('تأكيد توثيق هذا المستخدم؟')) {
+      await fetch(`${API_BASE}/admin-verify`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+      showToast('تم توثيق المستخدم');
+      loadUsers();
+    }
+  }
+
+  async function blockUser(email) {
+    if(confirm('تأكيد حظر هذا المستخدم؟')) {
+      await fetch(`${API_BASE}/admin-block`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+      showToast('تم حظر المستخدم');
+      loadUsers();
+    }
+  }
+
+  async function freezeUser(email) {
+    await fetch(`${API_BASE}/admin-freeze`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    showToast('تم تجميد المستخدم');
+    loadUsers();
+  }
+
+  async function unblockUser(email) {
+    await fetch(`${API_BASE}/admin-unblock`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    showToast('تم فك الحظر والتجميد');
+    loadUsers();
+  }
+
+  async function blockWithdraw(email) {
+    await fetch(`${API_BASE}/admin-block-withdraw`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    showToast('تم منع السحب عن المستخدم');
+    loadUsers();
+  }
+
+  async function deleteUser(email) {
+    if(confirm('تحذير! حذف المستخدم نهائياً؟')) {
+      await fetch(`${API_BASE}/admin-delete`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+      showToast('تم حذف المستخدم');
+      loadUsers();
+    }
+  }
+
+  async function loadDeposits() {
+    try {
+      const res = await fetch(`${API_BASE}/admin-deposits`);
+      const data = await res.json();
+      if (data.success) {
+        depositsData = data.deposits || [];
+        displayDeposits(depositsData);
+      }
+    } catch(err) {
+      showToast('خطأ في تحميل الإيداعات', true);
+    }
+  }
+
+  function displayDeposits(deposits) {
+    const tbody = document.getElementById('depositsList');
+    tbody.innerHTML = '';
+    deposits.forEach((dep, index) => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = index + 1;
+      row.insertCell(1).innerText = dep.email;
+      row.insertCell(2).innerText = dep.amount;
+      row.insertCell(3).innerText = dep.walletAddress || '-';
+      
+      let imageHtml = '-';
+      if (dep.imageUrl) {
+        imageHtml = `<span style="color:#3b82f6;cursor:pointer" onclick="showImage('${dep.imageUrl}')">📷 عرض الصورة</span>`;
+      }
+      row.insertCell(4).innerHTML = imageHtml;
+      
+      let statusBadge = '';
+      if (dep.status === 'approved') statusBadge = '<span class="badge badge-verified">مقبول</span>';
+      else if (dep.status === 'rejected') statusBadge = '<span class="badge badge-blocked">مرفوض</span>';
+      else statusBadge = '<span class="badge badge-pending">قيد الانتظار</span>';
+      row.insertCell(5).innerHTML = statusBadge;
+      
+      const actions = row.insertCell(6);
+      if (dep.status === 'pending') {
+        actions.innerHTML = `
+          <button class="btn btn-success" onclick="approveDeposit(${index})">قبول</button>
+          <button class="btn btn-danger" onclick="rejectDeposit(${index})">رفض</button>
+        `;
+      } else {
+        actions.innerHTML = '-';
+      }
+    });
+  }
+
+  function approveDeposit(index) {
+    showToast('تم قبول الإيداع (تمت المحاكاة)');
+  }
+
+  function rejectDeposit(index) {
+    showToast('تم رفض الإيداع (تمت المحاكاة)');
+  }
+
+  async function loadWithdraws() {
+    try {
+      const res = await fetch(`${API_BASE}/admin-withdraws`);
+      const data = await res.json();
+      if (data.success) {
+        withdrawsData = data.requests || [];
+        displayWithdraws(withdrawsData);
+      }
+    } catch(err) {
+      showToast('خطأ في تحميل السحوبات', true);
+    }
+  }
+
+  function displayWithdraws(requests) {
+    const tbody = document.getElementById('withdrawsList');
+    tbody.innerHTML = '';
+    requests.forEach((req, index) => {
+      const row = tbody.insertRow();
+      row.insertCell(0).innerText = index + 1;
+      row.insertCell(1).innerText = req.email;
+      row.insertCell(2).innerText = req.amount;
+      
+      let statusBadge = '';
+      if (req.status === 'approved') statusBadge = '<span class="badge badge-verified">مقبول</span>';
+      else if (req.status === 'rejected') statusBadge = '<span class="badge badge-blocked">مرفوض</span>';
+      else statusBadge = '<span class="badge badge-pending">قيد الانتظار</span>';
+      row.insertCell(3).innerHTML = statusBadge;
+      
+      const actions = row.insertCell(4);
+      if (req.status === 'pending') {
+        actions.innerHTML = `
+          <button class="btn btn-success" onclick="approveWithdraw(${req.id})">قبول</button>
+          <button class="btn btn-danger" onclick="rejectWithdraw(${req.id})">رفض</button>
+        `;
+      } else {
+        actions.innerHTML = '-';
+      }
+    });
+  }
+
+  async function approveWithdraw(id) {
+    if(confirm('تأكيد قبول طلب السحب؟')) {
+      await fetch(`${API_BASE}/admin-approve-withdraw`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+      showToast('تم قبول السحب');
+      loadWithdraws();
+      loadUsers();
+    }
+  }
+
+  async function rejectWithdraw(id) {
+    await fetch(`${API_BASE}/admin-reject-withdraw`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({id}) });
+    showToast('تم رفض السحب');
+    loadWithdraws();
+  }
+
+  async function addPackage() {
+    const email = document.getElementById('packageEmail').value;
+    const packageName = document.getElementById('packageName').value;
+    const dailyProfit = parseFloat(document.getElementById('dailyProfit').value);
+    const durationDays = parseInt(document.getElementById('durationDays').value);
+    
+    if(!email || !packageName || !dailyProfit || !durationDays) {
+      showToast('يرجى ملء جميع الحقول', true);
+      return;
+    }
+    
+    await fetch(`${API_BASE}/admin-add-package`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, packageName, dailyProfit, durationDays})
+    });
+    
+    showToast('تم إضافة الباقة بنجاح');
+    document.getElementById('packageEmail').value = '';
+    document.getElementById('packageName').value = '';
+    document.getElementById('dailyProfit').value = '';
+    document.getElementById('durationDays').value = '';
+  }
+
+  function showImage(url) {
+    document.getElementById('modalImage').src = url;
+    document.getElementById('imageModal').style.display = 'flex';
+  }
+
+  function closeImageModal() {
+    document.getElementById('imageModal').style.display = 'none';
+  }
+
+  function adminLogout() {
+    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminUsername');
+    window.location.href = 'admin-login.html';
+  }
+
+  // البحث
+  document.getElementById('searchInput')?.addEventListener('keyup', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#usersList tr');
+    rows.forEach(row => {
+      const name = row.cells[1]?.innerText.toLowerCase() || '';
+      const email = row.cells[2]?.innerText.toLowerCase() || '';
+      if(name.includes(searchTerm) || email.includes(searchTerm)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  });
+
+  // التحقق من صلاحية الدخول
+  if (localStorage.getItem("adminLoggedIn") !== "true") {
+    window.location.href = "admin-login.html";
+  }
+
+  loadUsers();
+</script>
+</body>
+    </html>
