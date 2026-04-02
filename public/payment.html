@@ -116,10 +116,6 @@
             display: inline-block;
             margin: 0 auto;
         }
-        #qrcode img {
-            display: block;
-            margin: 0 auto;
-        }
         
         .address-box {
             background: rgba(0,0,0,0.5);
@@ -169,6 +165,19 @@
             padding: 20px;
             text-align: center;
             cursor: pointer;
+            transition: 0.2s;
+        }
+        .file-label:hover {
+            background: rgba(245,176,66,0.25);
+        }
+        .upload-success {
+            color: #4caf50;
+            margin-top: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         .preview-image { text-align: center; margin-top: 10px; }
         .preview-image img { max-width: 100%; max-height: 150px; border-radius: 12px; }
@@ -219,24 +228,21 @@
             <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> نسخ العنوان</button>
         </div>
 
-        <!-- QR Code -->
+        <!-- QR Code للدفع -->
         <div class="qr-box">
             <div class="qr-title"><i class="fas fa-qrcode"></i> رمز QR للدفع</div>
             <div id="qrcode"></div>
         </div>
 
-        <!-- باركود الطلب -->
-        <div class="qr-box" style="margin-top: 10px;">
-            <div class="qr-title"><i class="fas fa-barcode"></i> باركود الطلب</div>
-            <div id="barcode" style="background: white; padding: 10px; border-radius: 12px; display: inline-block;"></div>
-        </div>
-
+        <!-- رقم العملية -->
         <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID)">
         
+        <!-- رفع الإيصال مع رسالة تأكيد -->
         <label class="file-label" id="fileLabel">
             <i class="fas fa-cloud-upload-alt"></i> اضغط لرفع إيصال الدفع
             <input type="file" id="fileInput" accept="image/*">
         </label>
+        <div id="uploadStatus"></div>
         <div class="preview-image" id="preview"></div>
 
         <button class="confirm-btn" id="confirmPaymentBtn">
@@ -245,7 +251,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script>
     // نجوم متحركة
     const starsContainer = document.getElementById('starsContainer');
@@ -290,18 +295,7 @@
         correctLevel: QRCode.CorrectLevel.H
     });
 
-    // باركود الطلب
-    JsBarcode("#barcode", orderNumber, {
-        format: "CODE128",
-        lineColor: "#000",
-        width: 1.5,
-        height: 50,
-        displayValue: true,
-        fontSize: 14,
-        margin: 5
-    });
-
-    // عداد تنازلي 15 دقيقة (900 ثانية) - شغال
+    // عداد تنازلي 15 دقيقة
     let timeLeft = 15 * 60;
     const timerEl = document.getElementById('timer');
     const interval = setInterval(() => {
@@ -318,15 +312,30 @@
         }
     }, 1000);
 
-    // معاينة الإيصال
+    // رفع الإيصال مع رسالة تأكيد
     const fileInput = document.getElementById('fileInput');
     const preview = document.getElementById('preview');
+    const uploadStatus = document.getElementById('uploadStatus');
+    
     fileInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
+            // عرض رسالة "جاري التحميل..."
+            uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-spinner fa-pulse"></i> جاري رفع الإيصال...</div>';
+            
             const reader = new FileReader();
             reader.onload = function(ev) {
                 preview.innerHTML = `<img src="${ev.target.result}" alt="الإيصال">`;
+                // رسالة نجاح التحميل
+                uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-check-circle"></i> ✓ تم رفع الإيصال بنجاح</div>';
+                // تغيير لون الخلفية مؤقتاً
+                const label = document.getElementById('fileLabel');
+                label.style.background = 'rgba(76, 175, 80, 0.2)';
+                label.style.borderColor = '#4caf50';
+                setTimeout(() => {
+                    label.style.background = 'rgba(245,176,66,0.15)';
+                    label.style.borderColor = '#f5b042';
+                }, 2000);
             };
             reader.readAsDataURL(file);
         }
@@ -352,4 +361,4 @@
     });
 </script>
 </body>
-            </html>
+    </html>
