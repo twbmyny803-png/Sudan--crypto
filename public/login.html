@@ -382,102 +382,71 @@
       <button id="sendResetCodeBtn">إرسال كود التحقق</button>
       <div id="resetStep1Msg" class="modal-message"></div>
     </div>
-    
+
     <div id="resetStep2" style="display:none;">
-      <p style="color:#ccc; margin-bottom:10px;">أدخل كود التحقق</p>
-      <input type="text" id="resetCode" placeholder="كود من 6 أرقام" maxlength="6">
-      <button id="verifyResetCodeBtn">التحقق من الكود</button>
+      <p style="color:#ccc; margin-bottom:10px;">أدخل الكود المرسل لبريدك</p>
+      <input type="text" id="resetCode" placeholder="كود التحقق (6 أرقام)">
+      <button id="verifyResetCodeBtn">تحقق من الكود</button>
       <div id="resetStep2Msg" class="modal-message"></div>
     </div>
-    
+
     <div id="resetStep3" style="display:none;">
-      <p style="color:#ccc; margin-bottom:10px;">كلمة المرور الجديدة</p>
-      <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة (8 أحرف على الأقل)">
-      <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة المرور">
-      <button id="resetPasswordBtn">تغيير كلمة المرور</button>
+      <p style="color:#ccc; margin-bottom:10px;">أدخل كلمة السر الجديدة</p>
+      <input type="password" id="newPassword" placeholder="كلمة السر الجديدة">
+      <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة السر">
+      <button id="resetPasswordBtn">تغيير كلمة السر</button>
       <div id="resetStep3Msg" class="modal-message"></div>
     </div>
-    
-    <button class="close-modal" onclick="closeResetModal()">إلغاء</button>
+
+    <button class="close-modal" onclick="closeResetModal()" style="margin-top:15px;">إغلاق</button>
   </div>
 </div>
 
-<div class="toast" id="toastMessage">
-  <i class="fa-solid fa-circle-check"></i>
-  <span id="toastText"></span>
-</div>
+<div id="toast" class="toast"></div>
 
 <script>
-  // ======================= التهيئة =======================
-  const API_BASE = "https://sudan-crypto-4mgt.onrender.com"; // رابط السيرفر الفعلي
-  let toastTimeout = null;
-  let resetEmail = "";
+  const API_BASE = ""; // اتركه فارغاً إذا كان السيرفر في نفس الدومين
+  let resetEmail = '';
 
   // إنشاء النجوم
   function createStars() {
     const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 180; i++) {
+    for (let i = 0; i < 100; i++) {
       const star = document.createElement('div');
-      star.classList.add('star');
-      const size = Math.random() * 3 + 1;
+      star.className = 'star';
+      const size = Math.random() * 3;
       star.style.width = size + 'px';
       star.style.height = size + 'px';
-      star.style.left = Math.random() * 100 + '%';
       star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 5 + 's';
-      star.style.animationDuration = Math.random() * 3 + 2 + 's';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 3 + 's';
       container.appendChild(star);
     }
   }
   createStars();
 
-  // إظهار رسالة داخل المودال
-  function showModalMessage(step, message, isError = false) {
-    let msgDiv;
-    if (step === 1) msgDiv = document.getElementById('resetStep1Msg');
-    else if (step === 2) msgDiv = document.getElementById('resetStep2Msg');
-    else msgDiv = document.getElementById('resetStep3Msg');
-    
-    if (msgDiv) {
-      msgDiv.innerHTML = message;
-      msgDiv.className = 'modal-message ' + (isError ? 'error' : 'info');
-      setTimeout(() => {
-        if (msgDiv) msgDiv.innerHTML = '';
-      }, 4000);
-    }
-  }
-
-  // إظهار رسالة toast (للمنصة الرئيسية)
-  function showToast(message, isError = false) {
-    const toast = document.getElementById('toastMessage');
-    const toastText = document.getElementById('toastText');
-    const icon = toast.querySelector('i');
-    toastText.innerText = message;
-    if (isError) {
-      icon.className = 'fa-solid fa-circle-exclamation';
-      toast.classList.add('error');
-      toast.classList.remove('success');
-    } else {
-      icon.className = 'fa-solid fa-circle-check';
-      toast.classList.add('success');
-      toast.classList.remove('error');
-    }
+  function showToast(msg, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
     toast.style.display = 'flex';
-    if (toastTimeout) clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-      toast.style.display = 'none';
-    }, 3000);
+    toast.className = 'toast ' + (isError ? 'error' : 'success');
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
   }
 
-  // إظهار/إخفاء كلمة المرور
+  function showModalMessage(step, msg, isError = false) {
+    const msgDiv = document.getElementById(`resetStep${step}Msg`);
+    msgDiv.textContent = msg;
+    msgDiv.className = 'modal-message ' + (isError ? 'error' : 'success');
+  }
+
   function togglePassword() {
-    const input = document.getElementById('password');
+    const passInput = document.getElementById('password');
     const btn = document.querySelector('.toggle-password');
-    if (input.type === 'password') {
-      input.type = 'text';
+    if (passInput.type === 'password') {
+      passInput.type = 'text';
       btn.textContent = 'إخفاء';
     } else {
-      input.type = 'password';
+      passInput.type = 'password';
       btn.textContent = 'إظهار';
     }
   }
@@ -499,13 +468,21 @@
         body: JSON.stringify({ email, password })
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.message || 'فشل تسجيل الدخول');
+      
+      if (data.success) {
+        // 🔥 نخزن الاسم والبريد
+        localStorage.setItem("name", data.name);
+        localStorage.setItem("email", data.email);
 
-      localStorage.setItem('userEmail', email);
-      showToast('تم تسجيل الدخول بنجاح');
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 1000);
+        showToast('تم تسجيل الدخول بنجاح');
+        
+        // 🔥 نوديه للداشبورد
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 1000);
+      } else {
+        throw new Error(data.message || 'فشل تسجيل الدخول');
+      }
     } catch (err) {
       showToast(err.message || 'خطأ في الاتصال', true);
     }
@@ -629,4 +606,4 @@
   });
 </script>
 </body>
-</html>
+  </html>
