@@ -7,24 +7,24 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// 🔴 حطيت المفتاح هنا عشان يشتغل معاك مباشرة
+// 🔐 مفتاح Resend (مباشر زي ما طلبت)
 const resend = new Resend("re_NBwHrNvM_8V7mPxiSistfrYy1B5DXTZDg");
 
-// 📁 ملفات الموقع
+// قراءة صفحات الموقع
 app.use(express.static(path.join(__dirname, "public")));
 
 let users = [];
-let codes = {};
+let codes = {}; // تخزين الأكواد مؤقت
 
-// ================== إرسال كود ==================
+// ================== إرسال كود التحقق ==================
 app.post("/send-code", async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.json({ success: false, message: "أدخل البريد" });
+    return res.json({ success: false, message: "أدخل الإيميل" });
   }
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = Math.floor(100000 + Math.random() * 900000);
   codes[email] = code;
 
   try {
@@ -32,22 +32,22 @@ app.post("/send-code", async (req, res) => {
       from: "Sudan Crypto <noreply@sudancrypto.com>",
       to: email,
       subject: "كود التحقق",
-      html: `<h2 style="text-align:center;">كودك هو: ${code}</h2>`
+      html: `<h2>كود التحقق الخاص بك: ${code}</h2>`
     });
 
-    res.json({ success: true });
+    res.json({ success: true, message: "تم إرسال الكود" });
 
   } catch (err) {
-    console.log("EMAIL ERROR:", err);
+    console.log(err);
     res.json({ success: false, message: "فشل إرسال الكود" });
   }
 });
 
-// ================== تحقق ==================
+// ================== التحقق من الكود ==================
 app.post("/verify", (req, res) => {
   const { email, code } = req.body;
 
-  if (codes[email] === code) {
+  if (codes[email] == code) {
     delete codes[email];
     return res.json({ success: true });
   }
@@ -55,7 +55,7 @@ app.post("/verify", (req, res) => {
   res.json({ success: false, message: "الكود غير صحيح" });
 });
 
-// ================== تسجيل ==================
+// ================== تسجيل المستخدم ==================
 app.post("/register", (req, res) => {
   const { name, email, phone, password, ref } = req.body;
 
@@ -72,13 +72,16 @@ app.post("/register", (req, res) => {
     name,
     email,
     phone,
-    password
+    password,
+    ref: ref || null,
+    verified: true, // 🔥 ما محتاج يتحقق تاني هنا
+    balance: 0
   });
 
-  res.json({ success: true });
+  res.json({ success: true, message: "تم إنشاء الحساب" });
 });
 
-// ================== تسجيل دخول ==================
+// ================== تسجيل الدخول ==================
 app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
@@ -98,6 +101,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// تشغيل السيرفر
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
