@@ -57,7 +57,7 @@ app.post("/verify", (req, res) => {
 
 // ================== تسجيل ==================
 app.post("/register", (req, res) => {
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password, ref } = req.body;
 
   if (!name || !email || !phone || !password) {
     return res.json({ success: false, message: "املأ كل الحقول" });
