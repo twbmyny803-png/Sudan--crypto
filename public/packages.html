@@ -2,176 +2,215 @@
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>باقات الاستثمار</title>
     <style>
-        body {
-            font-family: 'Tahoma', 'Segoe UI', system-ui, sans-serif;
-            background: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            background: #eef2f7;
+            font-family: 'Segoe UI', Tahoma, system-ui, sans-serif;
+            padding: 40px 20px;
+        }
+
         .container {
-            max-width: 800px;
-            width: 100%;
-            background: white;
-            border-radius: 28px;
-            box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1);
-            padding: 24px 20px 32px 20px;
-            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
         }
-        /* زر الباقات الرئيسي */
-        .main-investment-btn {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            font-size: 28px;
-            font-weight: bold;
-            padding: 18px 20px;
-            border: none;
-            border-radius: 60px;
+
+        /* زر الباقات العلوي */
+        .main-btn {
             width: 100%;
+            background: #0a2b3e;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            font-size: 26px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
             cursor: pointer;
             margin-bottom: 40px;
-            transition: 0.3s;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-            letter-spacing: 1px;
+            transition: 0.2s;
+            font-family: inherit;
         }
-        .main-investment-btn:hover {
-            background: linear-gradient(135deg, #2a5298, #1e3c72);
-            transform: scale(1.01);
+
+        .main-btn:hover {
+            background: #124b66;
         }
-        /* شبكة الباقات الخمسة */
-        .packages-grid {
+
+        /* قائمة الباقات العمودية */
+        .packages-list {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
         }
+
+        /* بطاقة الباقة الواحدة */
         .package-card {
-            background: #ffffff;
-            border-right: 8px solid #2a5298;
-            border-radius: 24px;
-            padding: 18px 24px;
-            text-align: right;
-            box-shadow: 0 5px 12px rgba(0,0,0,0.08);
-            transition: all 0.2s ease;
-            cursor: pointer;
+            background: white;
+            border-radius: 20px;
+            padding: 20px 24px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: 0.2s;
+            border: 1px solid #dee4ec;
         }
+
         .package-card:hover {
             transform: translateX(-5px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
-            background: #fefefe;
+            box-shadow: 0 10px 22px rgba(0,0,0,0.1);
         }
+
         .package-info {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            flex: 2;
         }
-        .package-name {
-            font-size: 22px;
-            font-weight: bold;
-            color: #1e2f4e;
+
+        .price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e4a6b;
         }
-        .package-desc {
+
+        .price small {
             font-size: 14px;
-            color: #5a6874;
+            font-weight: normal;
+            color: #6c7a8e;
         }
-        .package-price {
-            background: #eef2fa;
-            padding: 8px 18px;
-            border-radius: 40px;
+
+        .package-name {
+            font-size: 20px;
             font-weight: bold;
-            color: #1e3c72;
-            font-size: 18px;
+            color: #1f2f3e;
+            margin: 5px 0 4px;
         }
+
+        .stars {
+            color: #f5b042;
+            font-size: 16px;
+            letter-spacing: 2px;
+            margin: 5px 0;
+        }
+
+        .desc {
+            font-size: 13px;
+            color: #5a6b7c;
+        }
+
+        .buy-btn {
+            background: #1e4a6b;
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .buy-btn:hover {
+            background: #0f334b;
+        }
+
         @media (max-width: 550px) {
             .package-card {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
+                gap: 15px;
             }
-            .main-investment-btn {
-                font-size: 22px;
+            .buy-btn {
+                width: 100%;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- زر الباقات الرئيسي (فوق) -->
-    <button class="main-investment-btn" id="mainPackagesBtn">
-        📦 باقات الاستثمار
-    </button>
+    <button class="main-btn" id="mainPackagesBtn">باقات الاستثمار</button>
 
-    <!-- الـ 5 باقات تحت بعض -->
-    <div class="packages-grid" id="packagesList">
-        <!-- باقة 1 -->
-        <div class="package-card" data-package="basic">
+    <div class="packages-list" id="packagesList">
+        <!-- باقة 50 -->
+        <div class="package-card">
             <div class="package-info">
-                <div class="package-name">🥉 الباقة الأساسية</div>
-                <div class="package-desc">مناسبة للمبتدئين – عائد شهري 5%</div>
+                <div class="price">50 $ <small>شهرياً</small></div>
+                <div class="package-name">الباقة البرونزية</div>
+                <div class="stars">★★★☆☆</div>
+                <div class="desc">بداية ذكية - عائد 4%</div>
             </div>
-            <div class="package-price">$ 499</div>
+            <button class="buy-btn" data-price="50">شراء الآن</button>
         </div>
-        <!-- باقة 2 -->
-        <div class="package-card" data-package="silver">
+
+        <!-- باقة 100 -->
+        <div class="package-card">
             <div class="package-info">
-                <div class="package-name">🥈 الباقة الفضية</div>
-                <div class="package-desc">الأكثر طلباً – دعم فوري + عائد 8%</div>
+                <div class="price">100 $ <small>شهرياً</small></div>
+                <div class="package-name">الباقة الفضية</div>
+                <div class="stars">★★★★☆</div>
+                <div class="desc">نمو متوازن - عائد 6%</div>
             </div>
-            <div class="package-price">$ 1,199</div>
+            <button class="buy-btn" data-price="100">شراء الآن</button>
         </div>
-        <!-- باقة 3 -->
-        <div class="package-card" data-package="gold">
+
+        <!-- باقة 250 -->
+        <div class="package-card">
             <div class="package-info">
-                <div class="package-name">🥇 الباقة الذهبية</div>
-                <div class="package-desc">أرباح متزايدة – استشارات أسبوعية</div>
+                <div class="price">250 $ <small>شهرياً</small></div>
+                <div class="package-name">الباقة الذهبية</div>
+                <div class="stars">★★★★★</div>
+                <div class="desc">أرباح متوسطة - عائد 9%</div>
             </div>
-            <div class="package-price">$ 2,499</div>
+            <button class="buy-btn" data-price="250">شراء الآن</button>
         </div>
-        <!-- باقة 4 -->
-        <div class="package-card" data-package="platinum">
+
+        <!-- باقة 500 -->
+        <div class="package-card">
             <div class="package-info">
-                <div class="package-name">💎 الباقة البلاتينية</div>
-                <div class="package-desc">أولوية السحب + نسبة 12%</div>
+                <div class="price">500 $ <small>شهرياً</small></div>
+                <div class="package-name">الباقة البلاتينية</div>
+                <div class="stars">★★★★★</div>
+                <div class="desc">أولوية السحب - عائد 12%</div>
             </div>
-            <div class="package-price">$ 4,999</div>
+            <button class="buy-btn" data-price="500">شراء الآن</button>
         </div>
-        <!-- باقة 5 -->
-        <div class="package-card" data-package="diamond">
+
+        <!-- باقة 1000 -->
+        <div class="package-card">
             <div class="package-info">
-                <div class="package-name">👑 الباقة الماسية</div>
-                <div class="package-desc">VIP – أرباح يومية ومحفظة خاصة</div>
+                <div class="price">1000 $ <small>شهرياً</small></div>
+                <div class="package-name">الباقة الماسية</div>
+                <div class="stars">★★★★★</div>
+                <div class="desc">VIP - أرباح يومية + محفظة خاصة</div>
             </div>
-            <div class="package-price">$ 9,999</div>
+            <button class="buy-btn" data-price="1000">شراء الآن</button>
         </div>
     </div>
 </div>
 
 <script>
-    // عند الضغط على أي بطاقة باقة - يمكنك تخصيص الإجراء
-    const cards = document.querySelectorAll('.package-card');
-    cards.forEach(card => {
-        card.addEventListener('click', () => {
-            const packageName = card.querySelector('.package-name').innerText;
-            alert(`✅ تم اختيار: ${packageName}\nسيتم نقلك لصفحة الدفع أو التفاصيل.`);
-            // هنا تقدر تضيف رابط أو إجراء حقيقي:
-            // window.location.href = `/packages?type=${card.dataset.package}`;
+    // زر الشراء يحول إلى order.html
+    const btns = document.querySelectorAll('.buy-btn');
+    btns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const price = this.getAttribute('data-price');
+            localStorage.setItem('selectedPackagePrice', price);
+            window.location.href = 'order.html';
         });
     });
 
-    // عند الضغط على زر "باقات الاستثمار" العلوي (اختياري: تمرير سلس للباقات)
+    // زر باقات الاستثمار العلوي (سكرول سلس للباقات)
     const mainBtn = document.getElementById('mainPackagesBtn');
     mainBtn.addEventListener('click', () => {
-        document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // أو ممكن يخفي/يظهر الباقات لو تحب، لكن الأفضل يمرر لها.
+        document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth' });
     });
 </script>
 </body>
