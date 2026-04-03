@@ -400,6 +400,35 @@ app.post("/deposit-request", (req, res) => {
   res.json({ success: true });
 });
 
+// 📸 رفع إثبات الإيداع
+app.post("/upload-proof", upload.single("file"), (req, res) => {
+  try {
+    const { email, txid, orderId } = req.body;
+
+    if (!req.file) {
+      return res.json({ success: false, message: "ما في صورة" });
+    }
+
+    const imagePath = "/uploads/" + req.file.filename;
+
+    deposits.push({
+      id: Date.now(),
+      email,
+      txid,
+      amount: 0, // ممكن تضيفه لو داير
+      orderId,
+      image: imagePath,
+      status: "pending"
+    });
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+});
+
 // عرض الإيداعات
 app.get("/admin-deposits", (req, res) => {
   res.json({ success: true, deposits });
@@ -499,49 +528,8 @@ app.post("/admin-reject-withdraw", (req, res) => {
   res.json({ success: true });
 });
 
-app.post("/submit-verification", upload.fields([
-  { name: "file", maxCount: 1 },
-  { name: "file2", maxCount: 1 }
-]), async (req, res) => {
-  try {
-    const { email, fullName, docType, docNumber } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "المستخدم غير موجود" });
-    }
-
-    const images = [];
-
-    if (req.files && req.files.file && req.files.file[0]) {
-      images.push("/uploads/" + req.files.file[0].filename);
-    }
-
-    if (req.files && req.files.file2 && req.files.file2[0]) {
-      images.push("/uploads/" + req.files.file2[0].filename);
-    }
-
-    if (images.length === 0) {
-      return res.json({ success: false, message: "ارفع صور المستند" });
-    }
-
-    user.verificationFullName = fullName;
-    user.verificationDocType = docType;
-    user.verificationDocNumber = docNumber;
-    user.verificationImages = images;
-    user.verificationStatus = "pending";
-
-    await user.save();
-
-    res.json({ success: true, message: "تم إرسال طلب التوثيق" });
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false, message: "فشل إرسال التوثيق" });
-  }
-});
-
-const PORT = process.env.PORT || 10000;
-
+// 🚀 تشغيل السيرفر
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server running on " + PORT);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
