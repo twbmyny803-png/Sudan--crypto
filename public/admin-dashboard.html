@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>لوحة الأدمن</title>
+
+<style>
+body {
+  background:#eef1f6;
+  font-family:Cairo;
+  margin:0;
+}
+
+.header {
+  background:#0a0f2a;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+.container {
+  padding:20px;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.card {
+  background:white;
+  padding:20px;
+  text-align:center;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.logout {
+  margin-top:20px;
+  background:#ef4444;
+  color:white;
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">لوحة تحكم الأدمن</div>
+
+<div class="container">
+
+<div class="grid">
+
+<div class="card" onclick="go('admin-deposits.html')">طلبات الإيداع</div>
+
+<div class="card" onclick="go('admin.html')">المستخدمين</div>
+
+<div class="card" onclick="go('admin-verifications.html')">طلبات التوثيق</div>
+
+<div class="card" onclick="go('admin-withdraws.html')">طلبات السحب</div>
+
+<div class="card" onclick="go('/')">دخول الموقع</div>
+
+</div>
+
+<button class="logout" onclick="logout()">تسجيل الخروج</button>
+
+</div>
+
+<script>
+// 🔒 حماية
+if(localStorage.getItem("admin") !== "ok"){
+  window.location = "admin-login.html";
+}
+
+// 🔁 التنقل
+function go(page){
+  window.location = page;
+}
+
+// 🚪 خروج
+function logout(){
+  localStorage.removeItem("admin");
+  window.location = "admin-login.html";
+}
+</script>
+
+</body>
+</html>
