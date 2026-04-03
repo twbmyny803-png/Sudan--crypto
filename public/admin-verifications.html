@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>طلبات التوثيق</title>
+
+<style>
+body {
+  background:#eef1f6;
+  font-family:Cairo;
+  margin:0;
+}
+
+.header {
+  background:#0a0f2a;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+.container {
+  padding:20px;
+}
+
+button {
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.refresh {
+  background:#3b82f6;
+  color:white;
+  float:left;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  margin-top:20px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th {
+  background:#f3f4f6;
+  padding:10px;
+}
+
+td {
+  padding:10px;
+  text-align:center;
+}
+
+tr {
+  border-bottom:1px solid #ddd;
+}
+
+img {
+  width:50px;
+  border-radius:5px;
+  margin:2px;
+}
+
+.actions button {
+  margin:2px;
+}
+
+.approve { background:#10b981; color:white }
+.reject { background:#ef4444; color:white }
+
+.loading {
+  text-align:center;
+  padding:20px;
+  color:#666;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">طلبات التوثيق 🔐</div>
+
+<div class="container">
+
+<button class="refresh" onclick="loadVerifications()">تحديث</button>
+
+<table>
+<thead>
+<tr>
+<th>الاسم</th>
+<th>البريد</th>
+<th>نوع المستند</th>
+<th>رقم المستند</th>
+<th>الصور</th>
+<th>الحالة</th>
+<th>التحكم</th>
+</tr>
+</thead>
+
+<tbody id="verifyTable">
+<tr><td colspan="7" class="loading">جاري التحميل...</td></tr>
+</tbody>
+</table>
+
+</div>
+
+<script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
+
+// 🔒 حماية الأدمن
+if(localStorage.getItem("admin") !== "ok"){
+  window.location = "admin-login.html";
+}
+
+async function loadVerifications(){
+  const table = document.getElementById("verifyTable");
+  table.innerHTML = `<tr><td colspan="7" class="loading">جاري التحميل...</td></tr>`;
+
+  try {
+    const res = await fetch(API + "/admin-verifications");
+    const data = await res.json();
+
+    table.innerHTML = "";
+
+    data.requests.forEach(v => {
+
+      const images = v.images && v.images.length > 0
+        ? v.images.map(img => `<img src="${API}/${img}">`).join("")
+        : "❌";
+
+      const row = `
+      <tr>
+        <td>${v.name}</td>
+        <td>${v.email}</td>
+        <td>${v.type || "-"}</td>
+        <td>${v.number || "-"}</td>
+        <td>${images}</td>
+        <td>${v.status || "pending"}</td>
+        <td class="actions">
+          <button class="approve" onclick="approve('${v.email}')">قبول</button>
+          <button class="reject" onclick="reject('${v.email}')">رفض</button>
+        </td>
+      </tr>
+      `;
+
+      table.innerHTML += row;
+    });
+
+  } catch(err) {
+    table.innerHTML = `<tr><td colspan="7">❌ فشل تحميل الطلبات</td></tr>`;
+  }
+}
+
+// ✅ قبول
+async function approve(email){
+  await fetch(API + "/admin-verify",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
+
+  loadVerifications();
+}
+
+// ❌ رفض
+async function reject(email){
+  await fetch(API + "/admin-reject-verification",{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email})
+  });
+
+  loadVerifications();
+}
+
+loadVerifications();
+</script>
+
+</body>
+</html>
