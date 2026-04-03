@@ -34,6 +34,10 @@ button{
   border-radius:10px;
   background:#f0b90b;
   font-weight:bold;
+  cursor:pointer;
+}
+button:hover{
+  background:#d9a60a;
 }
 </style>
 </head>
@@ -52,10 +56,17 @@ function login(){
   const u = document.getElementById("user").value;
   const p = document.getElementById("pass").value;
 
+  // التحقق من بيانات الأدمن
   if(u === "admain" && p === "admain_2030"){
-    localStorage.setItem("admin","true");
-    window.location.href = "admin-dashboard.html";
-  }else{
+    // تخزين القيمة "ok" لضمان التوافق مع باقي الصفحات
+    localStorage.setItem("admin", "ok");
+    
+    // إضافة تأخير بسيط (200ms) لضمان ثبات التخزين قبل التحويل
+    setTimeout(() => {
+      window.location.href = "admin-dashboard.html";
+    }, 200);
+    
+  } else {
     alert("خطأ في البيانات");
   }
 }
