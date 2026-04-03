@@ -400,10 +400,12 @@ app.post("/deposit-request", (req, res) => {
   res.json({ success: true });
 });
 
-// 📸 رفع إثبات الإيداع
+// 📸 رفع إثبات الإيداع (تم التحديث)
 app.post("/upload-proof", upload.single("file"), (req, res) => {
   try {
     const { email, txid, orderId } = req.body;
+
+    console.log("🔥 deposit received:", email, txid); // مهم للتأكد
 
     if (!req.file) {
       return res.json({ success: false, message: "ما في صورة" });
@@ -415,8 +417,7 @@ app.post("/upload-proof", upload.single("file"), (req, res) => {
       id: Date.now(),
       email,
       txid,
-      amount: 0, // ممكن تضيفه لو داير
-      orderId,
+      amount: 100, // مؤقت كما هو مطلوب
       image: imagePath,
       status: "pending"
     });
@@ -498,37 +499,29 @@ app.get("/admin-withdraws", (req, res) => {
 // قبول السحب
 app.post("/admin-approve-withdraw", async (req, res) => {
   const { id } = req.body;
-
   const request = withdrawRequests.find(r => r.id == id);
   if (!request) return res.json({ success: false });
 
   const user = await User.findOne({ email: request.email });
+  if (!user) return res.json({ success: false });
 
-  if (!user || user.balance < request.amount) {
-    return res.json({ success: false });
-  }
-
-  user.balance -= request.amount;
+  user.balance -= Number(request.amount);
   await user.save();
 
   request.status = "approved";
-
   res.json({ success: true });
 });
 
 // رفض السحب
 app.post("/admin-reject-withdraw", (req, res) => {
   const { id } = req.body;
-
   const request = withdrawRequests.find(r => r.id == id);
   if (!request) return res.json({ success: false });
 
   request.status = "rejected";
-
   res.json({ success: true });
 });
 
-// 🚀 تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
