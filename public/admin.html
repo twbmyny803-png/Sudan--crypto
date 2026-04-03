@@ -3,217 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <title>إدارة المستخدمين - لوحة الأدمن</title>
-
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background: #eef1f6;
-  font-family: 'Cairo', 'Tahoma', sans-serif;
-}
-
-.header {
-  background: #0a0f2a;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  position: relative;
-}
-
-.back-btn {
-  position: absolute;
-  left: 20px;
-  top: 15px;
-  background: #2d3748;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.container {
-  padding: 20px;
-  max-width: 1400px;
-  margin: auto;
-}
-
-/* بطاقات الإحصائيات */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-.stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.stat-number {
-  font-size: 32px;
-  font-weight: bold;
-  color: #0a0f2a;
-}
-
-.stat-label {
-  color: #666;
-  margin-top: 5px;
-}
-
-/* شريط البحث */
-.search-bar {
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.search-bar input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.search-bar select {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: white;
-}
-
-.search-bar button {
-  background: #0a0f2a;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* الجدول */
-.table-wrapper {
-  background: white;
-  border-radius: 12px;
-  overflow-x: auto;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 800px;
-}
-
-th, td {
-  padding: 12px 15px;
-  text-align: center;
-  border-bottom: 1px solid #eee;
-}
-
-th {
-  background: #0a0f2a;
-  color: white;
-  font-weight: bold;
-}
-
-tr:hover {
-  background: #f8f9fa;
-}
-
-/* الأزرار */
-.btn {
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin: 3px;
-  font-size: 12px;
-  color: white;
-  transition: 0.2s;
-}
-
-.btn-sm {
-  padding: 4px 8px;
-  font-size: 11px;
-}
-
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #eef1f6; font-family: 'Cairo', 'Tahoma', sans-serif; }
+.header { background: #0a0f2a; color: white; padding: 15px; text-align: center; position: relative; }
+.back-btn { position: absolute; left: 20px; top: 15px; background: #2d3748; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; }
+.container { padding: 20px; max-width: 1400px; margin: auto; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.stat-number { font-size: 32px; font-weight: bold; color: #0a0f2a; }
+.stat-label { color: #666; margin-top: 5px; }
+.search-bar { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.search-bar input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+.search-bar select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+.search-bar button { background: #0a0f2a; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+.table-wrapper { background: white; border-radius: 12px; overflow-x: auto; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+table { width: 100%; border-collapse: collapse; min-width: 800px; }
+th, td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #eee; }
+th { background: #0a0f2a; color: white; }
+tr:hover { background: #f8f9fa; }
+.btn { border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin: 3px; font-size: 12px; color: white; }
+.btn-sm { padding: 4px 8px; font-size: 11px; }
 .btn-danger { background: #ef4444; }
 .btn-warning { background: #f59e0b; }
 .btn-success { background: #10b981; }
 .btn-info { background: #3b82f6; }
 .btn-dark { background: #6b7280; }
 .btn-primary { background: #0a0f2a; }
-
-.btn:hover { opacity: 0.8; transform: scale(0.98); }
-
-/* نافذة منبثقة */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 400px;
-}
-
-.modal-content input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-}
-
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: white; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; }
+.modal-content input, .modal-content select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
 .status-active { color: #10b981; font-weight: bold; }
 .status-banned { color: #ef4444; font-weight: bold; }
 .status-frozen { color: #f59e0b; font-weight: bold; }
-
-footer {
-  margin-top: 20px;
-  text-align: center;
-  padding: 15px;
-  color: #666;
-}
+footer { margin-top: 20px; text-align: center; padding: 15px; color: #666; }
 </style>
-
 </head>
 <body>
 
 <div class="header">
   <button class="back-btn" onclick="window.location='admin-dashboard.html'">← رجوع للوحة</button>
-  🛡️ إدارة المستخدمين المتقدمة
+  🛡️ إدارة المستخدمين
 </div>
 
 <div class="container">
-
-<!-- الإحصائيات -->
 <div class="stats">
   <div class="stat-card"><div class="stat-number" id="totalUsers">0</div><div class="stat-label">إجمالي المستخدمين</div></div>
   <div class="stat-card"><div class="stat-number" id="activeUsers">0</div><div class="stat-label">✅ نشطون</div></div>
@@ -222,58 +55,29 @@ footer {
   <div class="stat-card"><div class="stat-number" id="totalBalance">0</div><div class="stat-label">💰 إجمالي الرصيد</div></div>
 </div>
 
-<!-- شريط البحث والفلترة -->
 <div class="search-bar">
-  <input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو البريد الإلكتروني..." onkeyup="filterUsers()">
+  <input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو البريد..." onkeyup="filterUsers()">
   <select id="statusFilter" onchange="filterUsers()">
     <option value="all">جميع الحالات</option>
     <option value="active">نشط</option>
     <option value="banned">محظور</option>
     <option value="frozen">مجمد</option>
   </select>
-  <button onclick="showAddUserModal()">➕ إضافة مستخدم جديد</button>
+  <button onclick="showAddUserModal()">➕ إضافة مستخدم</button>
 </div>
 
-<!-- جدول المستخدمين -->
 <div class="table-wrapper">
   <table>
-    <thead>
-      <tr><th>#</th><th>اسم المستخدم</th><th>البريد الإلكتروني</th><th>الرصيد</th><th>الحالة</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr>
-    </thead>
+    <thead><tr><th>#</th><th>الاسم</th><th>البريد</th><th>الرصيد</th><th>الحالة</th><th>تاريخ التسجيل</th><th>الإجراءات</th></tr></thead>
     <tbody id="usersTable"></tbody>
   </table>
 </div>
-
-<footer>🛡️ لوحة تحكم متقدمة - جميع الإجراءات مسجلة في سجل العمليات</footer>
-
+<footer>🛡️ البيانات قادمة من السيرفر - جميع التعديلات ترسل عبر API</footer>
 </div>
 
-<!-- نافذة خصم/إضافة رصيد -->
-<div id="balanceModal" class="modal">
-  <div class="modal-content">
-    <h3 id="balanceModalTitle">💰 تعديل الرصيد</h3>
-    <p id="balanceUserName"></p>
-    <input type="number" id="balanceAmount" placeholder="المبلغ">
-    <select id="balanceAction">
-      <option value="add">➕ إضافة رصيد</option>
-      <option value="deduct">➖ خصم رصيد</option>
-    </select>
-    <button class="btn btn-primary" onclick="processBalance()">تأكيد</button>
-    <button class="btn btn-danger" onclick="closeModal('balanceModal')">إلغاء</button>
-  </div>
-</div>
-
-<!-- نافذة إضافة مستخدم -->
-<div id="addUserModal" class="modal">
-  <div class="modal-content">
-    <h3>➕ إضافة مستخدم جديد</h3>
-    <input type="text" id="newUserName" placeholder="الاسم الكامل">
-    <input type="email" id="newUserEmail" placeholder="البريد الإلكتروني">
-    <input type="password" id="newUserPassword" placeholder="كلمة المرور">
-    <button class="btn btn-primary" onclick="addUser()">إضافة</button>
-    <button class="btn btn-danger" onclick="closeModal('addUserModal')">إلغاء</button>
-  </div>
-</div>
+<!-- نماذج التعديل -->
+<div id="balanceModal" class="modal"><div class="modal-content"><h3>💰 تعديل الرصيد</h3><p id="balanceUserName"></p><input type="number" id="balanceAmount" placeholder="المبلغ"><select id="balanceAction"><option value="add">➕ إضافة</option><option value="deduct">➖ خصم</option></select><button class="btn btn-primary" onclick="processBalance()">تأكيد</button><button class="btn btn-danger" onclick="closeModal('balanceModal')">إلغاء</button></div></div>
+<div id="addUserModal" class="modal"><div class="modal-content"><h3>➕ إضافة مستخدم</h3><input type="text" id="newUserName" placeholder="الاسم"><input type="email" id="newUserEmail" placeholder="البريد"><input type="password" id="newUserPassword" placeholder="كلمة المرور"><button class="btn btn-primary" onclick="addUser()">إضافة</button><button class="btn btn-danger" onclick="closeModal('addUserModal')">إلغاء</button></div></div>
 
 <script>
 // 🔒 التحقق من جلسة الأدمن
@@ -281,248 +85,182 @@ if(localStorage.getItem("admin") !== "ok"){
   window.location = "admin-login.html";
 }
 
-// 📦 بيانات المستخدمين (مع رصيد وحالة)
-let users = [
-  { id: 1, name: "أحمد محمد", email: "ahmed@example.com", balance: 1500, status: "active", date: "2024-01-15" },
-  { id: 2, name: "سارة علي", email: "sara@example.com", balance: 3200, status: "active", date: "2024-01-20" },
-  { id: 3, name: "محمد خالد", email: "mohamed@example.com", balance: 500, status: "banned", date: "2024-02-01" },
-  { id: 4, name: "نورا أحمد", email: "nora@example.com", balance: 2800, status: "frozen", date: "2024-02-10" },
-  { id: 5, name: "يوسف إبراهيم", email: "yousef@example.com", balance: 750, status: "active", date: "2024-02-15" }
-];
+// ====================== البيانات تأتي من السيرفر ======================
+let users = [];   // فارغة - ستجلب من الـ API
 
-let currentUserId = null;
-let currentFilter = "all";
-let currentSearch = "";
-
-// تحميل البيانات المخزنة
-function loadData() {
-  const stored = localStorage.getItem("usersData");
-  if(stored) {
-    users = JSON.parse(stored);
+// ====================== دوال جلب البيانات من السيرفر ======================
+async function loadUsersFromServer() {
+  try {
+    // 🔁 غير هذا الرابط ليناسب API الخاص بك
+    const response = await fetch('/api/get_users.php');  // أو '/api/users'
+    if(!response.ok) throw new Error('فشل في جلب البيانات');
+    users = await response.json();
+    renderUsers();
+  } catch(error) {
+    console.error('خطأ:', error);
+    document.getElementById("usersTable").innerHTML = '<tr><td colspan="7">❌ فشل تحميل البيانات. تأكد من إعدادات API.</td></tr>';
   }
 }
 
-function saveData() {
-  localStorage.setItem("usersData", JSON.stringify(users));
+// ====================== دوال إرسال التعديلات للسيرفر ======================
+async function updateUserOnServer(userId, action, data = {}) {
+  // action: 'ban', 'unban', 'freeze', 'unfreeze', 'delete', 'balance', 'add'
+  const payload = { id: userId, action, ...data };
+  const response = await fetch('/api/update_user.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if(!response.ok) throw new Error('فشل التحديث');
+  return await response.json();
 }
 
-// عرض الجدول
+// ====================== دوال العرض والفلترة ======================
+let currentFilter = "all", currentSearch = "";
+
 function renderUsers() {
   const tbody = document.getElementById("usersTable");
   tbody.innerHTML = "";
-  
-  let filtered = users.filter(user => {
-    const matchesStatus = currentFilter === "all" || user.status === currentFilter;
-    const matchesSearch = user.name.includes(currentSearch) || user.email.includes(currentSearch);
-    return matchesStatus && matchesSearch;
+  let filtered = users.filter(u => (currentFilter === "all" || u.status === currentFilter) && 
+                                   (u.name.includes(currentSearch) || u.email.includes(currentSearch)));
+  let active=0, banned=0, frozen=0, totalBal=0;
+  filtered.forEach((u,idx) => {
+    if(u.status === 'active') active++;
+    else if(u.status === 'banned') banned++;
+    else if(u.status === 'frozen') frozen++;
+    totalBal += u.balance;
+    let statusClass = u.status === 'active' ? 'status-active' : (u.status === 'banned' ? 'status-banned' : 'status-frozen');
+    let statusText = u.status === 'active' ? '✅ نشط' : (u.status === 'banned' ? '⛔ محظور' : '❄️ مجمد');
+    tbody.innerHTML += `<tr>
+      <td>${idx+1}</td><td>${u.name}</td><td>${u.email}</td><td>💰 ${u.balance}</td>
+      <td class="${statusClass}">${statusText}</td><td>${u.date || '-'}</td>
+      <td>
+        <button class="btn btn-success btn-sm" onclick="showBalanceModal(${u.id})">💰 رصيد</button>
+        <button class="btn btn-info btn-sm" onclick="showPackageModal(${u.id})">📦 باقة</button>
+        ${u.status !== 'banned' ? `<button class="btn btn-warning btn-sm" onclick="banUser(${u.id})">⛔ حظر</button>` : `<button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">✅ إلغاء الحظر</button>`}
+        ${u.status !== 'frozen' ? `<button class="btn btn-dark btn-sm" onclick="freezeUser(${u.id})">❄️ تجميد</button>` : `<button class="btn btn-success btn-sm" onclick="unfreezeUser(${u.id})">🔥 إلغاء التجميد</button>`}
+        <button class="btn btn-danger btn-sm" onclick="deleteUser(${u.id})">🗑️ حذف</button>
+      </td>
+    </tr>`;
   });
-  
-  let active = 0, banned = 0, frozen = 0, totalBalance = 0;
-  
-  filtered.forEach((user, index) => {
-    if(user.status === "active") active++;
-    if(user.status === "banned") banned++;
-    if(user.status === "frozen") frozen++;
-    totalBalance += user.balance;
-    
-    let statusClass = "";
-    let statusText = "";
-    if(user.status === "active") { statusClass = "status-active"; statusText = "✅ نشط"; }
-    if(user.status === "banned") { statusClass = "status-banned"; statusText = "⛔ محظور"; }
-    if(user.status === "frozen") { statusClass = "status-frozen"; statusText = "❄️ مجمد"; }
-    
-    const row = `
-      <tr>
-        <td>${index+1}</td>
-        <td>${user.name}</td>
-        <td>${user.email}</td>
-        <td>💰 ${user.balance.toFixed(2)}</td>
-        <td class="${statusClass}">${statusText}</td>
-        <td>${user.date}</td>
-        <td>
-          <button class="btn btn-success btn-sm" onclick="showBalanceModal(${user.id})">💰 رصيد</button>
-          <button class="btn btn-info btn-sm" onclick="showPackageModal(${user.id})">📦 باقة</button>
-          ${user.status !== "banned" ? `<button class="btn btn-warning btn-sm" onclick="banUser(${user.id})">⛔ حظر</button>` : `<button class="btn btn-success btn-sm" onclick="unbanUser(${user.id})">✅ إلغاء الحظر</button>`}
-          ${user.status !== "frozen" ? `<button class="btn btn-dark btn-sm" onclick="freezeUser(${user.id})">❄️ تجميد</button>` : `<button class="btn btn-success btn-sm" onclick="unfreezeUser(${user.id})">🔥 إلغاء التجميد</button>`}
-          <button class="btn btn-danger btn-sm" onclick="deleteUser(${user.id})">🗑️ حذف</button>
-        </td>
-      </tr>
-    `;
-    tbody.innerHTML += row;
-  });
-  
   document.getElementById("totalUsers").innerHTML = users.length;
   document.getElementById("activeUsers").innerHTML = active;
   document.getElementById("bannedUsers").innerHTML = banned;
   document.getElementById("frozenUsers").innerHTML = frozen;
-  document.getElementById("totalBalance").innerHTML = totalBalance.toFixed(2);
-  
-  saveData();
+  document.getElementById("totalBalance").innerHTML = totalBal.toFixed(2);
 }
 
-// فلترة وبحث
 function filterUsers() {
   currentSearch = document.getElementById("searchInput").value;
   currentFilter = document.getElementById("statusFilter").value;
   renderUsers();
 }
 
-// إضافة مستخدم
+// ====================== عمليات المستخدمين (ترسل للسيرفر) ======================
+let currentUserId = null;
+
+async function banUser(id) {
+  if(confirm("⛔ حظر هذا المستخدم؟")) {
+    await updateUserOnServer(id, 'ban');
+    await loadUsersFromServer();
+  }
+}
+async function unbanUser(id) {
+  await updateUserOnServer(id, 'unban');
+  await loadUsersFromServer();
+}
+async function freezeUser(id) {
+  if(confirm("❄️ تجميد الحساب؟")) {
+    await updateUserOnServer(id, 'freeze');
+    await loadUsersFromServer();
+  }
+}
+async function unfreezeUser(id) {
+  await updateUserOnServer(id, 'unfreeze');
+  await loadUsersFromServer();
+}
+async function deleteUser(id) {
+  if(confirm("⚠️ حذف نهائي؟ لا يمكن التراجع!")) {
+    await updateUserOnServer(id, 'delete');
+    await loadUsersFromServer();
+  }
+}
+function showBalanceModal(id) {
+  currentUserId = id;
+  let u = users.find(u=>u.id===id);
+  document.getElementById("balanceUserName").innerHTML = `الرصيد الحالي: ${u.balance}`;
+  document.getElementById("balanceModal").style.display="flex";
+}
+async function processBalance() {
+  let amount = parseFloat(document.getElementById("balanceAmount").value);
+  let action = document.getElementById("balanceAction").value;
+  if(isNaN(amount) || amount<=0) { alert("أدخل مبلغ صحيح"); return; }
+  await updateUserOnServer(currentUserId, 'balance', { operation: action, amount: amount });
+  await loadUsersFromServer();
+  closeModal('balanceModal');
+}
+
+// ====================== الباقات المحدثة (5 باقات بالأسعار المطلوبة) ======================
+function showPackageModal(id) {
+  const user = users.find(u => u.id === id);
+  if(!user) return;
+  
+  // قائمة الباقات الخمسة بالأسعار الجديدة: 50, 100, 250, 500, 1000
+  const packages = {
+    "🥉 الباقة البرونزية": 50,
+    "🥈 الباقة الفضية": 100,
+    "🥇 الباقة الذهبية": 250,
+    "💎 الباقة البلاتينية": 500,
+    "👑 الباقة الماسية": 1000
+  };
+  
+  let message = `📦 اختر الباقة لـ ${user.name}:\n\n`;
+  for(let [name, price] of Object.entries(packages)) {
+    message += `${name} - ${price} جنيه\n`;
+  }
+  message += `\nاكتب اسم الباقة بالضبط:`;
+  
+  let choice = prompt(message);
+  if(choice && packages[choice]) {
+    let amount = packages[choice];
+    // إضافة الرصيد عبر السيرفر
+    updateUserOnServer(id, 'balance', { operation: 'add', amount: amount })
+      .then(() => loadUsersFromServer())
+      .then(() => alert(`✅ تمت إضافة ${choice} بقيمة ${amount} جنيه إلى رصيد ${user.name}`))
+      .catch(err => alert("حدث خطأ أثناء إضافة الباقة"));
+  } else if(choice) {
+    alert(`❌ الباقة "${choice}" غير موجودة. اختر من القائمة.`);
+  }
+}
+
+// ====================== إضافة مستخدم جديد ======================
+async function addUser() {
+  let name = document.getElementById("newUserName").value;
+  let email = document.getElementById("newUserEmail").value;
+  let password = document.getElementById("newUserPassword").value;
+  if(!name || !email || !password) { alert("املأ جميع الحقول"); return; }
+  await updateUserOnServer(0, 'add', { name, email, password });
+  await loadUsersFromServer();
+  closeModal('addUserModal');
+  document.getElementById("newUserName").value = "";
+  document.getElementById("newUserEmail").value = "";
+  document.getElementById("newUserPassword").value = "";
+}
+
 function showAddUserModal() {
   document.getElementById("addUserModal").style.display = "flex";
 }
 
-function addUser() {
-  const name = document.getElementById("newUserName").value;
-  const email = document.getElementById("newUserEmail").value;
-  const password = document.getElementById("newUserPassword").value;
-  
-  if(!name || !email || !password) {
-    alert("❌ الرجاء ملء جميع الحقول");
-    return;
-  }
-  
-  const newId = Math.max(...users.map(u => u.id), 0) + 1;
-  users.push({
-    id: newId,
-    name: name,
-    email: email,
-    balance: 0,
-    status: "active",
-    date: new Date().toISOString().split('T')[0]
-  });
-  
-  closeModal("addUserModal");
-  document.getElementById("newUserName").value = "";
-  document.getElementById("newUserEmail").value = "";
-  document.getElementById("newUserPassword").value = "";
-  renderUsers();
-  alert(`✅ تمت إضافة المستخدم ${name} بنجاح`);
+function closeModal(id) {
+  document.getElementById(id).style.display = "none";
 }
 
-// حذف مستخدم
-function deleteUser(id) {
-  if(confirm("⚠️ هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع!")) {
-    users = users.filter(u => u.id !== id);
-    renderUsers();
-    alert("🗑️ تم حذف المستخدم بنجاح");
-  }
-}
-
-// حظر
-function banUser(id) {
-  const user = users.find(u => u.id === id);
-  if(user && confirm(`⛔ هل تريد حظر ${user.name}؟`)) {
-    user.status = "banned";
-    renderUsers();
-    alert(`⛔ تم حظر ${user.name}`);
-  }
-}
-
-function unbanUser(id) {
-  const user = users.find(u => u.id === id);
-  if(user) {
-    user.status = "active";
-    renderUsers();
-    alert(`✅ تم إلغاء حظر ${user.name}`);
-  }
-}
-
-// تجميد
-function freezeUser(id) {
-  const user = users.find(u => u.id === id);
-  if(user && confirm(`❄️ هل تريد تجميد حساب ${user.name}؟`)) {
-    user.status = "frozen";
-    renderUsers();
-    alert(`❄️ تم تجميد حساب ${user.name}`);
-  }
-}
-
-function unfreezeUser(id) {
-  const user = users.find(u => u.id === id);
-  if(user) {
-    user.status = "active";
-    renderUsers();
-    alert(`🔥 تم إلغاء تجميد ${user.name}`);
-  }
-}
-
-// تعديل الرصيد
-function showBalanceModal(id) {
-  currentUserId = id;
-  const user = users.find(u => u.id === id);
-  document.getElementById("balanceModalTitle").innerHTML = `💰 تعديل رصيد ${user.name}`;
-  document.getElementById("balanceUserName").innerHTML = `الرصيد الحالي: ${user.balance.toFixed(2)}`;
-  document.getElementById("balanceAmount").value = "";
-  document.getElementById("balanceModal").style.display = "flex";
-}
-
-function processBalance() {
-  const amount = parseFloat(document.getElementById("balanceAmount").value);
-  const action = document.getElementById("balanceAction").value;
-  const user = users.find(u => u.id === currentUserId);
-  
-  if(isNaN(amount) || amount <= 0) {
-    alert("❌ أدخل مبلغ صحيح أكبر من صفر");
-    return;
-  }
-  
-  if(action === "add") {
-    user.balance += amount;
-    alert(`➕ تمت إضافة ${amount} إلى رصيد ${user.name}. الرصيد الجديد: ${user.balance}`);
-  } else {
-    if(user.balance < amount) {
-      alert(`❌ رصيد ${user.name} غير كافٍ! الرصيد الحالي: ${user.balance}`);
-      return;
-    }
-    user.balance -= amount;
-    alert(`➖ تم خصم ${amount} من رصيد ${user.name}. الرصيد الجديد: ${user.balance}`);
-  }
-  
-  closeModal("balanceModal");
-  renderUsers();
-}
-
-// إضافة باقة (حزمة)
-function showPackageModal(id) {
-  const user = users.find(u => u.id === id);
-  const packages = {
-    "باقة صغيرة": 100,
-    "باقة متوسطة": 300,
-    "باقة كبيرة": 500,
-    "باقة بريميوم": 1000
-  };
-  
-  let options = "";
-  for(let [name, price] of Object.entries(packages)) {
-    options += `${name} (${price} جنيه)\n`;
-  }
-  
-  let choice = prompt(`📦 اختر الباقة لـ ${user.name}:\n\n${options}\nاكتب اسم الباقة بالضبط:`);
-  if(choice && packages[choice]) {
-    user.balance += packages[choice];
-    alert(`✅ تمت إضافة ${choice} بقيمة ${packages[choice]} إلى رصيد ${user.name}`);
-    renderUsers();
-  } else if(choice) {
-    alert("❌ اسم الباقة غير صحيح! اختر من القائمة.");
-  }
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).style.display = "none";
-}
-
-// إغلاق النوافذ بالضغط خارجها
 window.onclick = function(e) {
-  if(e.target.classList.contains('modal')) {
-    e.target.style.display = "none";
-  }
+  if(e.target.classList.contains('modal')) e.target.style.display = "none";
 }
 
-// تهيئة
-loadData();
-renderUsers();
+// تحميل البيانات عند بدء الصفحة
+loadUsersFromServer();
 </script>
-
 </body>
-                                                                     </html>
+      </html>
