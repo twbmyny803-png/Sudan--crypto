@@ -343,10 +343,13 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          name: "user",
+          name: localStorage.getItem("userName") || "user",
           amount,
           txid,
-          image: uploadData.imageUrl
+          image: uploadData.imageUrl,
+          orderId,
+          packageName,
+          network
         })
       });
 
