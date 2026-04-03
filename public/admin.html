@@ -25,7 +25,7 @@ body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
 table { width:100%; border-collapse:collapse; margin-top:20px }
 td, th { padding:10px; border:1px solid #444 }
 button.action { padding:5px 10px; margin:2px; cursor:pointer }
-img { border-radius:5px }
+img { border-radius:5px; margin:2px }
 </style>
 </head>
 
@@ -67,8 +67,12 @@ async function loadUsers() {
   table.innerHTML = "";
 
   data.users.forEach(u => {
+
     const images = u.verificationImages && u.verificationImages.length > 0
-      ? u.verificationImages.map(img => `<img src="${API + img}" width="50">`).join("")
+      ? u.verificationImages.map(img => {
+          const fixed = API + "/" + img.replace(/^\/+/, "");
+          return `<img src="${fixed}" width="50">`;
+        }).join("")
       : "❌";
 
     const row = `
