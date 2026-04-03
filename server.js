@@ -391,6 +391,8 @@ app.post("/admin-add-package", async (req, res) => {
 
 // 💰 طلب إيداع
 app.post("/deposit-request", (req, res) => {
+  console.log("🔥 Deposit saved:", req.body);
+
   deposits.push({
     id: Date.now(),
     ...req.body,
@@ -413,16 +415,10 @@ app.post("/upload-proof", upload.single("file"), (req, res) => {
 
     const imagePath = "/uploads/" + req.file.filename;
 
-    deposits.push({
-      id: Date.now(),
-      email,
-      txid,
-      amount: 100, // مؤقت كما هو مطلوب
-      image: imagePath,
-      status: "pending"
+        res.json({
+      success: true,
+      imageUrl: imagePath
     });
-
-    res.json({ success: true });
 
   } catch (err) {
     console.log(err);
