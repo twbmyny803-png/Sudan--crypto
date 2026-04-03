@@ -2,43 +2,91 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>لوحة الأدمن</title>
+<title>إدارة المستخدمين</title>
+
 <style>
-body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
-
-.nav {
-  margin-bottom:20px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+body {
+  background:#eef1f6;
+  font-family:Cairo;
+  padding:0;
+  margin:0;
 }
 
-.nav button {
-  padding:10px 15px;
-  background:#F0B90B;
+.header {
+  background:#0a0f2a;
+  color:white;
+  padding:15px;
+  text-align:center;
+  font-size:18px;
+}
+
+.container {
+  padding:20px;
+}
+
+button {
+  padding:8px 12px;
   border:none;
-  border-radius:10px;
+  border-radius:6px;
   cursor:pointer;
-  font-weight:bold;
 }
 
-table { width:100%; border-collapse:collapse; margin-top:20px }
-td, th { padding:10px; border:1px solid #444 }
-button.action { padding:5px 10px; margin:2px; cursor:pointer }
-img { border-radius:5px; margin:2px }
+.refresh {
+  background:#3b82f6;
+  color:white;
+  float:left;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  margin-top:20px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th {
+  background:#f3f4f6;
+  padding:10px;
+}
+
+td {
+  padding:10px;
+  text-align:center;
+}
+
+tr {
+  border-bottom:1px solid #ddd;
+}
+
+.status-ok { color:green }
+.status-no { color:red }
+
+.actions button {
+  margin:2px;
+}
+
+.verify { background:#10b981; color:white }
+.block { background:#ef4444; color:white }
+.delete { background:black; color:white }
+
+.loading {
+  text-align:center;
+  padding:20px;
+  color:#666;
+}
 </style>
+
 </head>
 
 <body>
 
-<h2>لوحة تحكم الأدمن 🔥</h2>
+<div class="header">إدارة المستخدمين</div>
 
-<div class="nav">
-  <a href="admin.html"><button>👤 المستخدمين</button></a>
-  <a href="admin-withdraws.html"><button>💸 السحب</button></a>
-  <a href="admin-deposits.html"><button>💰 الإيداع</button></a>
-  <a href="admin-packages.html"><button>📦 الباقات</button></a>
-</div>
+<div class="container">
+
+<button class="refresh" onclick="loadUsers()">تحديث القائمة</button>
 
 <table>
 <thead>
@@ -47,76 +95,74 @@ img { border-radius:5px; margin:2px }
 <th>البريد</th>
 <th>الهاتف</th>
 <th>الرصيد</th>
-<th>الصور</th>
-<th>الحالة</th>
-<th>تحكم</th>
+<th>الباقة</th>
+<th>محظور</th>
+<th>مجمد</th>
+<th>التحكم</th>
 </tr>
 </thead>
 
-<tbody id="usersTable"></tbody>
+<tbody id="usersTable">
+<tr><td colspan="8" class="loading">جاري التحميل...</td></tr>
+</tbody>
 </table>
+
+</div>
 
 <script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
 
-async function loadUsers() {
-  const res = await fetch(API + "/admin-users");
-  const data = await res.json();
-
-  const table = document.getElementById("usersTable");
-  table.innerHTML = "";
-
-  data.users.forEach(u => {
-
-    const images = u.verificationImages && u.verificationImages.length > 0
-      ? u.verificationImages.map(img => {
-          const fixed = API + "/" + img.replace(/^\/+/, "");
-          return `<img src="${fixed}" width="50">`;
-        }).join("")
-      : "❌";
-
-    const row = `
-    <tr>
-      <td>${u.name}</td>
-      <td>${u.email}</td>
-      <td>${u.phone}</td>
-      <td>${u.balance}</td>
-
-      <td>${images}</td>
-
-      <td>
-        ${
-          u.isVerified
-          ? "✅ موثق"
-          : u.verificationStatus === "pending"
-          ? "⏳ قيد المراجعة"
-          : "❌ غير موثق"
-        }
-      </td>
-
-      <td>
-        <button class="action" onclick="verify('${u.email}')">قبول</button>
-        <button class="action" onclick="reject('${u.email}')">رفض</button>
-        <button class="action" onclick="block('${u.email}')">حظر</button>
-        <button class="action" onclick="del('${u.email}')">حذف</button>
-      </td>
-    </tr>
-    `;
-    table.innerHTML += row;
-  });
+// 🔒 حماية الأدمن
+if(localStorage.getItem("admin") !== "ok"){
+  window.location = "admin-login.html";
 }
 
+async function loadUsers() {
+  const table = document.getElementById("usersTable");
+  table.innerHTML = `<tr><td colspan="8" class="loading">جاري التحميل...</td></tr>`;
+
+  try {
+    const res = await fetch(API + "/admin-users");
+    const data = await res.json();
+
+    table.innerHTML = "";
+
+    data.users.forEach(u => {
+      const row = `
+      <tr>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td>${u.phone}</td>
+        <td>${u.balance}</td>
+        <td>${u.packageName || "-"}</td>
+
+        <td class="${u.isBlocked ? "status-no" : "status-ok"}">
+          ${u.isBlocked ? "نعم" : "لا"}
+        </td>
+
+        <td class="${u.isFrozen ? "status-no" : "status-ok"}">
+          ${u.isFrozen ? "نعم" : "لا"}
+        </td>
+
+        <td class="actions">
+          <button class="verify" onclick="verify('${u.email}')">توثيق</button>
+          <button class="block" onclick="block('${u.email}')">حظر</button>
+          <button class="delete" onclick="del('${u.email}')">حذف</button>
+        </td>
+      </tr>
+      `;
+
+      table.innerHTML += row;
+    });
+
+  } catch(err) {
+    table.innerHTML = `<tr><td colspan="8">فشل تحميل المستخدمين</td></tr>`;
+  }
+}
+
+// 🔥 العمليات
 async function verify(email){
   await fetch(API+"/admin-verify",{
-    method:"POST",
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({email})
-  });
-  loadUsers();
-}
-
-async function reject(email){
-  await fetch(API+"/admin-reject-verification",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({email})
