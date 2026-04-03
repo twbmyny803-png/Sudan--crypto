@@ -293,7 +293,7 @@ app.get("/admin-verifications", async (req, res) => {
     verificationStatus: "pending"
   });
 
-  res.json({ success: true, users });
+  res.json({ success: true, requests: users }); // 🔥 بدل users → requests
 });
 
 // ❌ رفض التوثيق
