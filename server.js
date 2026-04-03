@@ -74,7 +74,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ملفات الموقع
+// ملفات الموقع (تأكد أن ملفات الأدمن داخل مجلد public)
 app.use(express.static(path.join(__dirname, "public")));
 
 // ================== إرسال كود ==================
@@ -287,6 +287,27 @@ app.post("/admin-verify", async (req, res) => {
   res.json({ success: true });
 });
 
+// 📄 طلبات التوثيق المعلقة
+app.get("/admin-verifications", async (req, res) => {
+  const users = await User.find({
+    verificationStatus: "pending"
+  });
+  res.json({ success: true, users });
+});
+
+// ❌ رفض التوثيق
+app.post("/admin-reject-verification", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne(
+    { email },
+    {
+      verificationStatus: "rejected",
+      isVerified: false
+    }
+  );
+  res.json({ success: true });
+});
+
 // ❄️ تجميد
 app.post("/admin-freeze", async (req, res) => {
   const { email } = req.body;
@@ -341,12 +362,46 @@ app.post("/admin-add-package", async (req, res) => {
 
 // 💰 الإيداع
 app.post("/deposit-request", (req, res) => {
-  deposits.push(req.body);
+  deposits.push({
+    id: Date.now(),
+    ...req.body,
+    status: "pending"
+  });
   res.json({ success: true });
 });
 
 app.get("/admin-deposits", (req, res) => {
   res.json({ success: true, deposits });
+});
+
+// ✅ قبول الإيداع
+app.post("/admin-approve-deposit", async (req, res) => {
+  const { id } = req.body;
+
+  const deposit = deposits.find(d => d.id == id);
+  if (!deposit) return res.json({ success: false });
+
+  const user = await User.findOne({ email: deposit.email });
+  if (!user) return res.json({ success: false });
+
+  user.balance += Number(deposit.amount);
+  await user.save();
+
+  deposit.status = "approved";
+
+  res.json({ success: true });
+});
+
+// ❌ رفض الإيداع
+app.post("/admin-reject-deposit", (req, res) => {
+  const { id } = req.body;
+
+  const deposit = deposits.find(d => d.id == id);
+  if (!deposit) return res.json({ success: false });
+
+  deposit.status = "rejected";
+
+  res.json({ success: true });
 });
 
 // 💸 السحب
