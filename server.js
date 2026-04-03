@@ -336,6 +336,32 @@ app.post("/admin-delete", async (req, res) => {
   res.json({ success: true });
 });
 
+// ================== هنا تضيف ==================
+
+// ➕ إضافة رصيد
+app.post("/admin-add-balance", async (req, res) => {
+  const { email, amount } = req.body;
+
+  await User.updateOne(
+    { email },
+    { $inc: { balance: Number(amount) } }
+  );
+
+  res.json({ success: true });
+});
+
+// ➖ خصم رصيد
+app.post("/admin-sub-balance", async (req, res) => {
+  const { email, amount } = req.body;
+
+  await User.updateOne(
+    { email },
+    { $inc: { balance: -Number(amount) } }
+  );
+
+  res.json({ success: true });
+});
+
 // 🔒 منع السحب
 app.post("/admin-block-withdraw", async (req, res) => {
   const { email } = req.body;
