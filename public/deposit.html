@@ -324,6 +324,20 @@
     document.getElementById('submitBtn').disabled = true;
 
     try {
+      // تعديل هنا لاستخدام الرابط المباشر لرفع الصورة
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const uploadRes = await fetch("https://sudan-crypto-4mgt.onrender.com/upload-proof", {
+        method: "POST",
+        body: formData
+      });
+      const uploadData = await uploadRes.json();
+      
+      if (!uploadData.success) {
+        throw new Error(uploadData.message || "فشل رفع الصورة");
+      }
+
       const res = await fetch(`${API_BASE}/deposit-request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -332,7 +346,7 @@
           name: "user",
           amount,
           txid,
-          image: "" // مؤقت
+          image: uploadData.imageUrl
         })
       });
 
@@ -349,9 +363,9 @@
       }
 
     } catch (err) {
-      document.getElementById('status').innerHTML = '<span style="color: #ef4444;">خطأ في الاتصال</span>';
+      document.getElementById('status').innerHTML = `<span style="color: #ef4444;">خطأ: ${err.message}</span>`;
       document.getElementById('submitBtn').disabled = false;
-      showToast("خطأ في الاتصال", true);
+      showToast(err.message || "خطأ في الاتصال", true);
     }
   }
 
