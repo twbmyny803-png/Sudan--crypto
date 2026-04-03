@@ -123,6 +123,16 @@ async function loadDeposits(){
     const res = await fetch(API + "/admin-deposits");
     const data = await res.json();
 
+    if (!data.success) {
+      table.innerHTML = `<tr><td colspan="7">❌ خطأ في السيرفر</td></tr>`;
+      return;
+    }
+
+    if (!data.deposits || data.deposits.length === 0) {
+      table.innerHTML = `<tr><td colspan="7">🚫 لا توجد طلبات</td></tr>`;
+      return;
+    }
+
     table.innerHTML = "";
 
     data.deposits.forEach(d => {
