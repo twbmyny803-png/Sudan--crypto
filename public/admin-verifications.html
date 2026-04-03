@@ -128,18 +128,18 @@ async function loadVerifications(){
 
     data.requests.forEach(v => {
 
-      const images = v.images && v.images.length > 0
-        ? v.images.map(img => `<img src="${API}/${img}">`).join("")
+      const images = v.verificationImages && v.verificationImages.length > 0
+        ? v.verificationImages.map(img => `<img src="${API}${img}" width="50">`).join("")
         : "❌";
 
       const row = `
       <tr>
-        <td>${v.name}</td>
+        <td>${v.verificationFullName || v.name}</td>
         <td>${v.email}</td>
-        <td>${v.type || "-"}</td>
-        <td>${v.number || "-"}</td>
+        <td>${v.verificationDocType || "-"}</td>
+        <td>${v.verificationDocNumber || "-"}</td>
         <td>${images}</td>
-        <td>${v.status || "pending"}</td>
+        <td>${v.verificationStatus || v.status || "pending"}</td>
         <td class="actions">
           <button class="approve" onclick="approve('${v.email}')">قبول</button>
           <button class="reject" onclick="reject('${v.email}')">رفض</button>
