@@ -3,71 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <title>طلبات الإيداع</title>
+
 <style>
-body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
-table { width:100%; border-collapse:collapse; margin-top:20px }
-td, th { padding:10px; border:1px solid #444 }
-button { padding:5px 10px; margin:2px; cursor:pointer }
+body {
+  background:#eef1f6;
+  font-family:Cairo;
+  margin:0;
+}
+
+.header {
+  background:#0a0f2a;
+  color:white;
+  padding:15px;
+  text-align:center;
+}
+
+.container {
+  padding:20px;
+}
+
+button {
+  padding:8px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.refresh {
+  background:#3b82f6;
+  color:white;
+  float:left;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  margin-top:20px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th {
+  background:#f3f4f6;
+  padding:10px;
+}
+
+td {
+  padding:10px;
+  text-align:center;
+}
+
+tr {
+  border-bottom:1px solid #ddd;
+}
+
+img {
+  width:50px;
+  border-radius:5px;
+}
+
+.actions button {
+  margin:2px;
+}
+
+.approve { background:#10b981; color:white }
+.reject { background:#ef4444; color:white }
+
+.loading {
+  text-align:center;
+  padding:20px;
+  color:#666;
+}
 </style>
+
 </head>
 
 <body>
 
-<h2>طلبات الإيداع 💰</h2>
+<div class="header">طلبات الإيداع 💰</div>
+
+<div class="container">
+
+<button class="refresh" onclick="loadDeposits()">تحديث</button>
 
 <table>
 <thead>
 <tr>
+<th>المستخدم</th>
 <th>البريد</th>
 <th>المبلغ</th>
+<th>TXID</th>
+<th>الصورة</th>
 <th>الحالة</th>
-<th>تحكم</th>
+<th>التحكم</th>
 </tr>
 </thead>
-<tbody id="depositTable"></tbody>
+
+<tbody id="depositTable">
+<tr><td colspan="7" class="loading">جاري التحميل...</td></tr>
+</tbody>
 </table>
+
+</div>
 
 <script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
 
-async function loadDeposits(){
-  const res = await fetch(API + "/admin-deposits");
-  const data = await res.json();
-
-  const table = document.getElementById("depositTable");
-  table.innerHTML = "";
-
-  data.deposits.forEach(d => {
-    const row = `
-    <tr>
-      <td>${d.email}</td>
-      <td>${d.amount}</td>
-      <td>${d.status || "pending"}</td>
-      <td>
-        <button onclick="approve('${d.id}')">قبول</button>
-        <button onclick="reject('${d.id}')">رفض</button>
-      </td>
-    </tr>
-    `;
-    table.innerHTML += row;
-  });
+// 🔒 حماية الأدمن
+if(localStorage.getItem("admin") !== "ok"){
+  window.location = "admin-login.html";
 }
 
+async function loadDeposits(){
+  const table = document.getElementById("depositTable");
+  table.innerHTML = `<tr><td colspan="7" class="loading">جاري التحميل...</td></tr>`;
+
+  try {
+    const res = await fetch(API + "/admin-deposits");
+    const data = await res.json();
+
+    table.innerHTML = "";
+
+    data.deposits.forEach(d => {
+
+      const img = d.image 
+        ? `<img src="${API}/${d.image}">` 
+        : "❌";
+
+      const row = `
+      <tr>
+        <td>${d.name || "-"}</td>
+        <td>${d.email}</td>
+        <td>${d.amount}</td>
+        <td>${d.txid || "-"}</td>
+        <td>${img}</td>
+        <td>${d.status || "pending"}</td>
+        <td class="actions">
+          <button class="approve" onclick="approve('${d.id}')">قبول</button>
+          <button class="reject" onclick="reject('${d.id}')">رفض</button>
+        </td>
+      </tr>
+      `;
+
+      table.innerHTML += row;
+    });
+
+  } catch(err) {
+    table.innerHTML = `<tr><td colspan="7">❌ فشل تحميل الطلبات</td></tr>`;
+  }
+}
+
+// ✅ قبول
 async function approve(id){
-  await fetch(API + "/admin-approve-deposit", {
+  await fetch(API + "/admin-approve-deposit",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ id })
+    body:JSON.stringify({id})
   });
+
   loadDeposits();
 }
 
+// ❌ رفض
 async function reject(id){
-  await fetch(API + "/admin-reject-deposit", {
+  await fetch(API + "/admin-reject-deposit",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ id })
+    body:JSON.stringify({id})
   });
+
   loadDeposits();
 }
 
