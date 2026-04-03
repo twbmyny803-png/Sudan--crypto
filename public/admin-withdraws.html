@@ -5,9 +5,20 @@
 <title>طلبات السحب</title>
 <style>
 body { background:#0a0f2a; color:white; font-family:Cairo; padding:20px }
+
 table { width:100%; border-collapse:collapse; margin-top:20px }
 td, th { padding:10px; border:1px solid #444 }
-button { padding:5px 10px; margin:2px; cursor:pointer }
+
+button {
+  padding:6px 10px;
+  margin:2px;
+  cursor:pointer;
+  border:none;
+  border-radius:6px;
+}
+
+.approve { background:#10b981; color:white }
+.reject { background:#ef4444; color:white }
 </style>
 </head>
 
@@ -20,17 +31,21 @@ button { padding:5px 10px; margin:2px; cursor:pointer }
 <tr>
 <th>البريد</th>
 <th>المبلغ</th>
+<th>عنوان المحفظة</th>
+<th>الشبكة</th>
+<th>الرصيد الكلي</th>
 <th>الحالة</th>
 <th>تحكم</th>
 </tr>
 </thead>
+
 <tbody id="withdrawTable"></tbody>
 </table>
 
 <script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
 
-async function loadWithdraws(){
+async function loadWithdraws() {
   const res = await fetch(API + "/admin-withdraws");
   const data = await res.json();
 
@@ -42,10 +57,13 @@ async function loadWithdraws(){
     <tr>
       <td>${w.email}</td>
       <td>${w.amount}</td>
-      <td>${w.status}</td>
+      <td>${w.walletAddress || "-"}</td>
+      <td>${w.network || "-"}</td>
+      <td>${w.userBalance || 0}</td>
+      <td>${w.status || "pending"}</td>
       <td>
-        <button onclick="approve('${w.id}')">قبول</button>
-        <button onclick="reject('${w.id}')">رفض</button>
+        <button class="approve" onclick="approve('${w.id}')">قبول</button>
+        <button class="reject" onclick="reject('${w.id}')">رفض</button>
       </td>
     </tr>
     `;
@@ -54,19 +72,19 @@ async function loadWithdraws(){
 }
 
 async function approve(id){
-  await fetch(API + "/admin-approve-withdraw", {
+  await fetch(API+"/admin-approve-withdraw",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ id })
+    body:JSON.stringify({id})
   });
   loadWithdraws();
 }
 
 async function reject(id){
-  await fetch(API + "/admin-reject-withdraw", {
+  await fetch(API+"/admin-reject-withdraw",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ id })
+    body:JSON.stringify({id})
   });
   loadWithdraws();
 }
