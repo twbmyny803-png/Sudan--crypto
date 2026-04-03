@@ -319,23 +319,25 @@
       showToast("يرجى رفع صورة الإثبات", true);
       return;
     }
-    if (txid.length < 20) {
-      showToast("رقم العملية غير صحيح (طويل جداً)", true);
-      return;
-    }
 
     document.getElementById('status').innerHTML = '<span style="color: #F0B90B;">جاري الإرسال...</span>';
     document.getElementById('submitBtn').disabled = true;
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("txid", txid);
-    formData.append("file", file);
-    formData.append("orderId", orderId);
-
     try {
-      const res = await fetch(`${API_BASE}/upload-proof`, { method: "POST", body: formData });
+      const res = await fetch(`${API_BASE}/deposit-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          name: "user",
+          amount,
+          txid,
+          image: "" // مؤقت
+        })
+      });
+
       const data = await res.json();
+
       if (data.success) {
         document.getElementById('status').innerHTML = '<span style="color: #10b981;">✓ تم إرسال طلب الدفع بنجاح! سيتم المراجعة قريباً.</span>';
         showToast("تم إرسال طلب الدفع بنجاح");
@@ -345,6 +347,7 @@
         document.getElementById('submitBtn').disabled = false;
         showToast(data.message || "فشل الإرسال", true);
       }
+
     } catch (err) {
       document.getElementById('status').innerHTML = '<span style="color: #ef4444;">خطأ في الاتصال</span>';
       document.getElementById('submitBtn').disabled = false;
