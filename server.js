@@ -287,17 +287,19 @@ app.post("/admin-verify", async (req, res) => {
   res.json({ success: true });
 });
 
-// 📄 طلبات التوثيق المعلقة
+// 📄 عرض التوثيق
 app.get("/admin-verifications", async (req, res) => {
   const users = await User.find({
     verificationStatus: "pending"
   });
+
   res.json({ success: true, users });
 });
 
 // ❌ رفض التوثيق
 app.post("/admin-reject-verification", async (req, res) => {
   const { email } = req.body;
+
   await User.updateOne(
     { email },
     {
@@ -305,6 +307,7 @@ app.post("/admin-reject-verification", async (req, res) => {
       isVerified: false
     }
   );
+
   res.json({ success: true });
 });
 
@@ -386,16 +389,18 @@ app.post("/admin-add-package", async (req, res) => {
   res.json({ success: true });
 });
 
-// 💰 الإيداع
+// 💰 طلب إيداع
 app.post("/deposit-request", (req, res) => {
   deposits.push({
     id: Date.now(),
     ...req.body,
     status: "pending"
   });
+
   res.json({ success: true });
 });
 
+// عرض الإيداعات
 app.get("/admin-deposits", (req, res) => {
   res.json({ success: true, deposits });
 });
