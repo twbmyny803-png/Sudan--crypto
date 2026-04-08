@@ -576,8 +576,8 @@
     formData.append('fullName', fullName);
     formData.append('docType', docType);
     formData.append('docNumber', docNumber);
-    formData.append('file', file1);
-    if (file2) formData.append('file2', file2);
+    formData.append('images', file1);
+    if (file2) formData.append('images', file2);
     
     try {
       const res = await fetch(`${API_BASE}/submit-verification`, { method: 'POST', body: formData });
