@@ -427,6 +427,12 @@
       statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
     } else if (user.verificationStatus === 'pending') {
       statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
+    } else if (user.verificationStatus === 'rejected') {
+      statusDiv.innerHTML = `
+        <span class="unverified-badge">
+          ❌ مرفوض - ${user.verificationRejectReason || ""}
+        </span>
+      `;
     } else {
       statusDiv.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
     }
