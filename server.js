@@ -57,7 +57,8 @@ const userSchema = new mongoose.Schema({
   verificationFullName: String,
   verificationDocType: String,
   verificationDocNumber: String,
-  verificationImages: [String]
+  verificationImages: [String],
+  verificationRejectReason: { type: String, default: null }
 });
 
 const User = mongoose.model("User", userSchema);
@@ -248,7 +249,8 @@ app.post("/user-data", async (req, res) => {
     isBlocked: user.isBlocked || false,
     isFrozen: user.isFrozen || false,
     withdrawBlocked: user.withdrawBlocked || false,
-    packageName: user.packageName || null
+    packageName: user.packageName || null,
+    verificationRejectReason: user.verificationRejectReason || null
   });
 });
 
@@ -298,13 +300,14 @@ app.get("/admin-verifications", async (req, res) => {
 
 // ❌ رفض التوثيق
 app.post("/admin-reject-verification", async (req, res) => {
-  const { email } = req.body;
+  const { email, reason } = req.body;
 
   await User.updateOne(
     { email },
     {
       verificationStatus: "rejected",
-      isVerified: false
+      isVerified: false,
+      verificationRejectReason: reason || "تم رفض التوثيق"
     }
   );
 
@@ -523,12 +526,22 @@ app.post("/submit-verification", upload.array("images"), async (req, res) => {
   try {
     const { email, fullName, docType, docNumber } = req.body;
 
-    if (!email) {
-      return res.json({ success: false, message: "No email" });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "المستخدم غير موجود" });
+    }
+
+    // ❌ منع التكرار
+    if (user.verificationStatus === "pending") {
+      return res.json({ success: false, message: "طلبك قيد المراجعة" });
+    }
+
+    if (user.verificationStatus === "verified") {
+      return res.json({ success: false, message: "حسابك موثق بالفعل" });
     }
 
     if (!req.files || req.files.length === 0) {
-      return res.json({ success: false, message: "No images uploaded" });
+      return res.json({ success: false, message: "ارفع الصور" });
     }
 
     const images = req.files.map(file => "/uploads/" + file.filename);
@@ -540,7 +553,8 @@ app.post("/submit-verification", upload.array("images"), async (req, res) => {
         verificationDocType: docType,
         verificationDocNumber: docNumber,
         verificationImages: images,
-        verificationStatus: "pending" // 🔥 أهم سطر
+        verificationStatus: "pending",
+        verificationRejectReason: null // 🔥 يمسح السبب القديم
       }
     );
 
