@@ -518,6 +518,40 @@ app.post("/admin-reject-withdraw", (req, res) => {
   res.json({ success: true });
 });
 
+// ================== رفع التوثيق ==================
+app.post("/submit-verification", upload.array("images"), async (req, res) => {
+  try {
+    const { email, fullName, docType, docNumber } = req.body;
+
+    if (!email) {
+      return res.json({ success: false, message: "No email" });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.json({ success: false, message: "No images uploaded" });
+    }
+
+    const images = req.files.map(file => "/uploads/" + file.filename);
+
+    await User.updateOne(
+      { email },
+      {
+        verificationFullName: fullName,
+        verificationDocType: docType,
+        verificationDocNumber: docNumber,
+        verificationImages: images,
+        verificationStatus: "pending" // 🔥 أهم سطر
+      }
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
