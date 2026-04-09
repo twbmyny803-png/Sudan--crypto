@@ -137,8 +137,9 @@ async function loadDeposits(){
 
     data.deposits.forEach(d => {
 
+      // ✅ تحسين عرض الصورة
       const img = d.image 
-        ? `<img src="${API}/${d.image}">` 
+        ? `<img src="${API}${d.image}">` 
         : "❌";
 
       const row = `
@@ -150,8 +151,8 @@ async function loadDeposits(){
         <td>${img}</td>
         <td>${d.status || "pending"}</td>
         <td class="actions">
-          <button class="approve" onclick="approve('${d.id}')">قبول</button>
-          <button class="reject" onclick="reject('${d.id}')">رفض</button>
+          <button class="approve" onclick="approve('${d._id}')">قبول</button>
+          <button class="reject" onclick="reject('${d._id}')">رفض</button>
         </td>
       </tr>
       `;
@@ -166,24 +167,40 @@ async function loadDeposits(){
 
 // ✅ قبول
 async function approve(id){
-  await fetch(API + "/admin-approve-deposit",{
+  if(!confirm("هل أنت متأكد من قبول هذا الإيداع؟")) return;
+  
+  const res = await fetch(API + "/admin-approve-deposit",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({id})
   });
-
-  loadDeposits();
+  
+  const data = await res.json();
+  if(data.success) {
+    alert("تم القبول بنجاح");
+    loadDeposits();
+  } else {
+    alert("فشل القبول");
+  }
 }
 
 // ❌ رفض
 async function reject(id){
-  await fetch(API + "/admin-reject-deposit",{
+  if(!confirm("هل أنت متأكد من رفض هذا الإيداع؟")) return;
+
+  const res = await fetch(API + "/admin-reject-deposit",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({id})
   });
 
-  loadDeposits();
+  const data = await res.json();
+  if(data.success) {
+    alert("تم الرفض");
+    loadDeposits();
+  } else {
+    alert("فشل الرفض");
+  }
 }
 
 loadDeposits();
