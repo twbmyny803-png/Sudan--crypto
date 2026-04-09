@@ -62,9 +62,10 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
-// 🧩 1. أضف Model للإيداع
+// 🧩 4. عدل Schema (أضف name)
 const depositSchema = new mongoose.Schema({
   email: String,
+  name: String, // 🔥 أضف دي
   amount: Number,
   txid: String,
   image: String,
@@ -402,11 +403,11 @@ app.post("/admin-add-package", async (req, res) => {
   res.json({ success: true });
 });
 
-// 🧩 2. استبدل /deposit-request
+// 🧩 1. عدل /deposit-request (تحديث أمني)
 app.post("/deposit-request", async (req, res) => {
-  const { email, amount, txid, image, orderId } = req.body;
+  const { email, txid, image, orderId } = req.body; // ❌ ما بنستقبل amount من الفرونت
 
-  if (!email || !amount || !txid || !image) {
+  if (!email || !txid || !image) {
     return res.json({ success: false, message: "بيانات ناقصة" });
   }
 
@@ -416,9 +417,17 @@ app.post("/deposit-request", async (req, res) => {
     return res.json({ success: false, message: "TXID مستخدم" });
   }
 
+  // 🧩 2. جيب المستخدم من DB
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.json({ success: false, message: "مستخدم غير موجود" });
+  }
+
+  // 🧩 3. خزّن الاسم والمبلغ من السيرفر
   const deposit = new Deposit({
     email,
-    amount,
+    name: user.name, // 🔥 الاسم من السيرفر
+    amount: user.packageName ? 100 : 0, // 🔥 المبلغ مربوط بالباقة أو السيرفر
     txid,
     image,
     orderId
