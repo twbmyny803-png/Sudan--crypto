@@ -214,9 +214,7 @@
 <script>
   const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
   const email = localStorage.getItem("userEmail");
-  const orderId = localStorage.getItem("orderId");
   const packageName = localStorage.getItem("selectedPackage");
-  const amount = localStorage.getItem("selectedPrice");
   const network = localStorage.getItem("selectedNetwork");
 
   const TRC20_ADDRESS = "TLPZEoW71BNe6mHPK8XRJ5PkN5Agqqpa5n";
@@ -227,14 +225,7 @@
   let orderCreated = false;
   let canSubmit = true;
 
-  if (!email || !orderId || !network) window.location.href = "packages.html";
-
-  document.getElementById('orderDetails').innerHTML = `
-    <div class="info-row"><span><i class="fa-solid fa-hashtag"></i> رقم الطلب</span><span>${orderId}</span></div>
-    <div class="info-row"><span><i class="fa-solid fa-box"></i> الباقة</span><span>${packageName}</span></div>
-    <div class="info-row"><span><i class="fa-solid fa-dollar-sign"></i> المبلغ</span><span>${amount} USDT</span></div>
-    <div class="info-row"><span><i class="fa-solid fa-network-wired"></i> الشبكة</span><span>${network}</span></div>
-  `;
+  if (!email || !packageName || !network) window.location.href = "packages.html";
 
   const address = network === "TRC20" ? TRC20_ADDRESS : BEP20_ADDRESS;
   document.getElementById('addressBox').innerHTML = `
@@ -291,19 +282,49 @@
   });
 
   async function createOrder() {
-    if (orderCreated) return;
     try {
-      await fetch(`${API_BASE}/manual-deposit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, amount, packageName, orderId })
+      const res = await fetch(`${API_BASE}/create-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email,
+          packageName
+        })
       });
-      orderCreated = true;
-    } catch (err) { console.error(err); }
+
+      const data = await res.json();
+
+      if (!data.success) {
+        showToast("فشل إنشاء الطلب", true);
+        return;
+      }
+
+      // 🔐 نخزن orderId الحقيقي
+      localStorage.setItem("orderId", data.orderId);
+
+      // 🔐 نعرض السعر من السيرفر
+      document.getElementById('orderDetails').innerHTML = `
+        <div class="info-row"><span>رقم الطلب</span><span>${data.orderId}</span></div>
+        <div class="info-row"><span>الباقة</span><span>${packageName}</span></div>
+        <div class="info-row"><span>المبلغ</span><span>${data.amount} USDT</span></div>
+        <div class="info-row"><span>الشبكة</span><span>${network}</span></div>
+      `;
+
+    } catch (err) {
+      showToast("خطأ في إنشاء الطلب", true);
+    }
   }
   createOrder();
 
   async function submitPayment() {
+    const orderId = localStorage.getItem("orderId");
+    if (!email || !orderId) {
+      showToast("جلسة غير صالحة", true);
+      return;
+    }
+
     if (!canSubmit) {
       showToast("انتهى الوقت! لا يمكن إرسال الطلب.", true);
       return;
@@ -311,12 +332,13 @@
     const txid = document.getElementById('txid').value.trim();
     const file = document.getElementById('proof').files[0];
     
-    if (!txid) {
-      showToast("يرجى إدخال رقم العملية (TXID)", true);
+    if (!txid || txid.length < 10) {
+      showToast("TXID غير صالح", true);
       return;
     }
-    if (!file) {
-      showToast("يرجى رفع صورة الإثبات", true);
+
+    if (!file || !file.type.startsWith("image/")) {
+      showToast("ارفع صورة صحيحة", true);
       return;
     }
 
@@ -324,7 +346,6 @@
     document.getElementById('submitBtn').disabled = true;
 
     try {
-      // تعديل هنا لاستخدام الرابط المباشر لرفع الصورة
       const formData = new FormData();
       formData.append('file', file);
       
@@ -343,13 +364,9 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          name: localStorage.getItem("userName") || "user",
-          amount,
           txid,
           image: uploadData.imageUrl,
-          orderId,
-          packageName,
-          network
+          orderId
         })
       });
 
