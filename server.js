@@ -27,7 +27,6 @@ mongoose.connect("mongodb+srv://maynwsmanswy_db_user:hOrkK68kCma6kJB5@cluster0.w
 // ================== إضافات فوق ==================
 let codes = {};
 let resetCodes = {};
-let deposits = [];
 let withdrawRequests = [];
 
 // 📦 Schema (Updated)
@@ -62,6 +61,19 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("User", userSchema);
+
+// 🧩 1. أضف Model للإيداع
+const depositSchema = new mongoose.Schema({
+  email: String,
+  amount: Number,
+  txid: String,
+  image: String,
+  orderId: String,
+  status: { type: String, default: "pending" },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Deposit = mongoose.model("Deposit", depositSchema);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -342,8 +354,6 @@ app.post("/admin-delete", async (req, res) => {
   res.json({ success: true });
 });
 
-// ================== هنا تضيف ==================
-
 // ➕ إضافة رصيد
 app.post("/admin-add-balance", async (req, res) => {
   const { email, amount } = req.body;
@@ -392,15 +402,29 @@ app.post("/admin-add-package", async (req, res) => {
   res.json({ success: true });
 });
 
-// 💰 طلب إيداع
-app.post("/deposit-request", (req, res) => {
-  console.log("🔥 Deposit saved:", req.body);
+// 🧩 2. استبدل /deposit-request
+app.post("/deposit-request", async (req, res) => {
+  const { email, amount, txid, image, orderId } = req.body;
 
-  deposits.push({
-    id: Date.now(),
-    ...req.body,
-    status: "pending"
+  if (!email || !amount || !txid || !image) {
+    return res.json({ success: false, message: "بيانات ناقصة" });
+  }
+
+  // ❌ منع تكرار TXID
+  const exists = await Deposit.findOne({ txid });
+  if (exists) {
+    return res.json({ success: false, message: "TXID مستخدم" });
+  }
+
+  const deposit = new Deposit({
+    email,
+    amount,
+    txid,
+    image,
+    orderId
   });
+
+  await deposit.save();
 
   res.json({ success: true });
 });
@@ -429,17 +453,22 @@ app.post("/upload-proof", upload.single("file"), (req, res) => {
   }
 });
 
-// عرض الإيداعات
-app.get("/admin-deposits", (req, res) => {
+// 🧩 3. استبدل /admin-deposits
+app.get("/admin-deposits", async (req, res) => {
+  const deposits = await Deposit.find().sort({ createdAt: -1 });
   res.json({ success: true, deposits });
 });
 
-// ✅ قبول الإيداع
+// 🧩 4. استبدل قبول الإيداع
 app.post("/admin-approve-deposit", async (req, res) => {
   const { id } = req.body;
 
-  const deposit = deposits.find(d => d.id == id);
+  const deposit = await Deposit.findById(id);
   if (!deposit) return res.json({ success: false });
+
+  if (deposit.status !== "pending") {
+    return res.json({ success: false });
+  }
 
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
@@ -448,18 +477,20 @@ app.post("/admin-approve-deposit", async (req, res) => {
   await user.save();
 
   deposit.status = "approved";
+  await deposit.save();
 
   res.json({ success: true });
 });
 
 // ❌ رفض الإيداع
-app.post("/admin-reject-deposit", (req, res) => {
+app.post("/admin-reject-deposit", async (req, res) => {
   const { id } = req.body;
 
-  const deposit = deposits.find(d => d.id == id);
+  const deposit = await Deposit.findById(id);
   if (!deposit) return res.json({ success: false });
 
   deposit.status = "rejected";
+  await deposit.save();
 
   res.json({ success: true });
 });
