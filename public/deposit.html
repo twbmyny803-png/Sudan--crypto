@@ -359,11 +359,12 @@
         throw new Error(uploadData.message || "فشل رفع الصورة");
       }
 
-      const res = await fetch(`${API_BASE}/deposit-request`, {
+      const res = await fetch("https://sudan-crypto-4mgt.onrender.com/deposit-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+          amount: localStorage.getItem("selectedPrice") || 0,
           txid,
           image: uploadData.imageUrl,
           orderId
