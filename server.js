@@ -65,11 +65,15 @@ const User = mongoose.model("User", userSchema);
 // 🧩 4. عدل Schema (أضف name)
 const depositSchema = new mongoose.Schema({
   email: String,
-  name: String, // 🔥 أضف دي
+  name: String,
   amount: Number,
   txid: String,
   image: String,
   orderId: String,
+
+  packageName: String, // 🔥 تضيف دي
+  network: String,     // 🔥 تضيف دي
+
   status: { type: String, default: "pending" },
   createdAt: { type: Date, default: Date.now }
 });
@@ -429,7 +433,10 @@ app.post("/deposit-request", async (req, res) => {
       amount: Number(amount) || 0,
       txid,
       image: image || null,
-      orderId
+      orderId,
+
+      packageName: req.body.packageName || null, // 🔥 تضيف دي
+      network: req.body.network || null          // 🔥 تضيف دي
     });
 
     await deposit.save();
