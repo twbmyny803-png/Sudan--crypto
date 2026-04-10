@@ -417,14 +417,15 @@ app.post("/deposit-request", async (req, res) => {
       return res.json({ success: false, message: "TXID مستخدم" });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "مستخدم غير موجود" });
-    }
+    // ❌ احذف دا مؤقتاً
+    // const user = await User.findOne({ email });
+    // if (!user) {
+    //   return res.json({ success: false, message: "مستخدم غير موجود" });
+    // }
 
     const deposit = new Deposit({
       email,
-      name: user.name,
+      name: "test", // مؤقت
       amount: Number(amount) || 0,
       txid,
       image: image || null,
