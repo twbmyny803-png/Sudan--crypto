@@ -405,37 +405,40 @@ app.post("/admin-add-package", async (req, res) => {
 
 // 🧩 1. عدل /deposit-request (تحديث أمني)
 app.post("/deposit-request", async (req, res) => {
-  const { email, txid, image, orderId } = req.body; // ❌ ما بنستقبل amount من الفرونت
+  const { email, amount, txid, image, orderId } = req.body;
 
-  if (!email || !txid || !image) {
+  if (!email || !txid) {
     return res.json({ success: false, message: "بيانات ناقصة" });
   }
 
-  // ❌ منع تكرار TXID
-  const exists = await Deposit.findOne({ txid });
-  if (exists) {
-    return res.json({ success: false, message: "TXID مستخدم" });
+  try {
+    const exists = await Deposit.findOne({ txid });
+    if (exists) {
+      return res.json({ success: false, message: "TXID مستخدم" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "مستخدم غير موجود" });
+    }
+
+    const deposit = new Deposit({
+      email,
+      name: user.name,
+      amount: Number(amount) || 0,
+      txid,
+      image: image || null,
+      orderId
+    });
+
+    await deposit.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
   }
-
-  // 🧩 2. جيب المستخدم من DB
-  const user = await User.findOne({ email });
-  if (!user) {
-    return res.json({ success: false, message: "مستخدم غير موجود" });
-  }
-
-  // 🧩 3. خزّن الاسم والمبلغ من السيرفر
-  const deposit = new Deposit({
-    email,
-    name: user.name, // 🔥 الاسم من السيرفر
-    amount: user.packageName ? 100 : 0, // 🔥 المبلغ مربوط بالباقة أو السيرفر
-    txid,
-    image,
-    orderId
-  });
-
-  await deposit.save();
-
-  res.json({ success: true });
 });
 
 // 📸 رفع إثبات الإيداع (تم التحديث)
