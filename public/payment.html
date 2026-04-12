@@ -1,565 +1,81 @@
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>إتمام الدفع - سودان كربتو</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            padding: 20px;
-            min-height: 100vh;
-            position: relative;
-        }
-        .stars-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .star-bg {
-            position: absolute;
-            background: radial-gradient(white, rgba(255,255,255,0.3));
-            border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out;
-        }
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8);}
-            50% { opacity: 1; transform: scale(1.2);}
-        }
-        .container {
-            max-width: 550px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-        }
-        .back-btn {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(245,176,66,0.4);
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            color: #f5b042;
-            border-radius: 50px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        .payment-card {
-            background: rgba(15, 22, 40, 0.95);
-            backdrop-filter: blur(12px);
-            border-radius: 28px;
-            border: 1px solid rgba(245,176,66,0.5);
-            padding: 24px;
-        }
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            background: linear-gradient(90deg, #f5b042, #ffd966);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 24px;
-        }
-        .timer-box {
-            text-align: center;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(245,176,66,0.3);
-        }
-        .timer-label { color: #f5b042; font-size: 14px; margin-bottom: 8px; }
-        .timer-value { font-size: 42px; font-weight: bold; color: #ff6666; font-family: monospace; letter-spacing: 3px; }
-        .timer-value.expired { color: #ff0000; }
-        .info-box {
-            background: rgba(0,0,0,0.4);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(245,176,66,0.2);
-        }
-        .info-label { color: #f5b042; font-size: 14px; }
-        .info-value { color: white; font-weight: bold; font-size: 14px; }
-        .qr-box {
-            text-align: center;
-            margin: 16px 0;
-            padding: 16px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 20px;
-        }
-        .qr-title { color: #f5b042; margin-bottom: 12px; font-size: 14px; }
-        #qrcode {
-            display: flex;
-            justify-content: center;
-            background: white;
-            padding: 12px;
-            border-radius: 16px;
-            display: inline-block;
-            margin: 0 auto;
-        }
-        .address-box {
-            background: rgba(0,0,0,0.5);
-            border-radius: 16px;
-            padding: 12px;
-            margin: 16px 0;
-        }
-        .address-value {
-            background: #1a1f2f;
-            padding: 10px;
-            border-radius: 12px;
-            color: #ffd966;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
-            direction: ltr;
-            text-align: left;
-        }
-        .copy-btn {
-            background: #f5b042;
-            border: none;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 8px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-        }
-        .transaction-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 15px;
-            border: 1px solid rgba(245,176,66,0.4);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            margin: 12px 0;
-            direction: ltr;
-        }
-        .file-label {
-            display: block;
-            background: rgba(245,176,66,0.15);
-            border: 1px dashed #f5b042;
-            border-radius: 16px;
-            padding: 14px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .file-label.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .file-label:hover:not(.disabled) {
-            background: rgba(245,176,66,0.25);
-        }
-        .upload-success {
-            color: #4caf50;
-            margin-top: 8px;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        .status-message {
-            margin-top: 16px;
-            padding: 12px;
-            border-radius: 16px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .status-success { background: rgba(76,175,80,0.2); border: 1px solid #4caf50; color: #4caf50; }
-        .status-rejected { background: rgba(255,0,0,0.2); border: 1px solid #ff4444; color: #ff8888; }
-        .status-warning { background: rgba(255,193,7,0.2); border: 1px solid #ffc107; color: #ffc107; }
-        .status-expired { background: rgba(255,0,0,0.3); border: 1px solid #ff0000; color: #ff6666; font-size: 16px; font-weight: bold; }
-        .preview-image { text-align: center; margin-top: 10px; }
-        .preview-image img { max-width: 100%; max-height: 120px; border-radius: 12px; }
-        .confirm-btn {
-            width: 100%;
-            background: linear-gradient(90deg, #f5b042, #ffd966);
-            border: none;
-            padding: 14px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #1a1f2f;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .confirm-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .new-order-btn {
-            width: 100%;
-            background: transparent;
-            border: 2px solid #f5b042;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #f5b042;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: 0.2s;
-        }
-        .new-order-btn:hover {
-            background: rgba(245,176,66,0.1);
-        }
-        #fileInput { display: none; }
-    </style>
-</head>
-<body>
-<div class="stars-bg" id="starsContainer"></div>
-<div class="container">
-    <button class="back-btn" id="backBtn"><i class="fas fa-arrow-right"></i> رجوع للطلب</button>
-    <div class="payment-card">
-        <div class="title"><i class="fas fa-credit-card"></i> إتمام الدفع</div>
-        
-        <div class="timer-box">
-            <div class="timer-label"><i class="fas fa-hourglass-half"></i> الوقت المتبقي لإتمام الدفع</div>
-            <div class="timer-value" id="timer">--:--</div>
-        </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الدفع - Sudan Crypto</title><style>
+body {
+  background: #0a0f2a;
+  font-family: Arial;
+  color: white;
+  text-align: center;
+  padding: 40px;
+}
 
-        <div id="statusMessage" class="status-message" style="display: none;"></div>
+.box {
+  background: #111933;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 400px;
+  margin: auto;
+}
 
-        <div class="info-box">
-            <div class="info-row">
-                <div class="info-label"><i class="fas fa-network-wired"></i> الشبكة المختارة</div>
-                <div class="info-value" id="selectedNetwork">-</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label"><i class="fas fa-hashtag"></i> رقم الطلب</div>
-                <div class="info-value" id="orderNumber">-</div>
-            </div>
-        </div>
+h2 {
+  color: #f0b90b;
+}
 
-        <div class="address-box">
-            <div class="address-value" id="walletAddress">-</div>
-            <button class="copy-btn" id="copyBtn"><i class="fas fa-copy"></i> نسخ العنوان</button>
-        </div>
+button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 30px;
+  border: none;
+  background: #f0b90b;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-        <div class="qr-box">
-            <div class="qr-title"><i class="fas fa-qrcode"></i> رمز QR للدفع</div>
-            <div id="qrcode"></div>
-        </div>
+button:hover {
+  opacity: 0.8;
+}
+</style></head><body><div class="box">
+  <h2>إتمام الدفع</h2>  <p id="amount"></p>
+  <p id="network"></p><button id="payBtn">ادفع الآن</button>
 
-        <input type="text" id="transactionId" class="transaction-input" placeholder="رقم العملية (Transaction ID / TXID)">
-        
-        <label class="file-label" id="fileLabel">
-            <i class="fas fa-cloud-upload-alt"></i> اضغط لرفع إيصال الدفع
-            <input type="file" id="fileInput" accept="image/*">
-        </label>
-        <div id="uploadStatus"></div>
-        <div class="preview-image" id="preview"></div>
+</div><script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
 
-        <button class="confirm-btn" id="confirmPaymentBtn">
-            <i class="fas fa-check-circle"></i> تأكيد الدفع
-        </button>
+const amount = localStorage.getItem("selectedPrice");
+const network = localStorage.getItem("selectedNetwork");
 
-        <button class="new-order-btn" id="newOrderBtn" style="display: none;">
-            <i class="fas fa-plus-circle"></i> طلب جديد
-        </button>
-    </div>
-</div>
+document.getElementById("amount").innerText = "المبلغ: " + amount + " USDT";
+document.getElementById("network").innerText = "الشبكة: " + network;
 
-<script>
-    // نجوم متحركة
-    const starsContainer = document.getElementById('starsContainer');
-    for (let i = 0; i < 150; i++) {
-        const star = document.createElement('div');
-        star.classList.add('star-bg');
-        const size = Math.random() * 3 + 1;
-        star.style.width = size + 'px';
-        star.style.height = size + 'px';
-        star.style.left = Math.random() * 100 + '%';
-        star.style.top = Math.random() * 100 + '%';
-        star.style.animationDelay = Math.random() * 5 + 's';
-        star.style.animationDuration = Math.random() * 3 + 2 + 's';
-        starsContainer.appendChild(star);
-    }
+document.getElementById("payBtn").onclick = async () => {
 
-    // 🔥 مسح الحالة القديمة مؤقتاً للتجربة
-    localStorage.removeItem('paymentStatus');
-
-    // قراءة البيانات
-    let selectedNetwork = localStorage.getItem('selectedNetwork') || 'BEP20';
-    let orderNumber = localStorage.getItem('orderId') || ('ORD' + Date.now());
-    let walletAddress = selectedNetwork === 'TRC20' ? 'TLPZEoW71BNe6mHPK8XRJ5PkN5Agqqpa5n' : '0x990635c24b47a3ebbc14efadf0355e26ec706385';
-    
-    document.getElementById('selectedNetwork').innerHTML = `<i class="fab ${selectedNetwork === 'TRC20' ? 'fa-tron' : 'fa-ethereum'}"></i> USDT ${selectedNetwork}`;
-    document.getElementById('orderNumber').innerText = orderNumber;
-    document.getElementById('walletAddress').innerText = walletAddress;
-    
-    // QR Code
-    document.getElementById('qrcode').innerHTML = '';
-    new QRCode(document.getElementById('qrcode'), {
-        text: walletAddress,
-        width: 160,
-        height: 160,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
+  try {
+    const res = await fetch(API + "/create-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        amount: parseFloat(amount) || 10
+      })
     });
 
-    // نسخ العنوان
-    document.getElementById('copyBtn').addEventListener('click', () => {
-        navigator.clipboard.writeText(walletAddress);
-        const btn = document.getElementById('copyBtn');
-        btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
-        setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i> نسخ العنوان', 2000);
-    });
+    const data = await res.json();
 
-    const transactionInput = document.getElementById('transactionId');
-    const fileInput = document.getElementById('fileInput');
-    const fileLabel = document.getElementById('fileLabel');
-    const confirmBtn = document.getElementById('confirmPaymentBtn');
-    const statusDiv = document.getElementById('statusMessage');
-    const timerEl = document.getElementById('timer');
-    const newOrderBtn = document.getElementById('newOrderBtn');
-    const preview = document.getElementById('preview');
-    const uploadStatus = document.getElementById('uploadStatus');
-
-    let paymentStatus = localStorage.getItem('paymentStatus') || 'pending';
-    let timerInterval = null;
-
-    function lockFields() {
-        transactionInput.disabled = true;
-        fileInput.disabled = true;
-        fileLabel.classList.add('disabled');
+    if (data.invoice_url) {
+      window.location.href = data.invoice_url;
+    } else {
+      alert("خطأ في إنشاء الدفع");
     }
 
-    function unlockFields() {
-        transactionInput.disabled = false;
-        fileInput.disabled = false;
-        fileLabel.classList.remove('disabled');
-    }
+  } catch (err) {
+    alert("فشل الاتصال بالسيرفر");
+  }
 
-    function showMessage(message, type) {
-        statusDiv.style.display = 'block';
-        statusDiv.innerHTML = message;
-        if (type === 'success') statusDiv.className = 'status-message status-success';
-        else if (type === 'rejected') statusDiv.className = 'status-message status-rejected';
-        else if (type === 'warning') statusDiv.className = 'status-message status-warning';
-        else if (type === 'expired') statusDiv.className = 'status-message status-expired';
-    }
-
-    function stopTimer() {
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-    }
-
-    function startTimer(remainingSeconds) {
-        stopTimer();
-        let remaining = remainingSeconds;
-        
-        function updateDisplay() {
-            const mins = Math.floor(remaining / 60);
-            const secs = remaining % 60;
-            timerEl.innerHTML = (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
-            if (remaining <= 0) {
-                timerEl.classList.add('expired');
-            } else {
-                timerEl.classList.remove('expired');
-            }
-        }
-        
-        updateDisplay();
-        
-        if (remaining <= 0) {
-            timerEl.classList.add('expired');
-            lockFields();
-            confirmBtn.disabled = true;
-            confirmBtn.classList.add('disabled');
-            showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
-            newOrderBtn.style.display = 'flex';
-            return;
-        }
-        
-        timerInterval = setInterval(() => {
-            if (remaining <= 1) {
-                stopTimer();
-                timerEl.innerHTML = "00:00";
-                timerEl.classList.add('expired');
-                lockFields();
-                confirmBtn.disabled = true;
-                confirmBtn.classList.add('disabled');
-                showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
-                newOrderBtn.style.display = 'flex';
-                localStorage.setItem('paymentStatus', 'expired');
-            } else {
-                remaining--;
-                const mins = Math.floor(remaining / 60);
-                const secs = remaining % 60;
-                timerEl.innerHTML = (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
-            }
-        }, 1000);
-    }
-
-    // حساب الوقت المتبقي
-    let startTime = localStorage.getItem('paymentStartTime');
-    let remainingSeconds = 15 * 60;
-    
-    if (paymentStatus === 'pending_review') {
-        timerEl.innerHTML = "00:00";
-        timerEl.classList.add('expired');
-        lockFields();
-        confirmBtn.disabled = true;
-        confirmBtn.classList.add('disabled');
-        showMessage('<i class="fas fa-check-circle"></i> تم الإرسال! جاري المراجعة... سيتم مراجعة طلبك خلال دقائق.', 'success');
-    } 
-    else if (paymentStatus === 'approved') {
-        timerEl.innerHTML = "00:00";
-        timerEl.classList.add('expired');
-        lockFields();
-        confirmBtn.disabled = true;
-        confirmBtn.classList.add('disabled');
-        showMessage('<i class="fas fa-check-circle"></i> تم قبول طلبك! سيتم تفعيل الباقة فوراً.', 'success');
-    }
-    else if (paymentStatus === 'rejected') {
-        unlockFields();
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('disabled');
-        showMessage('<i class="fas fa-times-circle"></i> طلبك السابق تم رفضه. الرجاء إعادة رفع إيصال جديد مع رقم عملية صحيح.', 'rejected');
-        let newStartTime = Date.now();
-        localStorage.setItem('paymentStartTime', newStartTime);
-        localStorage.setItem('paymentStatus', 'pending');
-        paymentStatus = 'pending';
-        startTimer(15 * 60);
-    }
-    else if (paymentStatus === 'expired') {
-        timerEl.innerHTML = "00:00";
-        timerEl.classList.add('expired');
-        lockFields();
-        confirmBtn.disabled = true;
-        confirmBtn.classList.add('disabled');
-        showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
-        newOrderBtn.style.display = 'flex';
-    }
-    else {
-        if (!startTime) {
-            startTime = Date.now();
-            localStorage.setItem('paymentStartTime', startTime);
-            remainingSeconds = 15 * 60;
-        } else {
-            const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
-            remainingSeconds = Math.max(0, 15 * 60 - elapsed);
-            if (remainingSeconds <= 0) {
-                localStorage.setItem('paymentStatus', 'expired');
-                timerEl.innerHTML = "00:00";
-                timerEl.classList.add('expired');
-                lockFields();
-                confirmBtn.disabled = true;
-                confirmBtn.classList.add('disabled');
-                showMessage('<i class="fas fa-exclamation-triangle"></i> انتهى الوقت! لا يمكن إتمام الدفع. الرجاء عمل طلب جديد.', 'expired');
-                newOrderBtn.style.display = 'flex';
-            } else {
-                unlockFields();
-                confirmBtn.disabled = false;
-                confirmBtn.classList.remove('disabled');
-                startTimer(remainingSeconds);
-            }
-        }
-        // ✅ تأكيد فتح الحقول عند البداية
-        unlockFields();
-        confirmBtn.disabled = false;
-        confirmBtn.classList.remove('disabled');
-        startTimer(remainingSeconds);
-    }
-
-    // معاينة الصورة
-    fileInput.addEventListener('change', function(e) {
-        if (fileInput.disabled) return;
-        const file = e.target.files[0];
-        if (file) {
-            uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-spinner fa-pulse"></i> جاري رفع الإيصال...</div>';
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                preview.innerHTML = `<img src="${ev.target.result}" alt="الإيصال">`;
-                uploadStatus.innerHTML = '<div class="upload-success"><i class="fas fa-check-circle"></i> تم رفع الإيصال بنجاح</div>';
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // تأكيد الدفع
-    document.getElementById('confirmPaymentBtn').addEventListener('click', () => {
-        const txId = transactionInput.value.trim();
-        if (!txId) {
-            alert("⚠️ الرجاء إدخال رقم العملية (TXID)");
-            return;
-        }
-        if (!fileInput.files.length) {
-            alert("⚠️ الرجاء رفع إيصال الدفع");
-            return;
-        }
-        
-        localStorage.setItem('paymentStatus', 'pending_review');
-        localStorage.setItem('transactionId', txId);
-        localStorage.setItem('paymentTime', new Date().toISOString());
-        paymentStatus = 'pending_review';
-        
-        lockFields();
-        confirmBtn.disabled = true;
-        confirmBtn.classList.add('disabled');
-        stopTimer();
-        timerEl.innerHTML = "00:00";
-        timerEl.classList.add('expired');
-        showMessage('<i class="fas fa-check-circle"></i> تم الإرسال! جاري المراجعة... سيتم مراجعة طلبك خلال دقائق.', 'success');
-        
-        alert(`✅ تم الإرسال بنجاح!\n\n🆔 رقم الطلب: ${orderNumber}\n🔗 الشبكة: ${selectedNetwork}\n🆔 رقم العملية: ${txId}\n\n⏳ سيتم مراجعة طلبك خلال دقائق.`);
-    });
-
-    // رجوع للطلب
-    document.getElementById('backBtn').addEventListener('click', () => {
-        window.location.href = 'create-order.html';
-    });
-
-    // طلب جديد
-    document.getElementById('newOrderBtn').addEventListener('click', () => {
-        localStorage.removeItem('paymentStartTime');
-        localStorage.removeItem('paymentStatus');
-        localStorage.removeItem('transactionId');
-        localStorage.removeItem('paymentTime');
-        localStorage.removeItem('selectedNetwork');
-        localStorage.removeItem('orderId');
-        localStorage.removeItem('selectedPackage');
-        localStorage.removeItem('selectedPrice');
-        localStorage.removeItem('selectedDailyProfit');
-        localStorage.removeItem('selectedDuration');
-        window.location.href = 'packages.html';
-    });
-</script>
-</body>
+};
+</script></body>
 </html>
