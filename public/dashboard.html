@@ -368,11 +368,32 @@
 
   <!-- الشريط السفلي (5 أزرار) -->
   <div class="bottom-nav">
-    <a href="dashboard.html" class="active"><i class="fa-solid fa-house"></i><span>الرئيسية</span></a>
-    <a href="packages.html"><i class="fa-solid fa-sack-dollar"></i><span>الباقات</span></a>
-    <a href="income.html"><i class="fa-solid fa-chart-line"></i><span>الدخل اليومي</span></a>
-    <a href="account.html"><i class="fa-solid fa-user"></i><span>حسابي</span></a>
-    <a href="#" onclick="logout()"><i class="fa-solid fa-sign-out-alt"></i><span>خروج</span></a>
+    <!-- حسابي (بدل خروج) -->
+    <a href="account.html" class="nav-item">
+      <i class="fas fa-user"></i>
+      <span>حسابي</span>
+    </a>
+
+    <!-- سجل العمليات (بدل حسابي القديم) -->
+    <a href="transactions.html" class="nav-item">
+      <i class="fas fa-receipt"></i>
+      <span>سجل العمليات</span>
+    </a>
+
+    <a href="income.html" class="nav-item">
+      <i class="fas fa-chart-line"></i>
+      <span>الدخل اليومي</span>
+    </a>
+
+    <a href="packages.html" class="nav-item">
+      <i class="fas fa-wallet"></i>
+      <span>الباقات</span>
+    </a>
+
+    <a href="dashboard.html" class="nav-item active">
+      <i class="fas fa-home"></i>
+      <span>الرئيسية</span>
+    </a>
   </div>
 
 </div>
