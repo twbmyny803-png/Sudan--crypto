@@ -313,7 +313,7 @@
             <div class="desc">
                 <i class="fas fa-rocket"></i> بداية ذكية - عائد ثابت ومستمر للمستثمرين
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(50, 'الباقة البرونزية')">
+            <button class="buy-now-btn" onclick="buyPackage(50, 'الباقة البرونزية', this)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -340,7 +340,7 @@
             <div class="desc">
                 <i class="fas fa-bolt"></i> نمو سريع - دعم فوري وإخراج متزايد
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(100, 'الباقة الفضية')">
+            <button class="buy-now-btn" onclick="buyPackage(100, 'الباقة الفضية', this)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -367,7 +367,7 @@
             <div class="desc">
                 <i class="fas fa-chart-line"></i> إنتاج موصوفة - استثمارات أسبوعية آمنة
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(250, 'الباقة الذهبية')">
+            <button class="buy-now-btn" onclick="buyPackage(250, 'الباقة الذهبية', this)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -394,7 +394,7 @@
             <div class="desc">
                 <i class="fas fa-tachometer-alt"></i> أولوية السحب - أدخل عائد للاستثمار المتوسط
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(500, 'الباقة البلاتينية')">
+            <button class="buy-now-btn" onclick="buyPackage(500, 'الباقة البلاتينية', this)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -421,7 +421,7 @@
             <div class="desc">
                 <i class="fas fa-user-tie"></i> إيجار يومية + محفظة استثمارية خاصة
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(1000, 'الباقة الماسية')">
+            <button class="buy-now-btn" onclick="buyPackage(1000, 'الباقة الماسية', this)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -447,10 +447,15 @@
     createStars();
 
     // 🔥 كود الدفع المباشر
-    async function buyPackage(price, name) {
+    async function buyPackage(price, name, btn) {
+        const email = localStorage.getItem("email");
+
+        if (!email) {
+            alert("سجل دخول أول");
+            return;
+        }
+
         try {
-            // إظهار حالة جاري التحميل
-            const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
@@ -461,20 +466,18 @@
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    amount: price
+                    amount: price,
+                    email: email,        // 🔥 أهم تعديل
+                    packageName: name    // 🔥 مهم للسجل
                 })
             });
 
             const data = await res.json();
 
-            console.log("Payment:", data);
-
             if (data.invoice_url) {
-                // 🔥 حفظ بيانات الباقة
                 localStorage.setItem("selectedPackage", name);
                 localStorage.setItem("selectedPrice", price);
 
-                // 🚀 تحويل للدفع مباشرة
                 window.location.href = data.invoice_url;
             } else {
                 alert("❌ فشل إنشاء الدفع");
@@ -483,9 +486,7 @@
             }
 
         } catch (err) {
-            console.log(err);
-            alert("❌ خطأ في الاتصال بالسيرفر");
-            const btn = event.currentTarget;
+            alert("❌ خطأ في السيرفر");
             btn.disabled = false;
             btn.innerHTML = '<i class="fas fa-cart-shopping"></i> شراء الآن';
         }
