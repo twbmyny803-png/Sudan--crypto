@@ -79,7 +79,9 @@ h2 {
 
 <script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
-const email = localStorage.getItem("email");
+
+// 🔥 التعديل هنا (المهم)
+const email = localStorage.getItem("userEmail");
 
 // 🔥 ترجمة الحالات + أيقونات
 function getStatusData(status) {
@@ -92,6 +94,9 @@ function getStatusData(status) {
   if (status === "rejected") {
     return { text: "مرفوض", color: "red", icon: "fa-circle-xmark" };
   }
+  if (status === "expired") {
+    return { text: "منتهي", color: "red", icon: "fa-hourglass-end" };
+  }
   return { text: status, color: "", icon: "fa-question" };
 }
 
@@ -101,11 +106,16 @@ function goBack() {
 }
 
 async function load() {
+  if (!email) {
+    document.getElementById("list").innerHTML = "لم يتم العثور على المستخدم";
+    return;
+  }
+
   const res = await fetch(API + "/transactions/" + email);
   const data = await res.json();
 
-  if (!data.success) {
-    document.getElementById("list").innerHTML = "خطأ";
+  if (!data.success || !data.data.length) {
+    document.getElementById("list").innerHTML = "لا توجد عمليات حالياً";
     return;
   }
 
@@ -120,7 +130,7 @@ async function load() {
       <div class="item">
 
         <div class="row">
-          <i class="fa-solid fa-arrow-down"></i>
+          <i class="fa-solid ${t.type === "deposit" ? "fa-arrow-down" : "fa-arrow-up"}"></i>
           النوع: ${t.type === "deposit" ? "إيداع" : "سحب"}
         </div>
 
@@ -136,7 +146,7 @@ async function load() {
 
         <div class="row">
           <i class="fa-solid fa-calendar"></i>
-          التاريخ: ${new Date(t.date).toLocaleString()}
+          التاريخ: ${new Date(t.date).toLocaleString('ar-EG')}
         </div>
 
       </div>
