@@ -433,20 +433,31 @@
 
   function updateTimer() {
     if (!packageEndDate) return;
+
     const now = new Date().getTime();
     const diff = packageEndDate - now;
+
     if (diff <= 0) {
       document.getElementById('remainingDays').innerText = '0';
       document.getElementById('remainingTime').innerHTML = 'انتهت';
-      if (timerInterval) clearInterval(timerInterval);
       return;
     }
+
+    // 🔥 العدد الحقيقي للأيام (بدون نقص)
+    const totalDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+    // 🔥 التفاصيل الدقيقة
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (86400000)) / (3600000));
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    document.getElementById('remainingDays').innerText = days;
-    document.getElementById('remainingTime').innerHTML = `${days} يوم - ${hours} س - ${minutes} د - ${seconds} ث`;
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    // 🔥 عرض الأيام (بدون نقص)
+    document.getElementById('remainingDays').innerText = totalDays;
+
+    // 🔥 عرض الوقت
+    document.getElementById('remainingTime').innerHTML =
+      `${days} يوم - ${hours} س - ${minutes} د - ${seconds} ث`;
   }
 
   function updateProfitTimer() {
@@ -507,12 +518,6 @@
       document.getElementById('dailyProfit').innerText = dailyProfit;
 
       if (packageStart && packageDuration > 0) {
-        const start = new Date(data.packageStart);
-        const now = new Date();
-        const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-        const remaining = data.packageDurationDays - diff;
-        document.getElementById("remainingDays").innerText = remaining > 0 ? remaining : 0;
-
         const startDate = new Date(packageStart);
         document.getElementById('startDate').innerText = startDate.toLocaleDateString('ar-EG');
         packageEndDate = startDate.getTime() + (packageDuration * 24 * 60 * 60 * 1000);
@@ -567,4 +572,4 @@
   loadUserData();
 </script>
 </body>
-</html>
+  </html>
