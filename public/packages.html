@@ -313,7 +313,7 @@
             <div class="desc">
                 <i class="fas fa-rocket"></i> بداية ذكية - عائد ثابت ومستمر للمستثمرين
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(50, 'الباقة البرونزية', this)">
+            <button class="buy-now-btn" onclick="buyPackage('الباقة البرونزية', 50)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -340,7 +340,7 @@
             <div class="desc">
                 <i class="fas fa-bolt"></i> نمو سريع - دعم فوري وإخراج متزايد
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(100, 'الباقة الفضية', this)">
+            <button class="buy-now-btn" onclick="buyPackage('الباقة الفضية', 100)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -367,7 +367,7 @@
             <div class="desc">
                 <i class="fas fa-chart-line"></i> إنتاج موصوفة - استثمارات أسبوعية آمنة
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(250, 'الباقة الذهبية', this)">
+            <button class="buy-now-btn" onclick="buyPackage('الباقة الذهبية', 250)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -394,7 +394,7 @@
             <div class="desc">
                 <i class="fas fa-tachometer-alt"></i> أولوية السحب - أدخل عائد للاستثمار المتوسط
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(500, 'الباقة البلاتينية', this)">
+            <button class="buy-now-btn" onclick="buyPackage('الباقة البلاتينية', 500)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -421,7 +421,7 @@
             <div class="desc">
                 <i class="fas fa-user-tie"></i> إيجار يومية + محفظة استثمارية خاصة
             </div>
-            <button class="buy-now-btn" onclick="buyPackage(1000, 'الباقة الماسية', this)">
+            <button class="buy-now-btn" onclick="buyPackage('الباقة الماسية', 1000)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -446,50 +446,28 @@
     }
     createStars();
 
-    // 🔥 كود الدفع المباشر
-    async function buyPackage(price, name, btn) {
-        const email = localStorage.getItem("email");
+    const API = "https://sudan-crypto-4mgt.onrender.com";
 
-        if (!email) {
-            alert("سجل دخول أول");
-            return;
+    function buyPackage(name, price) {
+      fetch(API + "/create-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          amount: price,
+          email: localStorage.getItem("userEmail"),
+          packageName: name
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.invoice_url) {
+          window.location.href = data.invoice_url;
+        } else {
+          alert("فشل الدفع");
         }
-
-        try {
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
-
-            const res = await fetch("https://sudan-crypto-4mgt.onrender.com/create-payment", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    amount: price,
-                    email: email,        // 🔥 أهم تعديل
-                    packageName: name    // 🔥 مهم للسجل
-                })
-            });
-
-            const data = await res.json();
-
-            if (data.invoice_url) {
-                localStorage.setItem("selectedPackage", name);
-                localStorage.setItem("selectedPrice", price);
-
-                window.location.href = data.invoice_url;
-            } else {
-                alert("❌ فشل إنشاء الدفع");
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
-
-        } catch (err) {
-            alert("❌ خطأ في السيرفر");
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-cart-shopping"></i> شراء الآن';
-        }
+      });
     }
 
     document.getElementById('mainPackagesBtn').addEventListener('click', () => {
