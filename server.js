@@ -696,7 +696,7 @@ app.post("/create-payment", async (req, res) => {
         price_currency: "usd",
         pay_currency: "usdttrc20",
         order_id: orderId,
-        order_description: JSON.stringify({ email, packageName }),
+        order_description: email,
         success_url: "https://sudan-crypto-4mgt.onrender.com/success.html",
         cancel_url: "https://sudan-crypto-4mgt.onrender.com/packages.html"
       })
