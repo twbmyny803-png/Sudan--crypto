@@ -267,7 +267,9 @@ app.post("/user-data", async (req, res) => {
     isBlocked: user.isBlocked || false,
     isFrozen: user.isFrozen || false,
     withdrawBlocked: user.withdrawBlocked || false,
-    packageName: user.packageName || null,
+    packageName: user.packageName,
+    packageStart: user.packageStart,
+    packageDurationDays: user.packageDurationDays,
     verificationRejectReason: user.verificationRejectReason || null
   });
 });
@@ -642,18 +644,32 @@ app.post("/nowpayments-webhook", async (req, res) => {
       { new: true }
     );
 
-    // ✅ إذا اكتمل الدفع، نفعّل الباقة ونضيف الرصيد
-    if (payment.payment_status === "finished" && deposit) {
-      const user = await User.findOne({ email: deposit.email });
+    if (payment.payment_status === "finished" || payment.payment_status === "confirmed") {
+      const parsed = JSON.parse(payment.order_description);
 
-      if (user) {
-        user.packageName = deposit.packageName;
-        user.packageStart = new Date();
-        user.balance += Number(payment.price_amount);
+      const user = await User.findOne({ email: parsed.email });
 
-        await user.save();
-        console.log("✅ Package activated for:", user.email);
-      }
+      if (!user) return res.sendStatus(200);
+
+      // 🔥 تفعيل الباقة
+      user.packageName = parsed.packageName;
+      user.packageStart = new Date();
+
+      // 🔥 مدة الباقة
+      const packages = {
+        gold: 280,
+        silver: 180,
+        vip: 365
+      };
+
+      user.packageDurationDays = packages[parsed.packageName] || 0;
+
+      // 🔥 إضافة الرصيد
+      user.balance += Number(payment.price_amount);
+
+      await user.save();
+
+      console.log("🔥 تم التفعيل");
     }
 
     res.sendStatus(200);
@@ -666,25 +682,9 @@ app.post("/nowpayments-webhook", async (req, res) => {
 
 // ================== CREATE PAYMENT ==================
 app.post("/create-payment", async (req, res) => {
-  const { amount, packageName, email } = req.body;
-  const orderId = Date.now().toString();
+  const { amount, email, packageName } = req.body;
 
   try {
-    // 🔥 1. نسجل العملية أولاً (pending) لتظهر فوراً في سجل العمليات
-    const deposit = new Deposit({
-      email,
-      name: "auto",
-      amount: Number(amount),
-      txid: null,
-      orderId,
-      status: "pending",
-      packageName,
-      network: "USDT"
-    });
-
-    await deposit.save();
-
-    // 🔥 2. نعمل invoice
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
       headers: {
@@ -695,19 +695,17 @@ app.post("/create-payment", async (req, res) => {
         price_amount: Number(amount),
         price_currency: "usd",
         pay_currency: "usdttrc20",
-        order_id: orderId,
-        order_description: email,
-        success_url: "https://sudan-crypto-4mgt.onrender.com/success.html",
-        cancel_url: "https://sudan-crypto-4mgt.onrender.com/packages.html"
+        order_id: Date.now().toString(),
+
+        // 🔥 أهم حاجة
+        order_description: JSON.stringify({
+          email: email,
+          packageName: packageName
+        })
       })
     });
 
     const data = await response.json();
-    console.log("NOWPayments:", data);
-
-    if (!data.invoice_url) {
-      return res.json({ success: false });
-    }
 
     res.json({
       success: true,
@@ -715,7 +713,7 @@ app.post("/create-payment", async (req, res) => {
     });
 
   } catch (err) {
-    console.log("Payment error:", err);
+    console.log(err);
     res.json({ success: false });
   }
 });
