@@ -710,7 +710,9 @@ app.post("/create-payment", async (req, res) => {
         order_description: JSON.stringify({
           email: email,
           packageName: packageName
-        })
+        }),
+        success_url: "https://sudan-crypto-4mgt.onrender.com/success.html",
+        cancel_url: "https://sudan-crypto-4mgt.onrender.com/packages.html"
       })
     });
 
