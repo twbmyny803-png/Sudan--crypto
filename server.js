@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
 const crypto = require("crypto");
+const axios = require("axios");
 
 const app = express();
 app.use(express.json());
@@ -660,6 +661,40 @@ app.post("/nowpayments-webhook", async (req, res) => {
   } catch (err) {
     console.log("❌ webhook error:", err);
     res.sendStatus(500);
+  }
+});
+
+// ================== Create Payment (NOWPayments) ==================
+app.post("/create-payment", async (req, res) => {
+  try {
+    const { price, email, packageName } = req.body;
+
+    const response = await axios.post(
+      "https://api.nowpayments.io/v1/invoice",
+      {
+        price_amount: price,
+        price_currency: "usd",
+        order_id: Date.now().toString(),
+        order_description: email,
+        success_url: "https://sudan-crypto-4mgt.onrender.com/success.html",
+        cancel_url: "https://sudan-crypto-4mgt.onrender.com/cancel.html"
+      },
+      {
+        headers: {
+          "x-api-key": "ZYE715R-H144D4D-QB66MAZ-XK8YVGP",
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      url: response.data.invoice_url
+    });
+
+  } catch (err) {
+    console.log("❌ payment error:", err.response?.data || err.message);
+    res.json({ success: false });
   }
 });
 
