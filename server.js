@@ -697,6 +697,8 @@ app.post("/create-payment", async (req, res) => {
   const { amount, email, packageName } = req.body;
 
   try {
+    const orderId = Date.now().toString();
+
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
       headers: {
@@ -707,9 +709,8 @@ app.post("/create-payment", async (req, res) => {
         price_amount: Number(amount),
         price_currency: "usd",
         pay_currency: "usdttrc20",
-        order_id: Date.now().toString(),
+        order_id: orderId,
 
-        // 🔥 أهم حاجة
         order_description: JSON.stringify({
           email: email,
           packageName: packageName
@@ -718,6 +719,21 @@ app.post("/create-payment", async (req, res) => {
     });
 
     const data = await response.json();
+
+    // 🔥 أهم خطوة (تسجيل العملية فوراً)
+    const deposit = new Deposit({
+      email,
+      name: "auto",
+      amount: Number(amount),
+      txid: null,
+      image: null,
+      orderId: orderId,
+      packageName: packageName,
+      network: "USDT",
+      status: "pending"
+    });
+
+    await deposit.save();
 
     res.json({
       success: true,
