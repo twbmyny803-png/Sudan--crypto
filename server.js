@@ -627,57 +627,32 @@ app.post("/nowpayments-webhook", async (req, res) => {
     }
 
     const payment = req.body;
-
     console.log("🔥 Payment received:", payment);
 
-    // ✅ لما الدفع يكتمل فقط
-    if (payment.payment_status === "finished") {
-
-      // 🔥 نفك البيانات
-      const parsed = JSON.parse(payment.order_description);
-
-      // 🔐 الحماية
-      const expectedPrices = {
-        "Starter": 10,
-        "VIP": 50,
-        "Pro": 100,
-        "Elite": 1000
-      };
-
-      const expected = expectedPrices[parsed.packageName];
-
-      if (payment.price_amount !== expected) {
-        console.log("❌ محاولة تحايل: السعر غير صحيح");
-        return res.sendStatus(200);
-      }
-
-      // ✅ نحفظ الإيداع
-      const deposit = new Deposit({
-        email: parsed.email,
-        name: "auto",
-        amount: payment.price_amount,
+    // ✅ تحديث حالة الإيداع
+    const status = payment.payment_status === "finished" ? "approved" : "pending";
+    
+    const deposit = await Deposit.findOneAndUpdate(
+      { orderId: payment.order_id },
+      { 
+        status: status,
         txid: payment.payin_hash,
-        image: null,
-        orderId: payment.order_id,
-        packageName: parsed.packageName,
         network: payment.pay_currency
-      });
+      },
+      { new: true }
+    );
 
-      await deposit.save();
-
-      // 🔥 نفعّل الباقة
-      const user = await User.findOne({ email: parsed.email });
+    // ✅ إذا اكتمل الدفع، نفعّل الباقة ونضيف الرصيد
+    if (payment.payment_status === "finished" && deposit) {
+      const user = await User.findOne({ email: deposit.email });
 
       if (user) {
-        user.packageName = parsed.packageName;
+        user.packageName = deposit.packageName;
         user.packageStart = new Date();
         user.balance += Number(payment.price_amount);
 
         await user.save();
-
-        console.log("✅ Package activated");
-      } else {
-        console.log("❌ User not found");
+        console.log("✅ Package activated for:", user.email);
       }
     }
 
@@ -692,8 +667,24 @@ app.post("/nowpayments-webhook", async (req, res) => {
 // ================== CREATE PAYMENT ==================
 app.post("/create-payment", async (req, res) => {
   const { amount, packageName, email } = req.body;
+  const orderId = Date.now().toString();
 
   try {
+    // 🔥 1. نسجل العملية أولاً (pending) لتظهر فوراً في سجل العمليات
+    const deposit = new Deposit({
+      email,
+      name: "auto",
+      amount: Number(amount),
+      txid: null,
+      orderId,
+      status: "pending",
+      packageName,
+      network: "USDT"
+    });
+
+    await deposit.save();
+
+    // 🔥 2. نعمل invoice
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
       method: "POST",
       headers: {
@@ -704,20 +695,14 @@ app.post("/create-payment", async (req, res) => {
         price_amount: Number(amount),
         price_currency: "usd",
         pay_currency: "usdttrc20",
-        order_id: Date.now().toString(),
-
-        // 🔥 أهم سطر (يربط الدفع بالحساب)
-        order_description: JSON.stringify({
-          email: email,
-          packageName: packageName
-        }),
+        order_id: orderId,
+        order_description: JSON.stringify({ email, packageName }),
         success_url: "https://sudan-crypto-4mgt.onrender.com/success.html",
         cancel_url: "https://sudan-crypto-4mgt.onrender.com/packages.html"
       })
     });
 
     const data = await response.json();
-
     console.log("NOWPayments:", data);
 
     if (!data.invoice_url) {
@@ -734,6 +719,22 @@ app.post("/create-payment", async (req, res) => {
     res.json({ success: false });
   }
 });
+
+// ⏱ نظام انتهاء الوقت (تحويل العمليات المعلقة القديمة إلى expired)
+setInterval(async () => {
+  try {
+    const expiredTime = new Date(Date.now() - 20 * 60 * 1000);
+    await Deposit.updateMany(
+      {
+        status: "pending",
+        createdAt: { $lt: expiredTime }
+      },
+      { status: "expired" }
+    );
+  } catch (err) {
+    console.log("Expiration check error:", err);
+  }
+}, 60000);
 
 app.get("/transactions/:email", async (req, res) => {
   const email = req.params.email;
