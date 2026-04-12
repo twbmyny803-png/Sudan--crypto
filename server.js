@@ -630,36 +630,53 @@ app.post("/nowpayments-webhook", async (req, res) => {
 
     console.log("🔥 Payment received:", payment);
 
-    // بس لما الدفع يكتمل
+    // ✅ لما الدفع يكتمل فقط
     if (payment.payment_status === "finished") {
 
+      // 🔥 نفك البيانات
+      const parsed = JSON.parse(payment.order_description);
+
+      // ✅ نحفظ الإيداع
       const deposit = new Deposit({
-        email: payment.order_description || "unknown",
+        email: parsed.email,
         name: "auto",
         amount: payment.price_amount,
         txid: payment.payin_hash,
         image: null,
         orderId: payment.order_id,
-        packageName: "auto",
+        packageName: parsed.packageName,
         network: payment.pay_currency
       });
 
       await deposit.save();
 
-      console.log("✅ Saved to DB");
+      // 🔥 نفعّل الباقة
+      const user = await User.findOne({ email: parsed.email });
+
+      if (user) {
+        user.packageName = parsed.packageName;
+        user.packageStart = new Date();
+        user.balance += Number(payment.price_amount);
+
+        await user.save();
+
+        console.log("✅ Package activated");
+      } else {
+        console.log("❌ User not found");
+      }
     }
 
     res.sendStatus(200);
 
   } catch (err) {
-    console.log("❌ webhook error:", err);
+    console.log("❌ Webhook error:", err);
     res.sendStatus(500);
   }
 });
 
 // ================== CREATE PAYMENT ==================
 app.post("/create-payment", async (req, res) => {
-  const { amount } = req.body;
+  const { amount, packageName, email } = req.body;
 
   try {
     const response = await fetch("https://api.nowpayments.io/v1/invoice", {
@@ -669,18 +686,24 @@ app.post("/create-payment", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        price_amount: Number(amount) || 10,
+        price_amount: Number(amount),
         price_currency: "usd",
         pay_currency: "usdttrc20",
         order_id: Date.now().toString(),
-        order_description: "Deposit"
+
+        // 🔥 أهم سطر (يربط الدفع بالحساب)
+        order_description: JSON.stringify({
+          email: email,
+          packageName: packageName
+        })
       })
     });
 
     const data = await response.json();
 
+    console.log("NOWPayments:", data);
+
     if (!data.invoice_url) {
-      console.log("خطأ:", data);
       return res.json({ success: false });
     }
 
@@ -690,7 +713,7 @@ app.post("/create-payment", async (req, res) => {
     });
 
   } catch (err) {
-    console.log(err);
+    console.log("Payment error:", err);
     res.json({ success: false });
   }
 });
