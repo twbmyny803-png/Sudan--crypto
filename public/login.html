@@ -470,13 +470,14 @@
       const data = await res.json();
       
       if (data.success) {
-        // 🔥 نخزن الاسم والبريد
         localStorage.setItem("name", data.name);
-        localStorage.setItem("email", data.email || email); // 🔥 مهم جداً
+        localStorage.setItem("userEmail", data.email || email);
+
+        // 🔥 أهم سطر جديد
+        localStorage.setItem("isLoggedIn", "true");
 
         showToast('تم تسجيل الدخول بنجاح');
-        
-        // 🔥 نوديه للداشبورد
+
         setTimeout(() => {
           window.location.href = 'dashboard.html';
         }, 1000);
