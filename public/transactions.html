@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>سجل العمليات</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
 body {
   background: #0a0f2a;
@@ -18,22 +20,27 @@ h2 {
   color: #f0b90b;
 }
 
-.box {
-  background: #111933;
-  padding: 15px;
-  border-radius: 15px;
-  margin-top: 15px;
-}
-
 .item {
   background: #1a2447;
-  padding: 12px;
-  border-radius: 12px;
-  margin-bottom: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(240,185,11,0.15);
 }
 
-.green { color: #4caf50; }
-.red { color: #ff5252; }
+.row {
+  margin-bottom: 6px;
+}
+
+.status {
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.green { color: #22c55e; }
+.red { color: #ef4444; }
 .yellow { color: #f0b90b; }
 
 </style>
@@ -49,6 +56,20 @@ h2 {
 const API = "https://sudan-crypto-4mgt.onrender.com";
 const email = localStorage.getItem("email");
 
+// 🔥 ترجمة الحالات + أيقونات
+function getStatusData(status) {
+  if (status === "pending") {
+    return { text: "قيد المراجعة", color: "yellow", icon: "fa-clock" };
+  }
+  if (status === "approved") {
+    return { text: "مكتمل", color: "green", icon: "fa-circle-check" };
+  }
+  if (status === "rejected") {
+    return { text: "مرفوض", color: "red", icon: "fa-circle-xmark" };
+  }
+  return { text: status, color: "", icon: "fa-question" };
+}
+
 async function load() {
   const res = await fetch(API + "/transactions/" + email);
   const data = await res.json();
@@ -63,16 +84,31 @@ async function load() {
 
   data.data.forEach(t => {
 
-    let statusColor = "yellow";
-    if (t.status === "approved") statusColor = "green";
-    if (t.status === "rejected") statusColor = "red";
+    const status = getStatusData(t.status);
 
     list.innerHTML += `
       <div class="item">
-        <div>النوع: ${t.type === "deposit" ? "إيداع" : "سحب"}</div>
-        <div>المبلغ: ${t.amount} USDT</div>
-        <div class="${statusColor}">الحالة: ${t.status}</div>
-        <div>التاريخ: ${new Date(t.date).toLocaleString()}</div>
+
+        <div class="row">
+          <i class="fa-solid fa-arrow-down"></i>
+          النوع: ${t.type === "deposit" ? "إيداع" : "سحب"}
+        </div>
+
+        <div class="row">
+          <i class="fa-solid fa-wallet"></i>
+          المبلغ: ${t.amount} USDT
+        </div>
+
+        <div class="row status ${status.color}">
+          <i class="fa-solid ${status.icon}"></i>
+          الحالة: ${status.text}
+        </div>
+
+        <div class="row">
+          <i class="fa-solid fa-calendar"></i>
+          التاريخ: ${new Date(t.date).toLocaleString()}
+        </div>
+
       </div>
     `;
   });
