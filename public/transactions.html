@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل العمليات</title>
+
+<style>
+body {
+  background: #0a0f2a;
+  font-family: Arial;
+  color: white;
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  color: #f0b90b;
+}
+
+.box {
+  background: #111933;
+  padding: 15px;
+  border-radius: 15px;
+  margin-top: 15px;
+}
+
+.item {
+  background: #1a2447;
+  padding: 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.green { color: #4caf50; }
+.red { color: #ff5252; }
+.yellow { color: #f0b90b; }
+
+</style>
+</head>
+
+<body>
+
+<h2>سجل العمليات</h2>
+
+<div id="list"></div>
+
+<script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
+const email = localStorage.getItem("email");
+
+async function load() {
+  const res = await fetch(API + "/transactions/" + email);
+  const data = await res.json();
+
+  if (!data.success) {
+    document.getElementById("list").innerHTML = "خطأ";
+    return;
+  }
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.data.forEach(t => {
+
+    let statusColor = "yellow";
+    if (t.status === "approved") statusColor = "green";
+    if (t.status === "rejected") statusColor = "red";
+
+    list.innerHTML += `
+      <div class="item">
+        <div>النوع: ${t.type === "deposit" ? "إيداع" : "سحب"}</div>
+        <div>المبلغ: ${t.amount} USDT</div>
+        <div class="${statusColor}">الحالة: ${t.status}</div>
+        <div>التاريخ: ${new Date(t.date).toLocaleString()}</div>
+      </div>
+    `;
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
