@@ -5,6 +5,7 @@ const { Resend } = require("resend");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
+const crypto = require("crypto");
 
 const app = express();
 app.use(express.json());
@@ -614,6 +615,51 @@ app.post("/submit-verification", upload.array("images"), async (req, res) => {
   } catch (err) {
     console.log(err);
     res.json({ success: false });
+  }
+});
+
+// ================== NowPayments Webhook ==================
+app.post("/nowpayments-webhook", async (req, res) => {
+  try {
+    const ipnSecret = "vbk9TcEg/bvftZWi+O6H2m+DWCBKtosc";
+
+    const hmac = crypto.createHmac("sha512", ipnSecret);
+    hmac.update(JSON.stringify(req.body));
+    const signature = hmac.digest("hex");
+
+    if (signature !== req.headers["x-nowpayments-sig"]) {
+      console.log("❌ Invalid signature");
+      return res.status(400).send("Invalid signature");
+    }
+
+    const payment = req.body;
+
+    console.log("🔥 Payment received:", payment);
+
+    // بس لما الدفع يكتمل
+    if (payment.payment_status === "finished") {
+
+      const deposit = new Deposit({
+        email: payment.order_description || "unknown",
+        name: "auto",
+        amount: payment.price_amount,
+        txid: payment.payin_hash,
+        image: null,
+        orderId: payment.order_id,
+        packageName: "auto",
+        network: payment.pay_currency
+      });
+
+      await deposit.save();
+
+      console.log("✅ Saved to DB");
+    }
+
+    res.sendStatus(200);
+
+  } catch (err) {
+    console.log("❌ webhook error:", err);
+    res.sendStatus(500);
   }
 });
 
