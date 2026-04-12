@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
 const crypto = require("crypto");
-const axios = require("axios");
 
 const app = express();
 app.use(express.json());
@@ -422,12 +421,6 @@ app.post("/deposit-request", async (req, res) => {
     if (exists) {
       return res.json({ success: false, message: "TXID مستخدم" });
     }
-
-    // ❌ احذف دا مؤقتاً
-    // const user = await User.findOne({ email });
-    // if (!user) {
-    //   return res.json({ success: false, message: "مستخدم غير موجود" });
-    // }
 
     const deposit = new Deposit({
       email,
