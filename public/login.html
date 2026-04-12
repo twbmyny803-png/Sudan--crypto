@@ -472,7 +472,7 @@
       if (data.success) {
         // 🔥 نخزن الاسم والبريد
         localStorage.setItem("name", data.name);
-        localStorage.setItem("userEmail", data.email || email);
+        localStorage.setItem("email", data.email || email); // 🔥 مهم جداً
 
         showToast('تم تسجيل الدخول بنجاح');
         
