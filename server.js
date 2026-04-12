@@ -631,18 +631,30 @@ app.post("/nowpayments-webhook", async (req, res) => {
     const payment = req.body;
     console.log("🔥 Payment received:", payment);
 
-    // ✅ تحديث حالة الإيداع
-    const status = payment.payment_status === "finished" ? "approved" : "pending";
-    
-    const deposit = await Deposit.findOneAndUpdate(
-      { orderId: payment.order_id },
-      { 
-        status: status,
+    const parsed = JSON.parse(payment.order_description);
+
+    // 🔥 أنشئ العملية لو ما موجودة
+    let deposit = await Deposit.findOne({ orderId: payment.order_id });
+
+    if (!deposit) {
+      deposit = new Deposit({
+        email: parsed.email,
+        name: "auto",
+        amount: payment.price_amount,
         txid: payment.payin_hash,
-        network: payment.pay_currency
-      },
-      { new: true }
-    );
+        image: null,
+        orderId: payment.order_id,
+        packageName: parsed.packageName,
+        network: payment.pay_currency,
+        status: "pending"
+      });
+
+      await deposit.save();
+    }
+
+    // 🔥 تحديث الحالة
+    deposit.status = payment.payment_status === "finished" ? "approved" : "pending";
+    await deposit.save();
 
     if (payment.payment_status === "finished" || payment.payment_status === "confirmed") {
       const parsed = JSON.parse(payment.order_description);
