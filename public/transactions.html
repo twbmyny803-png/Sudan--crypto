@@ -20,6 +20,26 @@ h2 {
   color: #f0b90b;
 }
 
+/* زر الرجوع */
+.back-btn {
+  background: rgba(240,185,11,0.15);
+  border: 1px solid rgba(240,185,11,0.4);
+  color: #f0b90b;
+  padding: 10px 16px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.back-btn:hover {
+  background: rgba(240,185,11,0.3);
+}
+
 .item {
   background: #1a2447;
   padding: 14px;
@@ -48,6 +68,11 @@ h2 {
 
 <body>
 
+<!-- زر الرجوع -->
+<button class="back-btn" onclick="goBack()">
+  <i class="fa-solid fa-arrow-right"></i> رجوع
+</button>
+
 <h2>سجل العمليات</h2>
 
 <div id="list"></div>
@@ -68,6 +93,11 @@ function getStatusData(status) {
     return { text: "مرفوض", color: "red", icon: "fa-circle-xmark" };
   }
   return { text: status, color: "", icon: "fa-question" };
+}
+
+// زر الرجوع
+function goBack() {
+  window.location.href = "dashboard.html";
 }
 
 async function load() {
