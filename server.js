@@ -7,7 +7,6 @@ const fs = require("fs");
 const multer = require("multer");
 const crypto = require("crypto");
 const axios = require("axios");
-const fetch = require("node-fetch");
 
 const app = express();
 app.use(express.json());
