@@ -7,6 +7,7 @@ const fs = require("fs");
 const multer = require("multer");
 const crypto = require("crypto");
 const axios = require("axios");
+const fetch = require("node-fetch");
 
 const app = express();
 app.use(express.json());
@@ -664,36 +665,40 @@ app.post("/nowpayments-webhook", async (req, res) => {
   }
 });
 
-// ================== Create Payment (NOWPayments) ==================
+// ================== CREATE PAYMENT ==================
 app.post("/create-payment", async (req, res) => {
-  try {
-    const { price, email, packageName } = req.body;
+  const { amount } = req.body;
 
-    const response = await axios.post(
-      "https://api.nowpayments.io/v1/invoice",
-      {
-        price_amount: price,
-        price_currency: "usd",
-        order_id: Date.now().toString(),
-        order_description: email,
-        success_url: "https://sudan-crypto-4mgt.onrender.com/success.html",
-        cancel_url: "https://sudan-crypto-4mgt.onrender.com/cancel.html"
+  try {
+    const response = await fetch("https://api.nowpayments.io/v1/invoice", {
+      method: "POST",
+      headers: {
+        "x-api-key": "ZYE715R-H144D4D-QB66MAZ-XK8YVGP",
+        "Content-Type": "application/json"
       },
-      {
-        headers: {
-          "x-api-key": "ZYE715R-H144D4D-QB66MAZ-XK8YVGP",
-          "Content-Type": "application/json"
-        }
-      }
-    );
+      body: JSON.stringify({
+        price_amount: Number(amount) || 10,
+        price_currency: "usd",
+        pay_currency: "usdttrc20",
+        order_id: Date.now().toString(),
+        order_description: "Deposit"
+      })
+    });
+
+    const data = await response.json();
+
+    if (!data.invoice_url) {
+      console.log("خطأ:", data);
+      return res.json({ success: false });
+    }
 
     res.json({
       success: true,
-      url: response.data.invoice_url
+      invoice_url: data.invoice_url
     });
 
   } catch (err) {
-    console.log("❌ payment error:", err.response?.data || err.message);
+    console.log(err);
     res.json({ success: false });
   }
 });
