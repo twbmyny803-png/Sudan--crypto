@@ -735,6 +735,42 @@ app.post("/create-payment", async (req, res) => {
   }
 });
 
+app.get("/transactions/:email", async (req, res) => {
+  const email = req.params.email;
+
+  try {
+    const deposits = await Deposit.find({ email });
+    
+    const withdraws = withdrawRequests.filter(w => w.email === email);
+
+    // ندمجهم
+    const all = [
+      ...deposits.map(d => ({
+        type: "deposit",
+        amount: d.amount,
+        status: d.status,
+        date: d.createdAt,
+        txid: d.txid,
+        network: d.network
+      })),
+      ...withdraws.map(w => ({
+        type: "withdraw",
+        amount: w.amount,
+        status: w.status,
+        date: new Date(w.id)
+      }))
+    ];
+
+    // ترتيب حسب الأحدث
+    all.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    res.json({ success: true, data: all });
+
+  } catch (err) {
+    res.json({ success: false });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
