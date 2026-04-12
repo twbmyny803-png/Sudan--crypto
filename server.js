@@ -636,6 +636,21 @@ app.post("/nowpayments-webhook", async (req, res) => {
       // 🔥 نفك البيانات
       const parsed = JSON.parse(payment.order_description);
 
+      // 🔐 الحماية
+      const expectedPrices = {
+        "Starter": 10,
+        "VIP": 50,
+        "Pro": 100,
+        "Elite": 1000
+      };
+
+      const expected = expectedPrices[parsed.packageName];
+
+      if (payment.price_amount !== expected) {
+        console.log("❌ محاولة تحايل: السعر غير صحيح");
+        return res.sendStatus(200);
+      }
+
       // ✅ نحفظ الإيداع
       const deposit = new Deposit({
         email: parsed.email,
