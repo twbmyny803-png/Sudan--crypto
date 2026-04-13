@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الإحالات والفريق</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body {
+  background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
+  font-family: 'Cairo', sans-serif;
+  color: white;
+  padding: 20px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+}
+
+.card {
+  background: rgba(15,25,45,0.7);
+  border-radius: 25px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #F0B90B;
+}
+
+.link-box {
+  background: #111933;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.btn {
+  background: linear-gradient(95deg,#F0B90B,#FFD966);
+  border: none;
+  border-radius: 30px;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.level {
+  margin-top: 10px;
+}
+
+.user {
+  background: #1a2447;
+  padding: 8px;
+  border-radius: 10px;
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.share {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.share a {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 20px;
+  color: white;
+  text-decoration: none;
+}
+
+.whatsapp { background: #25D366; }
+.telegram { background: #229ED9; }
+.facebook { background: #1877F2; }
+
+.back {
+  margin-bottom: 10px;
+  cursor: pointer;
+  color: #F0B90B;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="back" onclick="location.href='dashboard.html'">
+<i class="fa-solid fa-arrow-right"></i> رجوع
+</div>
+
+<h2><i class="fa-solid fa-users"></i> الإحالات والفريق</h2>
+
+<!-- رابط الدعوة -->
+<div class="card">
+<i class="fa-solid fa-link"></i> رابط الدعوة
+<div class="link-box" id="link"></div>
+
+<button class="btn" onclick="copyLink()">
+<i class="fa-solid fa-copy"></i> نسخ الرابط
+</button>
+
+<div class="qr" id="qrcode"></div>
+
+<div class="share">
+<a id="wa" class="whatsapp"><i class="fa-brands fa-whatsapp"></i></a>
+<a id="tg" class="telegram"><i class="fa-brands fa-telegram"></i></a>
+<a id="fb" class="facebook"><i class="fa-brands fa-facebook"></i></a>
+</div>
+</div>
+
+<!-- الأرباح -->
+<div class="card">
+<i class="fa-solid fa-coins"></i> أرباح الإحالات
+<div id="income">0 USDT</div>
+</div>
+
+<!-- الفريق -->
+<div class="card" id="team"></div>
+
+</div>
+
+<script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
+const email = localStorage.getItem("userEmail");
+
+async function load() {
+  const res = await fetch(API + "/referrals/" + email);
+  const data = await res.json();
+
+  if (!data.success) return;
+
+  const link = window.location.origin + "/?ref=" + data.refCode;
+
+  document.getElementById("link").innerText = link;
+  document.getElementById("income").innerText = data.income + " USDT";
+
+  // QR Code
+  new QRCode(document.getElementById("qrcode"), {
+    text: link,
+    width: 150,
+    height: 150
+  });
+
+  // مشاركة
+  document.getElementById("wa").href =
+    "https://wa.me/?text=" + encodeURIComponent(link);
+
+  document.getElementById("tg").href =
+    "https://t.me/share/url?url=" + encodeURIComponent(link);
+
+  document.getElementById("fb").href =
+    "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(link);
+
+  // الفريق
+  const team = document.getElementById("team");
+
+  const names = {
+    level1: "المستوى الأول",
+    level2: "المستوى الثاني",
+    level3: "المستوى الثالث",
+    level4: "المستوى الرابع",
+    level5: "المستوى الخامس"
+  };
+
+  Object.keys(data.levels).forEach(level => {
+    const users = data.levels[level];
+
+    team.innerHTML += `
+      <div class="level">
+        <strong>${names[level]} (${users.length})</strong>
+        ${users.map(u => `<div class="user"><i class="fa-solid fa-user"></i> ${u.name}</div>`).join("")}
+      </div>
+    `;
+  });
+}
+
+function copyLink() {
+  const text = document.getElementById("link").innerText;
+  navigator.clipboard.writeText(text);
+  alert("تم نسخ الرابط");
+}
+
+load();
+</script>
+
+</body>
+                               </html>
