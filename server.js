@@ -181,14 +181,18 @@ app.post("/register", async (req, res) => {
     if (!userExists) existsCode = false;
   }
 
+  let refUser = null;
+  if (ref) {
+    refUser = await User.findOne({ refCode: ref });
+  }
+
   const user = new User({
     name,
     email,
     phone,
     password,
-    ref: ref || null,
-    refBy: ref || null, // 🔥 الربط
-    refCode: refCode     // 🔥 كود الدعوة
+    refCode: refCode,
+    refBy: refUser ? refUser.refCode : null
   });
 
   await user.save();
@@ -276,6 +280,11 @@ app.post("/user-data", async (req, res) => {
 
   if (!user) {
     return res.json({ success: false });
+  }
+
+  if (!user.refCode) {
+    user.refCode = generateRefCode();
+    await user.save();
   }
 
   res.json({
