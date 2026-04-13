@@ -562,6 +562,26 @@ app.post("/nowpayments-webhook", async (req, res) => {
 
       if (!user) return res.sendStatus(200);
 
+      const percentages = [0.10, 0.08, 0.06, 0.04, 0.02];
+
+      let currentRef = user.refBy;
+
+      for (let i = 0; i < 5; i++) {
+        if (!currentRef) break;
+
+        const refUser = await User.findOne({ refCode: currentRef });
+
+        if (!refUser) break;
+
+        const profit = payment.price_amount * percentages[i];
+
+        refUser.incomeBalance += profit;
+        await refUser.save();
+
+        // نطلع للمستوى الأعلى
+        currentRef = refUser.refBy;
+      }
+
       // 🔥 تفعيل الباقة
       user.packageName = parsed.packageName;
       user.packageStart = new Date();
