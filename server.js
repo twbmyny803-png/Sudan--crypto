@@ -37,6 +37,9 @@ const userSchema = new mongoose.Schema({
   phone: String,
   password: String,
   ref: String,
+  refCode: String,
+  refBy: String,
+
   balance: { type: Number, default: 0 },
   incomeBalance: { type: Number, default: 0 },
 
@@ -95,6 +98,15 @@ const upload = multer({ storage });
 
 // ملفات الموقع (تأكد أن ملفات الأدمن داخل مجلد public)
 app.use(express.static(path.join(__dirname, "public")));
+
+function generateRefCode() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
 
 // ================== إرسال كود ==================
 app.post("/send-code", async (req, res) => {
@@ -160,12 +172,23 @@ app.post("/register", async (req, res) => {
     return res.json({ success: false, message: "الإيميل مستخدم" });
   }
 
+  let refCode;
+  let existsCode = true;
+
+  while (existsCode) {
+    refCode = generateRefCode();
+    const userExists = await User.findOne({ refCode });
+    if (!userExists) existsCode = false;
+  }
+
   const user = new User({
     name,
     email,
     phone,
     password,
-    ref: ref || null
+    ref: ref || null,
+    refBy: ref || null, // 🔥 الربط
+    refCode: refCode     // 🔥 كود الدعوة
   });
 
   await user.save();
@@ -270,7 +293,8 @@ app.post("/user-data", async (req, res) => {
     packageName: user.packageName,
     packageStart: user.packageStart,
     packageDurationDays: user.packageDurationDays,
-    verificationRejectReason: user.verificationRejectReason || null
+    verificationRejectReason: user.verificationRejectReason || null,
+    refCode: user.refCode
   });
 });
 
@@ -370,131 +394,6 @@ app.post("/admin-add-balance", async (req, res) => {
     { email },
     { $inc: { balance: Number(amount) } }
   );
-
-  res.json({ success: true });
-});
-
-// ➖ خصم رصيد
-app.post("/admin-sub-balance", async (req, res) => {
-  const { email, amount } = req.body;
-
-  await User.updateOne(
-    { email },
-    { $inc: { balance: -Number(amount) } }
-  );
-
-  res.json({ success: true });
-});
-
-// 🔒 منع السحب
-app.post("/admin-block-withdraw", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { withdrawBlocked: true });
-  res.json({ success: true });
-});
-
-// 📦 إضافة باقة
-app.post("/admin-add-package", async (req, res) => {
-  const { email, packageName, dailyProfit, durationDays } = req.body;
-
-  await User.updateOne(
-    { email },
-    {
-      packageName,
-      dailyProfit,
-      packageDurationDays: durationDays,
-      packageStart: new Date()
-    }
-  );
-
-  res.json({ success: true });
-});
-
-// 🧩 1. عدل /deposit-request (تحديث أمني)
-app.post("/deposit-request", async (req, res) => {
-  const { email, amount, txid, image, orderId } = req.body;
-
-  if (!email || !txid) {
-    return res.json({ success: false, message: "بيانات ناقصة" });
-  }
-
-  try {
-    const exists = await Deposit.findOne({ txid });
-    if (exists) {
-      return res.json({ success: false, message: "TXID مستخدم" });
-    }
-
-    const deposit = new Deposit({
-      email,
-      name: "test", // مؤقت
-      amount: Number(amount) || 0,
-      txid,
-      image: image || null,
-      orderId,
-
-      packageName: req.body.packageName || null, // 🔥 تضيف دي
-      network: req.body.network || null          // 🔥 تضيف دي
-    });
-
-    await deposit.save();
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
-  }
-});
-
-// 📸 رفع إثبات الإيداع (تم التحديث)
-app.post("/upload-proof", upload.single("file"), (req, res) => {
-  try {
-    const { email, txid, orderId } = req.body;
-
-    console.log("🔥 deposit received:", email, txid); // مهم للتأكد
-
-    if (!req.file) {
-      return res.json({ success: false, message: "ما في صورة" });
-    }
-
-    const imagePath = "/uploads/" + req.file.filename;
-
-        res.json({
-      success: true,
-      imageUrl: imagePath
-    });
-
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
-  }
-});
-
-// 🧩 3. استبدل /admin-deposits
-app.get("/admin-deposits", async (req, res) => {
-  const deposits = await Deposit.find().sort({ createdAt: -1 });
-  res.json({ success: true, deposits });
-});
-
-// 🧩 4. استبدل قبول الإيداع
-app.post("/admin-approve-deposit", async (req, res) => {
-  const { id } = req.body;
-
-  const deposit = await Deposit.findById(id);
-  if (!deposit) return res.json({ success: false });
-
-  if (deposit.status !== "pending") {
-    return res.json({ success: false });
-  }
-
-  const user = await User.findOne({ email: deposit.email });
-  if (!user) return res.json({ success: false });
-
-  user.balance += Number(deposit.amount);
-  await user.save();
-
-  deposit.status = "approved";
-  await deposit.save();
 
   res.json({ success: true });
 });
