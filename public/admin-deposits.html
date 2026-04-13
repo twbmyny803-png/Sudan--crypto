@@ -139,7 +139,7 @@ async function loadDeposits(){
 
       // ✅ تحسين عرض الصورة
       const img = d.image 
-        ? `<img src="${API}${d.image}">` 
+        ? `<img src="${API}${d.image.startsWith('/') ? '' : '/'}${d.image}">` 
         : "❌";
 
       const row = `
