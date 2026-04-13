@@ -250,6 +250,45 @@
     }
     .toast.success { background: #10b981; color: white; }
     .toast.error { background: #ef4444; color: white; }
+
+    /* أنماط رفع الصور الجديدة */
+    .upload-card {
+      border: 2px dashed rgba(240,185,11,0.5);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      margin-top: 10px;
+      background: rgba(15,25,45,0.6);
+      transition: 0.3s;
+    }
+    .upload-card:hover {
+      border-color: #F0B90B;
+      background: rgba(15,25,45,0.8);
+    }
+    .upload-card i {
+      font-size: 30px;
+      color: #F0B90B;
+      margin-bottom: 8px;
+    }
+    .upload-card p {
+      color: #aaa;
+      font-size: 13px;
+    }
+    .upload-card img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: contain;
+      margin-top: 10px;
+      border-radius: 10px;
+      display: none;
+    }
+    #statusMessage {
+      text-align: center;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #F0B90B;
+    }
   </style>
 </head>
 <body>
@@ -323,7 +362,7 @@
 <div id="withdrawPasswordModal" class="modal">
   <div class="modal-content">
     <h3><i class="fa-solid fa-lock"></i> تعيين كلمة السحب</h3>
-    <p style="color:#aaa; font-size:12px; margin-bottom:8px;">⚠️ كلمة السحب مكونة من 6 أرقام، لا يمكن تغييرها بعد الحفظ</p>
+    <p style="color:#aaa; font-size:12px; margin-bottom:8px;"><i class="fa-solid fa-triangle-exclamation"></i> كلمة السحب مكونة من 6 أرقام، لا يمكن تغييرها بعد الحفظ</p>
     <input type="password" id="withdrawPass" placeholder="كلمة السحب (6 أرقام)" maxlength="6" inputmode="numeric">
     <input type="password" id="confirmWithdrawPass" placeholder="تأكيد كلمة السحب" maxlength="6">
     <button class="btn-gold" onclick="setWithdrawPassword()">حفظ</button>
@@ -335,28 +374,45 @@
 <div id="verificationModal" class="modal">
   <div class="modal-content">
     <h3><i class="fa-solid fa-id-card"></i> توثيق الحساب</h3>
-    <p style="color:#aaa; font-size:12px; margin-bottom:8px;">يرجى رفع صورة واضحة للمستند</p>
-    <input type="text" id="fullName" placeholder="الاسم كما في المستند">
-    <select id="docType" onchange="toggleFileInputs()">
-      <option value="">اختر نوع المستند</option>
-      <option value="بطاقة قومية">بطاقة قومية</option>
-      <option value="جواز سفر">جواز سفر</option>
-    </select>
-    <input type="text" id="docNumber" placeholder="رقم المستند">
     
-    <div id="idFiles" style="display:none;">
-      <label class="file-label">الوجه الأمامي للبطاقة</label>
-      <input type="file" id="frontFile" accept="image/*">
-      <label class="file-label">الوجه الخلفي للبطاقة</label>
-      <input type="file" id="backFile" accept="image/*">
+    <div id="uploadSection">
+      <p style="color:#aaa; font-size:12px; margin-bottom:8px;">يرجى رفع صورة واضحة للمستند</p>
+      <input type="text" id="fullName" placeholder="الاسم كما في المستند">
+      <select id="docType" onchange="toggleFileInputs()">
+        <option value="">اختر نوع المستند</option>
+        <option value="بطاقة قومية">بطاقة قومية</option>
+        <option value="جواز سفر">جواز سفر</option>
+      </select>
+      <input type="text" id="docNumber" placeholder="رقم المستند">
+      
+      <div id="idFiles" style="display:none;">
+        <div class="upload-card" onclick="selectFile('front')">
+          <i class="fa-solid fa-id-card"></i>
+          <p>الوجه الأمامي للبطاقة</p>
+          <img id="previewFront">
+          <input type="file" id="frontFile" hidden accept="image/*">
+        </div>
+        <div class="upload-card" onclick="selectFile('back')">
+          <i class="fa-solid fa-id-card"></i>
+          <p>الوجه الخلفي للبطاقة</p>
+          <img id="previewBack">
+          <input type="file" id="backFile" hidden accept="image/*">
+        </div>
+      </div>
+
+      <div id="passportFiles" style="display:none;">
+        <div class="upload-card" onclick="selectFile('passport')">
+          <i class="fa-solid fa-passport"></i>
+          <p>صورة جواز السفر</p>
+          <img id="previewPassport">
+          <input type="file" id="passportFile" hidden accept="image/*">
+        </div>
+      </div>
+
+      <button class="btn-gold" id="submitBtn" onclick="submitVerification()">إرسال الطلب</button>
     </div>
 
-    <div id="passportFiles" style="display:none;">
-      <label class="file-label">صورة جواز السفر</label>
-      <input type="file" id="passportFile" accept="image/*">
-    </div>
-
-    <button class="btn-gold" onclick="submitVerification()">إرسال الطلب</button>
+    <div id="statusMessage"></div>
     <button class="btn-outline" onclick="closeVerificationModal()">إلغاء</button>
   </div>
 </div>
@@ -420,21 +476,33 @@
   // ============================================
   function updateVerificationStatus(user) {
     const statusDiv = document.getElementById('verificationStatus');
+    const uploadSection = document.getElementById("uploadSection");
+    const statusMessage = document.getElementById("statusMessage");
     
     if (!statusDiv) return;
 
-    if (user.isVerified) {
+    const status = user.verificationStatus;
+
+    if (user.isVerified || status === 'verified') {
       statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
-    } else if (user.verificationStatus === 'pending') {
+      uploadSection.style.display = "none";
+      statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> تم التوثيق بنجاح";
+    } else if (status === 'pending') {
       statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
-    } else if (user.verificationStatus === 'rejected') {
+      uploadSection.style.display = "none";
+      statusMessage.innerHTML = "<i class='fa-solid fa-hourglass-half'></i> طلبك قيد المراجعة";
+    } else if (status === 'rejected') {
       statusDiv.innerHTML = `
         <span class="unverified-badge">
-          ❌ مرفوض - ${user.verificationRejectReason || ""}
+          <i class="fa-solid fa-circle-xmark"></i> مرفوض - ${user.verificationRejectReason || ""}
         </span>
       `;
+      uploadSection.style.display = "block";
+      statusMessage.innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> تم رفض الطلب، يمكنك إعادة المحاولة";
     } else {
       statusDiv.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
+      uploadSection.style.display = "block";
+      statusMessage.innerHTML = "";
     }
   }
 
@@ -453,15 +521,32 @@
   function openWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'flex'; }
   function closeWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'none'; }
 
+  function selectFile(type) {
+    document.getElementById(type + "File").click();
+  }
+
+  // معاينة الصور المرفوعة
+  function setupPreview(inputId, imgId) {
+    document.getElementById(inputId).onchange = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function() {
+        const img = document.getElementById(imgId);
+        img.src = reader.result;
+        img.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    };
+  }
+
+  setupPreview("frontFile", "previewFront");
+  setupPreview("backFile", "previewBack");
+  setupPreview("passportFile", "previewPassport");
+
   function openVerificationModal() { 
     document.getElementById('verificationModal').style.display = 'flex';
-    document.getElementById('fullName').value = '';
-    document.getElementById('docType').value = '';
-    document.getElementById('docNumber').value = '';
-    document.getElementById('frontFile').value = '';
-    document.getElementById('backFile').value = '';
-    document.getElementById('passportFile').value = '';
-    toggleFileInputs();
+    // لا نمسح الحقول هنا لأننا سنعتمد على checkStatus للتحكم في العرض
   }
   function closeVerificationModal() { document.getElementById('verificationModal').style.display = 'none'; }
 
@@ -590,7 +675,8 @@
       const data = await res.json();
       if (data.success) {
         showToast('تم إرسال طلب التوثيق بنجاح');
-        closeVerificationModal();
+        // تحديث الواجهة فوراً بعد الإرسال
+        loadUserData(); 
       } else {
         showToast(data.message || 'فشل إرسال الطلب', true);
       }
