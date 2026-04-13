@@ -384,6 +384,37 @@ app.get("/admin-deposits", async (req, res) => {
   }
 });
 
+// ================== قبول الإيداع ==================
+app.post("/admin-approve-deposit", async (req, res) => {
+  const { id } = req.body;
+
+  try {
+    const deposit = await Deposit.findById(id);
+    if (!deposit) return res.json({ success: false });
+
+    // لو متقبل قبل كدا
+    if (deposit.status === "approved") {
+      return res.json({ success: false, message: "تم القبول مسبقاً" });
+    }
+
+    deposit.status = "approved";
+    await deposit.save();
+
+    // 🔥 إضافة الرصيد للمستخدم
+    const user = await User.findOne({ email: deposit.email });
+    if (user) {
+      user.balance += Number(deposit.amount);
+      await user.save();
+    }
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+});
+
 // 🚫 حظر
 app.post("/admin-block", async (req, res) => {
   const { email } = req.body;
