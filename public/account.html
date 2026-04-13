@@ -14,6 +14,7 @@
       min-height: 100vh;
       padding: 20px;
       position: relative;
+      overflow-y: auto;
     }
     .stars {
       position: fixed;
@@ -40,6 +41,7 @@
       margin: 0 auto;
       position: relative;
       z-index: 2;
+      padding-bottom: 120px;
     }
     .back-btn {
       display: inline-flex;
@@ -62,6 +64,8 @@
       border: 1px solid rgba(255,255,255,0.2);
       padding: 24px;
       margin-bottom: 16px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     h2 {
       color: #F0B90B;
@@ -259,6 +263,7 @@
       text-align: center;
       cursor: pointer;
       margin-top: 10px;
+      margin-bottom: 15px;
       background: rgba(15,25,45,0.6);
       transition: 0.3s;
     }
@@ -443,7 +448,7 @@
   }
 
   // ============================================
-  // 👤 دالة تحميل بيانات المستخدم (المحدثة)
+  // 👤 دالة تحميل بيانات المستخدم
   // ============================================
   async function loadUserData() {
     try {
@@ -460,7 +465,6 @@
         document.getElementById('userEmail').innerText = data.email;
         document.getElementById('userPhone').innerText = data.phone;
         
-        // تحديث حالة التوثيق إذا كانت موجودة في الاستجابة
         if (typeof updateVerificationStatus === 'function') {
           updateVerificationStatus(data);
         }
@@ -485,24 +489,24 @@
 
     if (user.isVerified || status === 'verified') {
       statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
-      uploadSection.style.display = "none";
-      statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> تم التوثيق بنجاح";
+      if(uploadSection) uploadSection.style.display = "none";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> تم التوثيق بنجاح";
     } else if (status === 'pending') {
       statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
-      uploadSection.style.display = "none";
-      statusMessage.innerHTML = "<i class='fa-solid fa-hourglass-half'></i> طلبك قيد المراجعة";
+      if(uploadSection) uploadSection.style.display = "none";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-hourglass-half'></i> طلبك قيد المراجعة";
     } else if (status === 'rejected') {
       statusDiv.innerHTML = `
         <span class="unverified-badge">
           <i class="fa-solid fa-circle-xmark"></i> مرفوض - ${user.verificationRejectReason || ""}
         </span>
       `;
-      uploadSection.style.display = "block";
-      statusMessage.innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> تم رفض الطلب، يمكنك إعادة المحاولة";
+      if(uploadSection) uploadSection.style.display = "block";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> تم رفض الطلب، يمكنك إعادة المحاولة";
     } else {
       statusDiv.innerHTML = '<span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> غير موثق</span>';
-      uploadSection.style.display = "block";
-      statusMessage.innerHTML = "";
+      if(uploadSection) uploadSection.style.display = "block";
+      if(statusMessage) statusMessage.innerHTML = "";
     }
   }
 
@@ -546,7 +550,6 @@
 
   function openVerificationModal() { 
     document.getElementById('verificationModal').style.display = 'flex';
-    // لا نمسح الحقول هنا لأننا سنعتمد على checkStatus للتحكم في العرض
   }
   function closeVerificationModal() { document.getElementById('verificationModal').style.display = 'none'; }
 
@@ -581,7 +584,6 @@
       if (data.success) {
         showToast('تم تغيير كلمة المرور بنجاح');
         closePasswordModal();
-        // مسح الحقول
         document.getElementById('currentPassword').value = '';
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmNewPassword').value = '';
@@ -620,7 +622,6 @@
       if (data.success) {
         showToast('تم تعيين كلمة السحب بنجاح');
         closeWithdrawPasswordModal();
-        // مسح الحقول
         document.getElementById('withdrawPass').value = '';
         document.getElementById('confirmWithdrawPass').value = '';
       } else {
@@ -675,7 +676,6 @@
       const data = await res.json();
       if (data.success) {
         showToast('تم إرسال طلب التوثيق بنجاح');
-        // تحديث الواجهة فوراً بعد الإرسال
         loadUserData(); 
       } else {
         showToast(data.message || 'فشل إرسال الطلب', true);
@@ -721,4 +721,4 @@
 </script>
 
 </body>
-</html>
+  </html>
