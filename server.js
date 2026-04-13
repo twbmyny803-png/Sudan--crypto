@@ -374,6 +374,16 @@ app.post("/admin-freeze", async (req, res) => {
   res.json({ success: true });
 });
 
+// ================== عرض الإيداعات للأدمن ==================
+app.get("/admin-deposits", async (req, res) => {
+  try {
+    const deposits = await Deposit.find().sort({ createdAt: -1 });
+    res.json({ success: true, deposits });
+  } catch (err) {
+    res.json({ success: false });
+  }
+});
+
 // 🚫 حظر
 app.post("/admin-block", async (req, res) => {
   const { email } = req.body;
