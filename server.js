@@ -717,6 +717,37 @@ app.get("/transactions/:email", async (req, res) => {
   }
 });
 
+// ================== الإحالات ==================
+app.get("/referrals/:email", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.params.email });
+    if (!user) return res.json({ success: false });
+
+    // 🧠 نجيب كل المستويات
+    const level1 = await User.find({ refBy: user.refCode });
+    const level2 = await User.find({ refBy: { $in: level1.map(u => u.refCode) } });
+    const level3 = await User.find({ refBy: { $in: level2.map(u => u.refCode) } });
+    const level4 = await User.find({ refBy: { $in: level3.map(u => u.refCode) } });
+    const level5 = await User.find({ refBy: { $in: level4.map(u => u.refCode) } });
+
+    res.json({
+      success: true,
+      refCode: user.refCode,
+      income: user.incomeBalance,
+      levels: {
+        level1,
+        level2,
+        level3,
+        level4,
+        level5
+      }
+    });
+
+  } catch (err) {
+    res.json({ success: false });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
