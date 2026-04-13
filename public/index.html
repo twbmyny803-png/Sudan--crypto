@@ -377,128 +377,114 @@
     <label><i class="fa-solid fa-lock"></i> كلمة المرور</label>
     <div class="password-wrapper">
       <input type="password" id="password" placeholder="••••••••">
-      <button class="toggle-password" id="togglePass">إظهار</button>
+      <button class="toggle-password" onclick="togglePass('password')">إظهار</button>
     </div>
   </div>
 
   <div class="input-group">
-    <label><i class="fa-solid fa-lock"></i> تأكيد كلمة المرور</label>
+    <label><i class="fa-solid fa-shield-check"></i> تأكيد كلمة المرور</label>
     <div class="password-wrapper">
       <input type="password" id="confirmPassword" placeholder="••••••••">
-      <button class="toggle-password" id="toggleConfirmPass">إظهار</button>
+      <button class="toggle-password" onclick="togglePass('confirmPassword')">إظهار</button>
     </div>
   </div>
 
-  <div class="alert-message" id="registerSuccess"></div>
+  <button class="btn-register" id="registerBtn"><i class="fa-solid fa-user-check"></i> إنشاء الحساب الآن</button>
+  <div class="alert-message alert-success" id="registerSuccess"></div>
   <div class="alert-message alert-error" id="registerError"></div>
 
-  <button class="btn-register" id="registerBtn"><i class="fa-solid fa-user-check"></i> إنشاء الحساب الآن</button>
-
   <div class="links">
-    <a href="login.html">لديك حساب بالفعل؟ تسجيل الدخول <i class="fa-solid fa-arrow-left"></i></a>
+    لديك حساب بالفعل؟ <a href="login.html">تسجيل الدخول <i class="fa-solid fa-arrow-left"></i></a>
   </div>
 
   <footer>
-    &copy; 2024 سودان كربتو - جميع الحقوق محفوظة
+    &copy; 2026 سودان كربتو - جميع الحقوق محفوظة
   </footer>
 </div>
 
 <script>
-  // إعداد النجوم الخلفية
+  // التقاط كود الإحالة من الرابط وتخزينه
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCodeFromURL = urlParams.get("ref");
+
+  if (refCodeFromURL) {
+    localStorage.setItem("refCode", refCodeFromURL);
+  }
+
+  // خلفية النجوم
   const starsContainer = document.getElementById('starsContainer');
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 120; i++) {
     const star = document.createElement('div');
     star.className = 'star';
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
     star.style.width = Math.random() * 3 + 'px';
     star.style.height = star.style.width;
+    star.style.top = Math.random() * 100 + '%';
+    star.style.left = Math.random() * 100 + '%';
     star.style.animationDelay = Math.random() * 3 + 's';
     starsContainer.appendChild(star);
   }
 
-  // إظهار/إخفاء كلمة المرور
-  const togglePass = document.getElementById('togglePass');
-  const passwordInput = document.getElementById('password');
-  togglePass.addEventListener('click', () => {
-    const type = passwordInput.type === 'password' ? 'text' : 'password';
-    passwordInput.type = type;
-    togglePass.textContent = type === 'password' ? 'إظهار' : 'إخفاء';
-  });
-
-  // إظهار/إخفاء تأكيد كلمة المرور
-  const toggleConfirmPass = document.getElementById('toggleConfirmPass');
-  const confirmPasswordInput = document.getElementById('confirmPassword');
-  toggleConfirmPass.addEventListener('click', () => {
-    const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
-    confirmPasswordInput.type = type;
-    toggleConfirmPass.textContent = type === 'password' ? 'إظهار' : 'إخفاء';
-  });
-
-  // التعامل مع كود التحقق (الانتقال التلقائي)
-  const codeInputs = document.querySelectorAll('.code-box input');
-  codeInputs.forEach((input, index) => {
-    input.addEventListener('input', (e) => {
-      if (e.target.value && index < 5) codeInputs[index + 1].focus();
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !e.target.value && index > 0) codeInputs[index - 1].focus();
-    });
-  });
-
-  // متغير للتحكم في منع الإرسال المتكرر
-  let canSend = true;
-  let timerInterval;
-
-  // دالة التحقق من صيغة البريد الإلكتروني
-  function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  function togglePass(id) {
+    const input = document.getElementById(id);
+    const btn = input.nextElementSibling;
+    if (input.type === "password") {
+      input.type = "text";
+      btn.innerText = "إخفاء";
+    } else {
+      input.type = "password";
+      btn.innerText = "إظهار";
+    }
   }
 
-  // العداد الزمني
+  const API_BASE = "https://sudancrypto-server.onrender.com"; // استبدله برابط سيرفرك
+
+  const codeInputs = document.querySelectorAll('.code-box input');
+  codeInputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+      if (input.value && index < codeInputs.length - 1) codeInputs[index + 1].focus();
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && index > 0) codeInputs[index - 1].focus();
+    });
+  });
+
+  function showAlert(id, msg, isError = false) {
+    const el = document.getElementById(id);
+    el.innerText = msg;
+    el.style.display = 'block';
+    if (isError) el.className = 'alert-message alert-error';
+    else el.className = 'alert-message alert-success';
+  }
+
+  let timer;
+  let canSend = true;
+
   function startTimer() {
-    const countSpan = document.getElementById('count');
-    const resendBtn = document.getElementById('resendBtn');
-    const btn = document.getElementById("sendCodeBtn");
-
-    let time = 60;
-    countSpan.innerText = time;
-    resendBtn.style.display = 'none';
-
-    timerInterval = setInterval(() => {
-      time--;
-      countSpan.innerText = time;
-
-      if (time <= 0) {
-        clearInterval(timerInterval);
-
-        // 🔓 فتح الزر بعد الدقيقة
+    let timeLeft = 60;
+    document.getElementById('resendBtn').style.display = 'none';
+    document.querySelector('.timer').style.display = 'block';
+    
+    clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft--;
+      document.getElementById('count').innerText = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        document.getElementById('resendBtn').style.display = 'block';
+        document.querySelector('.timer').style.display = 'none';
         canSend = true;
-        btn.disabled = false;
-        btn.style.opacity = "1";
-
-        resendBtn.style.display = 'block';
+        document.getElementById("sendCodeBtn").disabled = false;
+        document.getElementById("sendCodeBtn").style.opacity = "1";
       }
     }, 1000);
   }
 
-  // تنبيهات
-  function showAlert(id, msg, isError = false) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = 'block';
-    el.className = isError ? 'alert-message alert-error' : 'alert-message alert-success';
-    setTimeout(() => { el.style.display = 'none'; }, 5000);
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  // API Base URL
-  const API_BASE = window.location.origin;
-
   async function sendCode() {
-
-    if (!canSend) return; // ❌ يمنع الإرسال قبل انتهاء الوقت
-
+    if (!canSend) return;
     const email = document.getElementById('email').value.trim();
 
     if (!email) return showAlert('sendError', '✏️ أدخل البريد الإلكتروني أولاً', true);
@@ -543,7 +529,7 @@
     const name = document.getElementById('fullName').value;
     const email = document.getElementById('email').value;
     const phone = document.getElementById('phone').value;
-    const ref = document.getElementById('referralCode').value;
+    const refInput = document.getElementById('referralCode').value;
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
@@ -584,7 +570,13 @@
       const regRes = await fetch(`${API_BASE}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, password, ref })
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          phone, 
+          password, 
+          ref: refInput || localStorage.getItem("refCode") || null 
+        })
       });
       const regData = await regRes.json();
 
@@ -614,8 +606,12 @@
 
   // تعبئة رمز الإحالة من الرابط
   const urlRef = new URLSearchParams(window.location.search).get('ref');
-  if (urlRef) document.getElementById('referralCode').value = urlRef;
+  if (urlRef) {
+    document.getElementById('referralCode').value = urlRef;
+  } else if (localStorage.getItem("refCode")) {
+    document.getElementById('referralCode').value = localStorage.getItem("refCode");
+  }
 </script>
 
 </body>
-</html>
+        </html>
