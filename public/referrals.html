@@ -42,6 +42,7 @@ h2 {
   border-radius: 10px;
   font-size: 12px;
   word-break: break-all;
+  margin-top: 10px;
 }
 
 .btn {
@@ -62,11 +63,19 @@ h2 {
 .qr {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin-top: 15px;
+  background: white;
+  padding: 10px;
+  border-radius: 15px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .level {
-  margin-top: 10px;
+  margin-top: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 10px;
 }
 
 .user {
@@ -75,12 +84,15 @@ h2 {
   border-radius: 10px;
   margin-top: 5px;
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .share {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .share a {
@@ -90,6 +102,7 @@ h2 {
   border-radius: 20px;
   color: white;
   text-decoration: none;
+  font-size: 18px;
 }
 
 .whatsapp { background: #25D366; }
@@ -103,6 +116,15 @@ h2 {
   display: flex;
   align-items: center;
   gap: 5px;
+  font-weight: bold;
+}
+
+#income {
+  font-size: 24px;
+  font-weight: 800;
+  color: #F0B90B;
+  text-align: center;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -117,10 +139,9 @@ h2 {
 
 <h2><i class="fa-solid fa-users"></i> الإحالات والفريق</h2>
 
-<!-- رابط الدعوة -->
 <div class="card">
 <i class="fa-solid fa-link"></i> رابط الدعوة
-<div class="link-box" id="link"></div>
+<div class="link-box" id="link">جاري التحميل...</div>
 
 <button class="btn" onclick="copyLink()">
 <i class="fa-solid fa-copy"></i> نسخ الرابط
@@ -129,57 +150,58 @@ h2 {
 <div class="qr" id="qrcode"></div>
 
 <div class="share">
-<a id="wa" class="whatsapp"><i class="fa-brands fa-whatsapp"></i></a>
-<a id="tg" class="telegram"><i class="fa-brands fa-telegram"></i></a>
-<a id="fb" class="facebook"><i class="fa-brands fa-facebook"></i></a>
+<a id="wa" class="whatsapp" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+<a id="tg" class="telegram" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+<a id="fb" class="facebook" target="_blank"><i class="fa-brands fa-facebook"></i></a>
 </div>
 </div>
 
-<!-- الأرباح -->
 <div class="card">
 <i class="fa-solid fa-coins"></i> أرباح الإحالات
 <div id="income">0 USDT</div>
 </div>
 
-<!-- الفريق -->
-<div class="card" id="team"></div>
+<div class="card">
+<i class="fa-solid fa-sitemap"></i> فريقي
+<div id="team"></div>
+</div>
 
 </div>
 
 <script>
-const API = "https://sudan-crypto-4mgt.onrender.com";
+const API = "https://sudan-crypto-4mgt.onrender.com"; // ✅ السيرفر الصحيح
 const email = localStorage.getItem("userEmail");
 
 async function load() {
+  if (!email) {
+    alert("سجل دخول أول");
+    location.href = 'login.html';
+    return;
+  }
+
   const res = await fetch(API + "/referrals/" + email);
   const data = await res.json();
 
   if (!data.success) return;
 
-  const link = window.location.origin + "/?ref=" + data.refCode;
+  const link = window.location.origin + "/index.html?ref=" + data.refCode;
 
   document.getElementById("link").innerText = link;
-  document.getElementById("income").innerText = data.income + " USDT";
+  document.getElementById("income").innerText = data.income.toFixed(2) + " USDT";
 
-  // QR Code
+  document.getElementById("qrcode").innerHTML = "";
   new QRCode(document.getElementById("qrcode"), {
     text: link,
     width: 150,
     height: 150
   });
 
-  // مشاركة
-  document.getElementById("wa").href =
-    "https://wa.me/?text=" + encodeURIComponent(link);
+  document.getElementById("wa").href = "https://wa.me/?text=" + encodeURIComponent(link);
+  document.getElementById("tg").href = "https://t.me/share/url?url=" + encodeURIComponent(link);
+  document.getElementById("fb").href = "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(link);
 
-  document.getElementById("tg").href =
-    "https://t.me/share/url?url=" + encodeURIComponent(link);
-
-  document.getElementById("fb").href =
-    "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(link);
-
-  // الفريق
   const team = document.getElementById("team");
+  team.innerHTML = "";
 
   const names = {
     level1: "المستوى الأول",
@@ -195,7 +217,11 @@ async function load() {
     team.innerHTML += `
       <div class="level">
         <strong>${names[level]} (${users.length})</strong>
-        ${users.map(u => `<div class="user"><i class="fa-solid fa-user"></i> ${u.name}</div>`).join("")}
+        ${users.map(u => `
+          <div class="user">
+            <i class="fa-solid fa-user"></i> ${u.name}
+          </div>
+        `).join("")}
       </div>
     `;
   });
@@ -204,11 +230,11 @@ async function load() {
 function copyLink() {
   const text = document.getElementById("link").innerText;
   navigator.clipboard.writeText(text);
-  alert("تم نسخ الرابط");
+  alert("تم النسخ");
 }
 
 load();
 </script>
 
 </body>
-                               </html>
+</html>
