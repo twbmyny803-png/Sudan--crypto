@@ -827,14 +827,14 @@ app.post("/nowpayments-webhook", async (req, res) => {
       await user.save();
 
       const packages = {
-        "50": { name: "البرونزية", daily: 2, duration: 280 },
-        "100": { name: "الفضية", daily: 6, duration: 280 },
-        "250": { name: "الذهبية", daily: 10, duration: 280 },
-        "500": { name: "البلاتينية", daily: 15, duration: 280 },
-        "1000": { name: "الماسية", daily: 20, duration: 280 }
+        "bronze": { name: "البرونزية", daily: 2, duration: 280 },
+        "silver": { name: "الفضية", daily: 6, duration: 280 },
+        "gold": { name: "الذهبية", daily: 10, duration: 280 },
+        "platinum": { name: "البلاتينية", daily: 15, duration: 280 },
+        "diamond": { name: "الماسية", daily: 20, duration: 280 }
       };
 
-      const pkg = packages[String(payment.price_amount)];
+      const pkg = packages[String(parsed.packageName)];
 
       if (pkg) {
         user.packageName = pkg.name;
@@ -881,7 +881,8 @@ app.post("/create-payment", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        pay_amount: Number(amount),
+        price_amount: Number(amount),
+        price_currency: "usd",
         pay_currency: "usdttrc20",
         order_id: orderId,
 
