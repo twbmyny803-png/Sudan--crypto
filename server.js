@@ -929,12 +929,15 @@ app.get("/transactions/:email", async (req, res) => {
     
     const withdraws = await Withdraw.find({ email });
 
-    const referrals = await ReferralTransaction.find({ email });
+    const referrals = await ReferralTransaction.find({
+      email,
+      type: { $in: ["referral", "transfer", "daily_profit"] }
+    }).lean();
 
     const referralFormatted = referrals.map(r => ({
-      type: r.type,
+      type: r.type || "referral",
       amount: r.amount,
-      status: r.status || "approved", // ✅ التعديل هنا
+      status: r.status || "approved",
       date: r.createdAt,
       level: r.level || 0
     }));
