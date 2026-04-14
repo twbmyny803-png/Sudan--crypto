@@ -787,11 +787,11 @@ app.get("/transactions/:email", async (req, res) => {
     const referrals = await ReferralTransaction.find({ email });
 
     const referralFormatted = referrals.map(r => ({
-      type: r.type, // ✅ التعديل هنا
+      type: r.type,
       amount: r.amount,
-      status: "earned",
+      status: r.status || "approved", // ✅ التعديل هنا
       date: r.createdAt,
-      level: r.level || 0 // ✅ عشان ما يظهر undefined
+      level: r.level || 0
     }));
 
     // ندمجهم
