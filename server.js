@@ -367,6 +367,38 @@ app.get("/admin-users", async (req, res) => {
   res.json({ success: true, users });
 });
 
+// 📄 عرض طلبات التوثيق
+app.get("/admin-verifications", async (req, res) => {
+  try {
+    const users = await User.find({
+      verificationStatus: "pending"
+    });
+
+    res.json({
+      success: true,
+      requests: users
+    });
+
+  } catch (err) {
+    res.json({ success: false });
+  }
+});
+
+// 📥 عرض الإيداعات للأدمن
+app.get("/admin-deposits", async (req, res) => {
+  try {
+    const deposits = await Deposit.find().sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      deposits
+    });
+
+  } catch (err) {
+    res.json({ success: false });
+  }
+});
+
 // ✅ توثيق
 app.post("/admin-verify", async (req, res) => {
   const { email } = req.body;
@@ -401,21 +433,33 @@ app.post("/admin-delete", async (req, res) => {
 app.post("/admin-update-wallet", async (req, res) => {
   const { email, newWallet } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ success: false });
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "المستخدم غير موجود" });
+    }
 
-  // 🔐 تحقق من العنوان
-  if (!newWallet.startsWith("T") || newWallet.length < 30) {
-    return res.json({ success: false, message: "عنوان غير صحيح" });
+    // تحقق العنوان
+    if (!newWallet || !newWallet.startsWith("T") || newWallet.length < 30) {
+      return res.json({ success: false, message: "عنوان غير صحيح" });
+    }
+
+    // 🔥 تحديث العنوان في حساب المستخدم
+    user.walletAddress = newWallet;
+    user.walletLocked = true;
+    await user.save();
+
+    // 🔥 تحديث الطلبات الحالية (المعلقة)
+    await Withdraw.updateMany(
+      { email: email, status: "pending" },
+      { wallet: newWallet }
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    res.json({ success: false });
   }
-
-  // 🔥 تحديث العنوان
-  user.walletAddress = newWallet;
-  user.walletLocked = true;
-
-  await user.save();
-
-  res.json({ success: true });
 });
 
 // ➕ إضافة رصيد
