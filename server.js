@@ -1025,10 +1025,17 @@ setInterval(async () => {
       const profitToAdd = expectedProfit - actualProfit;
 
       if (profitToAdd > 0) {
-        user.balance += profitToAdd;
         user.incomeBalance += profitToAdd;
-
         await user.save();
+
+        // 🧾 تسجيل الربح اليومي
+        await ReferralTransaction.create({
+          email: user.email,
+          type: "daily_profit",
+          amount: profitToAdd,
+          status: "approved",
+          createdAt: new Date()
+        });
       }
     }
 
