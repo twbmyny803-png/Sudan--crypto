@@ -35,10 +35,6 @@ h2 {
   width: fit-content;
 }
 
-.back-btn:hover {
-  background: rgba(240,185,11,0.3);
-}
-
 .item {
   background: #1a2447;
   padding: 14px;
@@ -78,22 +74,31 @@ h2 {
 const API = "https://sudan-crypto-4mgt.onrender.com";
 const email = localStorage.getItem("userEmail");
 
-// ✅ حالات العمليات
+// 🔥 الحالات
 function getStatusData(status) {
+
   if (status === "pending") {
     return { text: "قيد المراجعة", color: "yellow", icon: "fa-clock" };
   }
+
   if (status === "approved") {
     return { text: "مكتمل", color: "green", icon: "fa-circle-check" };
   }
+
   if (status === "rejected") {
     return { text: "مرفوض", color: "red", icon: "fa-circle-xmark" };
   }
+
   if (status === "expired") {
     return { text: "منتهي", color: "red", icon: "fa-hourglass-end" };
   }
+
   if (status === "earned") {
-    return { text: "تم إضافة عمولة الفريق", color: "green", icon: "fa-coins" };
+    return { text: "تمت إضافة عمولة الفريق", color: "green", icon: "fa-coins" };
+  }
+
+  if (status === "transfer") {
+    return { text: "تم تحويل الأرباح", color: "green", icon: "fa-coins" };
   }
 
   return { text: status, color: "", icon: "fa-question" };
@@ -104,8 +109,8 @@ function goBack() {
   window.location.href = "dashboard.html";
 }
 
-// تحميل البيانات
 async function load() {
+
   if (!email) {
     document.getElementById("list").innerHTML = "لم يتم العثور على المستخدم";
     return;
@@ -129,18 +134,26 @@ async function load() {
     let typeText = "";
     let typeIcon = "";
 
+    // 🔥 الأنواع (مهم جداً)
     if (t.type === "deposit") {
       typeText = "إيداع";
       typeIcon = "fa-arrow-down";
+
     } else if (t.type === "withdraw") {
       typeText = "سحب";
       typeIcon = "fa-arrow-up";
-    } else if (t.type === "referral") {
-      typeText = `عمولة إحالة (مستوى ${t.level})`;
-      typeIcon = "fa-users";
+
     } else if (t.type === "transfer") {
       typeText = "تحويل أرباح";
       typeIcon = "fa-coins";
+
+    } else if (t.type === "referral") {
+      typeText = `عمولة إحالة (مستوى ${t.level || 1})`;
+      typeIcon = "fa-users";
+
+    } else {
+      typeText = "عملية";
+      typeIcon = "fa-question";
     }
 
     list.innerHTML += `
