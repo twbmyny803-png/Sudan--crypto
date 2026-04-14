@@ -388,31 +388,41 @@ app.get("/admin-deposits", async (req, res) => {
 app.post("/admin-approve-deposit", async (req, res) => {
   const { id } = req.body;
 
-  try {
-    const deposit = await Deposit.findById(id);
-    if (!deposit) return res.json({ success: false });
+  const deposit = await Deposit.findById(id);
+  if (!deposit) return res.json({ success: false });
 
-    // لو متقبل قبل كدا
-    if (deposit.status === "approved") {
-      return res.json({ success: false, message: "تم القبول مسبقاً" });
-    }
+  // ✔️ تحديث الحالة
+  deposit.status = "approved";
+  await deposit.save();
 
-    deposit.status = "approved";
-    await deposit.save();
+  // ✔️ جيب المستخدم
+  const user = await User.findOne({ email: deposit.email });
+  if (!user) return res.json({ success: false });
 
-    // 🔥 إضافة الرصيد للمستخدم
-    const user = await User.findOne({ email: deposit.email });
-    if (user) {
-      user.balance += Number(deposit.amount);
-      await user.save();
-    }
+  // ✔️ أضف الرصيد للمستخدم
+  user.balance += Number(deposit.amount);
+  await user.save();
 
-    res.json({ success: true });
+  // 🔥 العمولات (الإحالات)
+  const percentages = [0.10, 0.08, 0.06, 0.04, 0.02];
 
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
+  let currentRef = user.refBy;
+
+  for (let i = 0; i < 5; i++) {
+    if (!currentRef) break;
+
+    const refUser = await User.findOne({ refCode: currentRef });
+    if (!refUser) break;
+
+    const profit = deposit.amount * percentages[i];
+
+    refUser.incomeBalance += profit;
+    await refUser.save();
+
+    currentRef = refUser.refBy;
   }
+
+  res.json({ success: true });
 });
 
 // 🚫 حظر
