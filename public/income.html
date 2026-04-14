@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الدخل اليومي</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+  background: #0a0f2a;
+  color: white;
+  font-family: Arial;
+  padding: 20px;
+}
+
+h2 {
+  text-align: center;
+  color: #f0b90b;
+}
+
+.item {
+  background: #1a2447;
+  padding: 14px;
+  border-radius: 14px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>الدخل اليومي</h2>
+
+<div id="list">جاري التحميل...</div>
+
+<script>
+const API = "https://sudan-crypto-4mgt.onrender.com";
+const email = localStorage.getItem("userEmail");
+
+async function load() {
+
+  if (!email) {
+    document.getElementById("list").innerText = "لا يوجد مستخدم";
+    return;
+  }
+
+  const res = await fetch(API + "/transactions/" + email);
+  const data = await res.json();
+
+  if (!data.success) {
+    document.getElementById("list").innerText = "خطأ في التحميل";
+    return;
+  }
+
+  // 🔥 فلترة الربح اليومي فقط
+  const profits = data.data.filter(t => t.type === "daily_profit");
+
+  if (!profits.length) {
+    document.getElementById("list").innerText = "لا توجد أرباح يومية";
+    return;
+  }
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  profits.forEach(p => {
+    list.innerHTML += `
+      <div class="item">
+        💰 ${p.amount} USDT <br>
+        📅 ${new Date(p.date).toLocaleString('ar-EG')}
+      </div>
+    `;
+  });
+
+}
+
+load();
+</script>
+
+</body>
+</html>
