@@ -279,6 +279,24 @@
     .toast.success { background: #10b981; }
     .toast.error { background: #ef4444; }
 
+    #msgBox {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+      color: white;
+    }
+
+    .success {
+      background: #22c55e;
+    }
+
+    .error {
+      background: #ef4444;
+    }
+
     @media (max-width: 500px) {
       .main-btn { padding: 10px 16px; }
       .main-btn i { font-size: 20px; }
@@ -318,6 +336,7 @@
   <!-- الأزرار السفلية -->
   <div class="glass-card">
     <div class="extra-buttons">
+      <div id="msgBox"></div>
       <button class="extra-btn" onclick="transferIncome()">
         <i class="fa-solid fa-exchange-alt"></i> تحويل الأرباح
       </button>
@@ -479,6 +498,9 @@
   }
 
   async function transferIncome() {
+    const box = document.getElementById("msgBox");
+    box.style.display = "block";
+
     try {
       const res = await fetch(`${API_BASE}/transfer-profit`, {
         method: 'POST',
@@ -486,15 +508,24 @@
         body: JSON.stringify({ email })
       });
       const data = await res.json();
+      
       if (data.success) {
-        alert("تم تحويل الأرباح بنجاح");
-        location.reload();
+        box.innerHTML = "تم تحويل الأرباح بنجاح";
+        box.className = "success";
+        setTimeout(() => location.reload(), 2000);
       } else {
-        alert(data.message);
+        box.innerHTML = data.message;
+        box.className = "error";
       }
     } catch (err) {
-      alert("خطأ في الاتصال بالسيرفر");
+      box.innerHTML = "خطأ في الاتصال بالسيرفر";
+      box.className = "error";
     }
+
+    // 🔥 تختفي بعد 3 ثواني
+    setTimeout(() => {
+      box.style.display = "none";
+    }, 3000);
   }
 
   async function loadUserData() {
