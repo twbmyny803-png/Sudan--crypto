@@ -520,6 +520,19 @@ app.post("/withdraw-request", async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
 
+  // 🚫 منع تكرار طلب السحب
+  const existing = await Withdraw.findOne({
+    email: email,
+    status: "pending"
+  });
+
+  if (existing) {
+    return res.json({
+      success: false,
+      message: "لديك طلب سحب قيد المعالجة حالياً"
+    });
+  }
+
   // 🔐 تحقق كلمة المرور (نفس كلمة الحساب)
   if (user.password !== password) {
     return res.json({ success: false, message: "كلمة المرور غير صحيحة" });
@@ -567,7 +580,10 @@ app.post("/withdraw-request", async (req, res) => {
     status: "pending"
   });
 
-  res.json({ success: true, message: "تم تقديم طلب السحب بنجاح" });
+  res.json({
+    success: true,
+    message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة. في حال تأخر الطلب لأكثر من 24 ساعة، يرجى التواصل مع خدمة العملاء."
+  });
 });
 
 // عرض السحب
