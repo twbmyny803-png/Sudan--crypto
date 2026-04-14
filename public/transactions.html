@@ -136,8 +136,11 @@ async function load() {
       typeText = "سحب";
       typeIcon = "fa-arrow-up";
     } else if (t.type === "referral") {
-      typeText = `عمولة إحالة (المستوى ${t.level})`;
+      typeText = `عمولة إحالة (مستوى ${t.level})`;
       typeIcon = "fa-users";
+    } else if (t.type === "transfer") {
+      typeText = "تحويل أرباح";
+      typeIcon = "fa-coins";
     }
 
     list.innerHTML += `
