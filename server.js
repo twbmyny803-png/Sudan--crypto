@@ -236,7 +236,8 @@ app.post("/login", async (req, res) => {
   const user = await User.findOne({ email, password });
 
   if (!user) {
-    return res.json({ success: false, message: "بيانات غلط" });
+    // تعديل: رسالة خطأ أكثر احترافية
+    return res.json({ success: false, message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
   }
 
   res.json({
@@ -373,114 +374,47 @@ app.post("/admin-verify", async (req, res) => {
   res.json({ success: true });
 });
 
-// 📄 عرض التوثيق
-app.get("/admin-verifications", async (req, res) => {
-  const users = await User.find({ verificationStatus: "pending" });
-  res.json({ success: true, requests: users });
-});
-
 // ❌ رفض التوثيق
-app.post("/admin-reject-verification", async (req, res) => {
+app.post("/admin-reject-verify", async (req, res) => {
   const { email, reason } = req.body;
-
-  await User.updateOne(
-    { email },
-    {
-      verificationStatus: "rejected",
-      isVerified: false,
-      verificationRejectReason: reason || "تم رفض التوثيق"
-    }
-  );
-
-  res.json({ success: true });
-});
-
-// ❄️ تجميد
-app.post("/admin-freeze", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isFrozen: true });
-  res.json({ success: true });
-});
-
-// ================== عرض الإيداعات للأدمن ==================
-app.get("/admin-deposits", async (req, res) => {
-  try {
-    const deposits = await Deposit.find().sort({ createdAt: -1 });
-    res.json({ success: true, deposits });
-  } catch (err) {
-    res.json({ success: false });
-  }
-});
-
-// ================== قبول الإيداع ==================
-app.post("/admin-approve-deposit", async (req, res) => {
-  const { id } = req.body;
-
-  const deposit = await Deposit.findById(id);
-  if (!deposit) return res.json({ success: false });
-
-  // ✔️ تحديث الحالة
-  deposit.status = "approved";
-  await deposit.save();
-
-  // ✔️ جيب المستخدم
-  const user = await User.findOne({ email: deposit.email });
-  if (!user) return res.json({ success: false });
-
-  // ✔️ أضف الرصيد للمستخدم
-  user.balance += Number(deposit.amount);
-  await user.save();
-
-  // 🔥 العمولات (الإحالات)
-  const percentages = [0.10, 0.08, 0.06, 0.04, 0.02];
-
-  let currentRef = user.refBy;
-
-  for (let i = 0; i < 5; i++) {
-    if (!currentRef) break;
-
-    const refUser = await User.findOne({ refCode: currentRef });
-    if (!refUser) break;
-
-    const profit = deposit.amount * percentages[i];
-
-    refUser.incomeBalance += profit;
-    await refUser.save();
-
-    await ReferralTransaction.create({
-      email: refUser.email,
-
-      amount: profit,
-      type: "referral",
-      status: "approved",
-      level: i + 1,
-      createdAt: new Date()
-    });
-
-    currentRef = refUser.refBy;
-  }
-
+  await User.updateOne({ email }, { verificationStatus: "rejected", verificationRejectReason: reason });
   res.json({ success: true });
 });
 
 // 🚫 حظر
 app.post("/admin-block", async (req, res) => {
   const { email } = req.body;
-  await User.updateOne({ email }, { isBlocked: true });
+  const user = await User.findOne({ email });
+  user.isBlocked = !user.isBlocked;
+  await user.save();
   res.json({ success: true });
 });
 
-// 🔓 فك الحظر
-app.post("/admin-unblock", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isBlocked: false, isFrozen: false });
-  res.json({ success: true });
-});
-
-// ❌ حذف مستخدم
+// 🗑 حذف
 app.post("/admin-delete", async (req, res) => {
   const { email } = req.body;
   await User.deleteOne({ email });
+  res.json({ success: true });
+});
+
+// 🔥 تحديث عنوان المحفظة (للأدمن فقط)
+app.post("/admin-update-wallet", async (req, res) => {
+  const { email, newWallet } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.json({ success: false });
+
+  // 🔐 تحقق من العنوان
+  if (!newWallet.startsWith("T") || newWallet.length < 30) {
+    return res.json({ success: false, message: "عنوان غير صحيح" });
+  }
+
+  // 🔥 تحديث العنوان
+  user.walletAddress = newWallet;
+  user.walletLocked = true;
+
+  await user.save();
+
   res.json({ success: true });
 });
 
