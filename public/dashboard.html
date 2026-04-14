@@ -480,17 +480,20 @@
 
   async function transferIncome() {
     try {
-      const res = await fetch(`${API_BASE}/transfer-income`, {
+      const res = await fetch(`${API_BASE}/transfer-profit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.message);
-      showToast('تم تحويل الأرباح إلى الرصيد');
-      setTimeout(() => location.reload(), 1500);
+      if (data.success) {
+        alert("تم تحويل الأرباح بنجاح");
+        location.reload();
+      } else {
+        alert(data.message);
+      }
     } catch (err) {
-      showToast(err.message, true);
+      alert("خطأ في الاتصال بالسيرفر");
     }
   }
 
