@@ -881,8 +881,7 @@ app.post("/create-payment", async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        price_amount: Number(amount),
-        price_currency: "usdt",
+        pay_amount: Number(amount),
         pay_currency: "usdttrc20",
         order_id: orderId,
 
