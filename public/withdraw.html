@@ -12,14 +12,25 @@
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .input-style { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; width: 100%; outline: none; transition: 0.3s; }
         .input-style:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .input-style:disabled { background: #0f172a; border-color: #1e293b; color: #94a3b8; cursor: not-allowed; }
         .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; padding: 14px; font-weight: bold; transition: 0.3s; width: 100%; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
+        .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 10px; font-size: 14px; transition: 0.3s; }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="glass w-full max-w-md p-8 rounded-2xl shadow-2xl">
-        <div class="text-center mb-8">
+    <div class="glass w-full max-w-md p-8 rounded-2xl shadow-2xl relative">
+        <!-- زر الرجوع -->
+        <div class="absolute top-6 right-6">
+            <a href="index.html" class="back-btn flex items-center gap-2">
+                <i class="fas fa-arrow-right"></i>
+                رجوع
+            </a>
+        </div>
+
+        <div class="text-center mb-8 mt-4">
             <div class="bg-blue-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-wallet text-blue-500 text-2xl"></i>
             </div>
@@ -48,7 +59,7 @@
             </div>
 
             <div>
-                <label class="block text-sm text-gray-400 mb-2 mr-1">كلمة سر السحب</label>
+                <label class="block text-sm text-gray-400 mb-2 mr-1">كلمة سر الحساب</label>
                 <input type="password" id="password" placeholder="••••••" class="input-style" required>
             </div>
 
@@ -57,12 +68,17 @@
                 <span class="font-bold text-green-400"><span id="finalAmount">0</span> USDT</span>
             </div>
 
+            <div class="text-[11px] text-gray-400 bg-blue-500/5 p-3 rounded-lg border border-blue-500/10 leading-relaxed">
+                🔒 كلمة مرور السحب هي نفس كلمة مرور حسابك<br>
+                ⚠️ لا يمكن تغيير عنوان المحفظة بعد إضافته لأول مرة
+            </div>
+
             <button type="submit" id="submitBtn" class="btn-primary">
                 تأكيد طلب السحب
             </button>
         </form>
 
-        <div id="msg" class="mt-4 text-center text-sm hidden p-3 rounded-lg"></div>
+        <div id="msgBox" class="mt-4 text-center text-sm hidden p-3 rounded-lg"></div>
     </div>
 
     <script>
@@ -70,9 +86,8 @@
         const finalAmountSpan = document.getElementById('finalAmount');
         const userBalanceSpan = document.getElementById('userBalance');
         const withdrawForm = document.getElementById('withdrawForm');
-        const msgDiv = document.getElementById('msg');
+        const msgBox = document.getElementById('msgBox');
         
-        // جلب بيانات المستخدم (محاكاة أو من API)
         const userEmail = localStorage.getItem("email");
         
         async function loadUserData() {
@@ -86,6 +101,13 @@
                 const data = await res.json();
                 if(data.success) {
                     userBalanceSpan.innerText = data.balance.toFixed(2);
+                    
+                    // 🔥 قفل العنوان إذا كان محفوظاً
+                    if (data.walletAddress) {
+                        const walletInput = document.getElementById('wallet');
+                        walletInput.value = data.walletAddress;
+                        walletInput.disabled = true;
+                    }
                 }
             } catch(e) {}
         }
@@ -97,32 +119,37 @@
             finalAmountSpan.innerText = final.toFixed(2);
         });
 
-        function showMsg(text, isError = true) {
-            msgDiv.innerText = text;
-            msgDiv.className = `mt-4 text-center text-sm p-3 rounded-lg ${isError ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'}`;
-            msgDiv.classList.remove('hidden');
+        // 💬 تنبيهات واضحة واحترافية
+        function showMsg(text, success = false) {
+            msgBox.innerHTML = text;
+            msgBox.style.color = success ? "#22c55e" : "#ef4444";
+            msgBox.className = `mt-4 text-center text-sm p-3 rounded-lg ${success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`;
+            msgBox.classList.remove('hidden');
         }
 
         withdrawForm.onsubmit = async (e) => {
             e.preventDefault();
-            const wallet = document.getElementById('wallet').value.trim();
+            const walletInput = document.getElementById('wallet');
+            const wallet = walletInput.value.trim();
             const amount = parseFloat(amountInput.value);
             const password = document.getElementById('password').value;
             const balance = parseFloat(userBalanceSpan.innerText);
 
-            // التحقق من TRC20
-            if (!wallet.startsWith('T') || wallet.length < 30 || wallet.length > 40) {
-                showMsg("عنوان المحفظة TRC20 غير صحيح (يجب أن يبدأ بـ T)");
-                return;
+            // التحقق من TRC20 فقط إذا لم يكن الحقل معطلاً (أي في المرة الأولى)
+            if (!walletInput.disabled) {
+                if (!wallet.startsWith('T') || wallet.length < 30 || wallet.length > 45) {
+                    showMsg("عنوان المحفظة TRC20 غير صحيح");
+                    return;
+                }
             }
 
             if (amount < 10) {
-                showMsg("الحد الأدنى للسحب هو 10 USDT");
+                showMsg("الحد الأدنى للسحب 10 USDT");
                 return;
             }
 
             if (amount > balance) {
-                showMsg("رصيدك غير كافٍ");
+                showMsg("رصيد غير كافي");
                 return;
             }
 
@@ -138,13 +165,9 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    if (data.message === "كلمة السر غير صحيحة") {
-                        showMsg(data.message);
-                    } else {
-                        showMsg("تم تقديم طلب السحب بنجاح!", false);
-                        withdrawForm.reset();
-                        loadUserData();
-                    }
+                    showMsg("تم إرسال طلب السحب بنجاح", true);
+                    withdrawForm.reset();
+                    loadUserData(); // لتحديث الرصيد وقفل المحفظة
                 } else {
                     showMsg(data.message || "فشل تقديم الطلب");
                 }
@@ -157,4 +180,4 @@
         };
     </script>
 </body>
-  </html>
+</html>
