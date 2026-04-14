@@ -86,9 +86,12 @@ const Deposit = mongoose.model("Deposit", depositSchema);
 
 const referralTransactionSchema = new mongoose.Schema({
   email: String,        // الشخص المستلم العمولة
-  from: String,         // منو جاب العمولة
+
   amount: Number,
-  type: String,         // نوع العملية (transfer, referral)
+  type: {
+    type: String,
+    required: true
+  },         // نوع العملية (transfer, referral)
   status: String,        // حالة العملية (approved, pending, rejected)
   level: Number,
   createdAt: { type: Date, default: Date.now }
@@ -433,7 +436,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
 
     await ReferralTransaction.create({
       email: refUser.email,
-      from: user.email,
+
       amount: profit,
       type: "referral",
       status: "approved",
@@ -662,7 +665,7 @@ app.post("/nowpayments-webhook", async (req, res) => {
 
         await ReferralTransaction.create({
           email: refUser.email,
-          from: user.email,
+    
           amount: profit,
           type: "referral",
           status: "approved",
@@ -788,7 +791,7 @@ app.get("/transactions/:email", async (req, res) => {
       amount: r.amount,
       status: "earned",
       date: r.createdAt,
-      from: r.from,
+
       level: r.level
     }));
 
