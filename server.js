@@ -401,33 +401,21 @@ app.post("/admin-delete", async (req, res) => {
 app.post("/admin-update-wallet", async (req, res) => {
   const { email, newWallet } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "المستخدم غير موجود" });
-    }
+  const user = await User.findOne({ email });
+  if (!user) return res.json({ success: false });
 
-    // تحقق العنوان
-    if (!newWallet || !newWallet.startsWith("T") || newWallet.length < 30) {
-      return res.json({ success: false, message: "عنوان غير صحيح" });
-    }
-
-    // 🔥 تحديث العنوان في حساب المستخدم
-    user.walletAddress = newWallet;
-    user.walletLocked = true;
-    await user.save();
-
-    // 🔥 تحديث الطلبات الحالية (المعلقة)
-    await Withdraw.updateMany(
-      { email: email, status: "pending" },
-      { wallet: newWallet }
-    );
-
-    res.json({ success: true });
-
-  } catch (err) {
-    res.json({ success: false });
+  // 🔐 تحقق من العنوان
+  if (!newWallet.startsWith("T") || newWallet.length < 30) {
+    return res.json({ success: false, message: "عنوان غير صحيح" });
   }
+
+  // 🔥 تحديث العنوان
+  user.walletAddress = newWallet;
+  user.walletLocked = true;
+
+  await user.save();
+
+  res.json({ success: true });
 });
 
 // ➕ إضافة رصيد
