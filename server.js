@@ -510,6 +510,29 @@ app.post("/admin-approve-deposit", async (req, res) => {
   user.balance += Number(deposit.amount);
   await user.save();
 
+  // 🎯 تحديد الباقات
+  const packages = {
+    "50": { name: "البرونزية", daily: 2, duration: 280 },
+    "100": { name: "الفضية", daily: 6, duration: 280 },
+    "250": { name: "الذهبية", daily: 10, duration: 280 },
+    "500": { name: "البلاتينية", daily: 15, duration: 280 },
+    "1000": { name: "الماسية", daily: 20, duration: 280 }
+  };
+
+  // 📦 اختيار الباقة حسب المبلغ
+  const pkg = packages[String(deposit.amount)];
+
+  if (pkg) {
+    user.packageName = pkg.name;
+    user.dailyProfit = pkg.daily;
+    user.packageDurationDays = pkg.duration;
+    user.packageStart = new Date();
+
+    user.balance += pkg.daily; // 🔥 ربح أول يوم فوراً
+
+    await user.save(); // مهم جداً
+  }
+
   res.json({ success: true });
 });
 
@@ -752,23 +775,30 @@ app.post("/nowpayments-webhook", async (req, res) => {
         currentRef = refUser.refBy;
       }
 
-      // 🔥 تفعيل الباقة
-      user.packageName = parsed.packageName;
-      user.packageStart = new Date();
-
-      // 🔥 مدة الباقة
-      const packages = {
-        gold: 280,
-        silver: 180,
-        vip: 365
-      };
-
-      user.packageDurationDays = packages[parsed.packageName] || 0;
-
       // 🔥 إضافة الرصيد
       user.balance += Number(payment.price_amount);
-
       await user.save();
+
+      const packages = {
+        "50": { name: "البرونزية", daily: 2, duration: 280 },
+        "100": { name: "الفضية", daily: 6, duration: 280 },
+        "250": { name: "الذهبية", daily: 10, duration: 280 },
+        "500": { name: "البلاتينية", daily: 15, duration: 280 },
+        "1000": { name: "الماسية", daily: 20, duration: 280 }
+      };
+
+      const pkg = packages[String(payment.price_amount)];
+
+      if (pkg) {
+        user.packageName = pkg.name;
+        user.dailyProfit = pkg.daily;
+        user.packageDurationDays = pkg.duration;
+        user.packageStart = new Date();
+
+        user.balance += pkg.daily; // 🔥 ربح أول يوم فوراً
+
+        await user.save();
+      }
 
       console.log("🔥 تم التفعيل");
     }
@@ -965,6 +995,49 @@ app.post("/transfer-profit", async (req, res) => {
     amount: amount
   });
 });
+
+// 🔁 نظام الأرباح اليومية
+setInterval(async () => {
+  try {
+    const users = await User.find({
+      packageName: { $ne: null }
+    });
+
+    const now = new Date();
+
+    for (let user of users) {
+
+      if (!user.packageStart) continue;
+
+      const diffTime = now - user.packageStart;
+      const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      // ⛔ لو انتهت الباقة
+      if (daysPassed >= user.packageDurationDays) continue;
+
+      // 👇 عدد الأرباح المفروض تكون نزلت
+      const expectedProfit = daysPassed * user.dailyProfit;
+
+      // 👇 نحسب كم نزل فعلياً
+      const actualProfit = user.incomeBalance || 0;
+
+      // 👇 الفرق (الربح الجديد)
+      const profitToAdd = expectedProfit - actualProfit;
+
+      if (profitToAdd > 0) {
+        user.balance += profitToAdd;
+        user.incomeBalance += profitToAdd;
+
+        await user.save();
+      }
+    }
+
+    console.log("✅ تم تحديث الأرباح اليومية");
+
+  } catch (err) {
+    console.log("❌ خطأ في الأرباح:", err);
+  }
+}, 60000); // كل دقيقة
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
