@@ -407,7 +407,7 @@ app.post("/admin-verify", async (req, res) => {
 });
 
 // ❌ رفض التوثيق
-app.post("/admin-reject-verify", async (req, res) => {
+app.post("/admin-reject-verification", async (req, res) => {
   const { email, reason } = req.body;
   await User.updateOne({ email }, { verificationStatus: "rejected", verificationRejectReason: reason });
   res.json({ success: true });
@@ -483,6 +483,32 @@ app.post("/admin-reject-deposit", async (req, res) => {
 
   deposit.status = "rejected";
   await deposit.save();
+
+  res.json({ success: true });
+});
+
+// ✅ قبول الإيداع
+app.post("/admin-approve-deposit", async (req, res) => {
+  const { id } = req.body;
+
+  const deposit = await Deposit.findById(id);
+  if (!deposit) return res.json({ success: false });
+
+  // منع التكرار
+  if (deposit.status === "approved") {
+    return res.json({ success: false });
+  }
+
+  // تغيير الحالة
+  deposit.status = "approved";
+  await deposit.save();
+
+  // إضافة الرصيد
+  const user = await User.findOne({ email: deposit.email });
+  if (!user) return res.json({ success: false });
+
+  user.balance += Number(deposit.amount);
+  await user.save();
 
   res.json({ success: true });
 });
