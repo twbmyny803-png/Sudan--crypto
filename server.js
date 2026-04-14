@@ -550,15 +550,15 @@ app.post("/admin-approve-deposit", async (req, res) => {
 
   // 🎯 تحديد الباقات
   const packages = {
-    "50": { name: "البرونزية", daily: 2, duration: 280 },
-    "100": { name: "الفضية", daily: 6, duration: 280 },
-    "250": { name: "الذهبية", daily: 10, duration: 280 },
-    "500": { name: "البلاتينية", daily: 15, duration: 280 },
-    "1000": { name: "الماسية", daily: 20, duration: 280 }
+    "bronze": { name: "البرونزية", price: 50, daily: 2, duration: 280 },
+    "silver": { name: "الفضية", price: 100, daily: 6, duration: 280 },
+    "gold": { name: "الذهبية", price: 250, daily: 10, duration: 280 },
+    "platinum": { name: "البلاتينية", price: 500, daily: 15, duration: 280 },
+    "diamond": { name: "الماسية", price: 1000, daily: 20, duration: 280 }
   };
 
-  // 📦 اختيار الباقة حسب المبلغ
-  const pkg = packages[String(deposit.amount)];
+  // 📦 اختيار الباقة حسب الاسم
+  const pkg = packages[deposit.packageName];
 
   if (pkg) {
     user.packageName = pkg.name;
@@ -827,14 +827,24 @@ app.post("/nowpayments-webhook", async (req, res) => {
       await user.save();
 
       const packages = {
-        "bronze": { name: "البرونزية", daily: 2, duration: 280 },
-        "silver": { name: "الفضية", daily: 6, duration: 280 },
-        "gold": { name: "الذهبية", daily: 10, duration: 280 },
-        "platinum": { name: "البلاتينية", daily: 15, duration: 280 },
-        "diamond": { name: "الماسية", daily: 20, duration: 280 }
+        "bronze": { name: "البرونزية", price: 50, daily: 2, duration: 280 },
+        "silver": { name: "الفضية", price: 100, daily: 6, duration: 280 },
+        "gold": { name: "الذهبية", price: 250, daily: 10, duration: 280 },
+        "platinum": { name: "البلاتينية", price: 500, daily: 15, duration: 280 },
+        "diamond": { name: "الماسية", price: 1000, daily: 20, duration: 280 }
       };
 
-      const pkg = packages[String(parsed.packageName)];
+      const pkg = packages[parsed.packageName];
+      if (!pkg) return res.sendStatus(200);
+
+      const tolerance = 1;
+      const min = pkg.price - tolerance;
+      const max = pkg.price + tolerance;
+
+      if (payment.price_amount < min || payment.price_amount > max) {
+        console.log("❌ مبلغ خارج النطاق:", payment.price_amount);
+        return res.sendStatus(200);
+      }
 
       if (pkg) {
         user.packageName = pkg.name;
