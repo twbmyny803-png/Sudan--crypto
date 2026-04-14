@@ -844,6 +844,42 @@ app.get("/referrals/:email", async (req, res) => {
   }
 });
 
+app.post("/transfer-profit", async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.json({ success: false });
+
+  // ❌ ما في أرباح
+  if (user.incomeBalance <= 0) {
+    return res.json({
+      success: false,
+      message: "لا توجد أرباح للتحويل"
+    });
+  }
+
+  const amount = user.incomeBalance;
+
+  // 🔥 التحويل
+  user.balance += amount;
+  user.incomeBalance = 0;
+
+  await user.save();
+
+  // 🔥 تسجيل العملية
+  await ReferralTransaction.create({
+    email: user.email,
+    from: "transfer",
+    amount: amount,
+    level: 0
+  });
+
+  res.json({
+    success: true,
+    amount: amount
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
