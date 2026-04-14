@@ -568,8 +568,12 @@ app.post("/withdraw-request", async (req, res) => {
 
 // عرض السحب
 app.get("/admin-withdraws", async (req, res) => {
-  const requests = await Withdraw.find().sort({ createdAt: -1 });
-  res.json({ success: true, requests });
+  try {
+    const data = await Withdraw.find().sort({ createdAt: -1 });
+    res.json({ success: true, requests: data });
+  } catch (err) {
+    res.json({ success: false });
+  }
 });
 
 // قبول السحب
