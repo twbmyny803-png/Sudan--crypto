@@ -88,6 +88,8 @@ const referralTransactionSchema = new mongoose.Schema({
   email: String,        // الشخص المستلم العمولة
   from: String,         // منو جاب العمولة
   amount: Number,
+  type: String,         // نوع العملية (transfer, referral)
+  status: String,        // حالة العملية (approved, pending, rejected)
   level: Number,
   createdAt: { type: Date, default: Date.now }
 });
@@ -433,7 +435,10 @@ app.post("/admin-approve-deposit", async (req, res) => {
       email: refUser.email,
       from: user.email,
       amount: profit,
-      level: i + 1
+      type: "referral",
+      status: "approved",
+      level: i + 1,
+      createdAt: new Date()
     });
 
     currentRef = refUser.refBy;
@@ -659,7 +664,10 @@ app.post("/nowpayments-webhook", async (req, res) => {
           email: refUser.email,
           from: user.email,
           amount: profit,
-          level: i + 1
+          type: "referral",
+          status: "approved",
+          level: i + 1,
+          createdAt: new Date()
         });
 
         // نطلع للمستوى الأعلى
@@ -869,9 +877,10 @@ app.post("/transfer-profit", async (req, res) => {
   // 🔥 تسجيل العملية
   await ReferralTransaction.create({
     email: user.email,
-    from: "transfer",
+    type: "transfer",
     amount: amount,
-    level: 0
+    status: "approved",
+    createdAt: new Date()
   });
 
   res.json({
