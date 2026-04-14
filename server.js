@@ -569,6 +569,14 @@ app.post("/admin-approve-deposit", async (req, res) => {
     user.incomeBalance += pkg.daily; // 🔥 ربح أول يوم فوراً
     user.lastProfitDate = new Date();
 
+    await ReferralTransaction.create({
+      email: user.email,
+      type: "daily_profit",
+      amount: pkg.daily,
+      status: "approved",
+      createdAt: new Date()
+    });
+
     await user.save(); // مهم جداً
   }
 
@@ -836,6 +844,14 @@ app.post("/nowpayments-webhook", async (req, res) => {
 
         user.incomeBalance += pkg.daily; // 🔥 ربح أول يوم فوراً
         user.lastProfitDate = new Date();
+
+        await ReferralTransaction.create({
+          email: user.email,
+          type: "daily_profit",
+          amount: pkg.daily,
+          status: "approved",
+          createdAt: new Date()
+        });
 
         await user.save();
       }
