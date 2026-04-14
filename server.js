@@ -65,7 +65,8 @@ const userSchema = new mongoose.Schema({
   verificationDocType: String,
   verificationDocNumber: String,
   verificationImages: [String],
-  verificationRejectReason: { type: String, default: null }
+  verificationRejectReason: { type: String, default: null },
+  lastProfitDate: Date
 });
 
 const User = mongoose.model("User", userSchema);
@@ -528,7 +529,8 @@ app.post("/admin-approve-deposit", async (req, res) => {
     user.packageDurationDays = pkg.duration;
     user.packageStart = new Date();
 
-    user.balance += pkg.daily; // 🔥 ربح أول يوم فوراً
+    user.incomeBalance += pkg.daily; // 🔥 ربح أول يوم فوراً
+    user.lastProfitDate = new Date();
 
     await user.save(); // مهم جداً
   }
@@ -795,7 +797,8 @@ app.post("/nowpayments-webhook", async (req, res) => {
         user.packageDurationDays = pkg.duration;
         user.packageStart = new Date();
 
-        user.balance += pkg.daily; // 🔥 ربح أول يوم فوراً
+        user.incomeBalance += pkg.daily; // 🔥 ربح أول يوم فوراً
+        user.lastProfitDate = new Date();
 
         await user.save();
       }
@@ -999,6 +1002,7 @@ app.post("/transfer-profit", async (req, res) => {
 // 🔁 نظام الأرباح اليومية
 setInterval(async () => {
   try {
+
     const users = await User.find({
       packageName: { $ne: null }
     });
@@ -1007,44 +1011,47 @@ setInterval(async () => {
 
     for (let user of users) {
 
-      if (!user.packageStart) continue;
+      if (!user.packageStart || !user.dailyProfit) continue;
 
-      const diffTime = now - user.packageStart;
-      const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-      // ⛔ لو انتهت الباقة
+      // ⛔ انتهاء الباقة
+      const daysPassed = Math.floor((now - user.packageStart) / (1000 * 60 * 60 * 24));
       if (daysPassed >= user.packageDurationDays) continue;
 
-      // 👇 عدد الأرباح المفروض تكون نزلت
-      const expectedProfit = daysPassed * user.dailyProfit;
-
-      // 👇 نحسب كم نزل فعلياً
-      const actualProfit = user.incomeBalance || 0;
-
-      // 👇 الفرق (الربح الجديد)
-      const profitToAdd = expectedProfit - actualProfit;
-
-      if (profitToAdd > 0) {
-        user.incomeBalance += profitToAdd;
-        await user.save();
-
-        // 🧾 تسجيل الربح اليومي
-        await ReferralTransaction.create({
-          email: user.email,
-          type: "daily_profit",
-          amount: profitToAdd,
-          status: "approved",
-          createdAt: new Date()
-        });
+      // 🔥 أول مرة
+      if (!user.lastProfitDate) {
+        user.lastProfitDate = user.packageStart;
       }
+
+      const hoursPassed = (now - new Date(user.lastProfitDate)) / (1000 * 60 * 60);
+
+      // ⛔ ما مر 24 ساعة
+      if (hoursPassed < 24) continue;
+
+      const profit = user.dailyProfit;
+
+      // ✅ نضيف للأرباح (مش الرصيد)
+      user.incomeBalance += profit;
+
+      // تحديث الوقت
+      user.lastProfitDate = new Date();
+
+      await user.save();
+
+      // تسجيل العملية
+      await ReferralTransaction.create({
+        email: user.email,
+        type: "daily_profit",
+        amount: profit,
+        status: "approved",
+        createdAt: new Date()
+      });
+
     }
 
-    console.log("✅ تم تحديث الأرباح اليومية");
-
   } catch (err) {
-    console.log("❌ خطأ في الأرباح:", err);
+    console.log("Daily profit error:", err);
   }
-}, 60000); // كل دقيقة
+}, 60000);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
