@@ -15,7 +15,7 @@
         .input-style:disabled { background: #0f172a; border-color: #1e293b; color: #94a3b8; cursor: not-allowed; }
         .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; padding: 14px; font-weight: bold; transition: 0.3s; width: 100%; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
-        .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 10px; font-size: 14px; transition: 0.3s; }
+        .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 10px; font-size: 14px; transition: 0.3s; cursor: pointer; }
         .back-btn:hover { background: rgba(255, 255, 255, 0.1); }
     </style>
 </head>
@@ -24,10 +24,10 @@
     <div class="glass w-full max-w-md p-8 rounded-2xl shadow-2xl relative">
         <!-- زر الرجوع -->
         <div class="absolute top-6 right-6">
-            <a href="index.html" class="back-btn flex items-center gap-2">
+            <button onclick="goBack()" class="back-btn flex items-center gap-2">
                 <i class="fas fa-arrow-right"></i>
                 رجوع
-            </a>
+            </button>
         </div>
 
         <div class="text-center mb-8 mt-4">
@@ -88,11 +88,20 @@
         const withdrawForm = document.getElementById('withdrawForm');
         const msgBox = document.getElementById('msgBox');
         
-        const userEmail = localStorage.getItem("email");
+        // تعديل: استخدام userEmail بدلاً من email ليتوافق مع التوجيهات
+        const userEmail = localStorage.getItem("userEmail");
         
+        function goBack() {
+            window.history.back();
+        }
+
         async function loadUserData() {
-            if(!userEmail) return;
+            if(!userEmail) {
+                window.location.href = "index.html";
+                return;
+            }
             try {
+                // ملاحظة: API هنا مفترض أنه مسار نسبي كما في الكود الأصلي
                 const res = await fetch("/user-data", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -100,7 +109,7 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    userBalanceSpan.innerText = data.balance.toFixed(2);
+                    userBalanceSpan.innerText = data.balance;
                     
                     // 🔥 قفل العنوان إذا كان محفوظاً
                     if (data.walletAddress) {
@@ -108,8 +117,12 @@
                         walletInput.value = data.walletAddress;
                         walletInput.disabled = true;
                     }
+                } else {
+                    window.location.href = "index.html";
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Error loading user data:", e);
+            }
         }
         loadUserData();
 
