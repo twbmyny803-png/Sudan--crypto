@@ -482,7 +482,7 @@
           window.location.href = 'dashboard.html';
         }, 1000);
       } else {
-        throw new Error(data.message || 'فشل تسجيل الدخول');
+        throw new Error(data.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
       }
     } catch (err) {
       showToast(err.message || 'خطأ في الاتصال', true);
