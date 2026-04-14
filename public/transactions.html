@@ -122,16 +122,30 @@ async function load() {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-  data.data.forEach(t => {
+    data.data.forEach(t => {
 
     const status = getStatusData(t.status);
+
+    let typeText = "";
+    let typeIcon = "";
+
+    if (t.type === "deposit") {
+      typeText = "إيداع";
+      typeIcon = "fa-arrow-down";
+    } else if (t.type === "withdraw") {
+      typeText = "سحب";
+      typeIcon = "fa-arrow-up";
+    } else if (t.type === "referral") {
+      typeText = `عمولة إحالة (مستوى ${t.level})`;
+      typeIcon = "fa-users";
+    }
 
     list.innerHTML += `
       <div class="item">
 
         <div class="row">
-          <i class="fa-solid ${t.type === "deposit" ? "fa-arrow-down" : "fa-arrow-up"}"></i>
-          النوع: ${t.type === "deposit" ? "إيداع" : "سحب"}
+          <i class="fa-solid ${typeIcon}"></i>
+          النوع: ${typeText}
         </div>
 
         <div class="row">
