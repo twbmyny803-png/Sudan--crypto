@@ -76,7 +76,7 @@ tr {
 
 <body>
 
-<div class="header">طلبات السحب 💸</div>
+<div class="header">طلبات السحب</div>
 
 <div class="container">
 
@@ -87,7 +87,6 @@ tr {
 <tr>
 <th>البريد</th>
 <th>المبلغ</th>
-<th>الشبكة</th>
 <th>عنوان المحفظة</th>
 <th>الحالة</th>
 <th>التاريخ</th>
@@ -96,7 +95,7 @@ tr {
 </thead>
 
 <tbody id="withdrawTable">
-<tr><td colspan="7" class="loading">جاري التحميل...</td></tr>
+<tr><td colspan="6" class="loading">جاري التحميل...</td></tr>
 </tbody>
 </table>
 
@@ -112,27 +111,35 @@ if(localStorage.getItem("admin") !== "ok"){
 
 async function loadWithdraws(){
   const table = document.getElementById("withdrawTable");
-  table.innerHTML = `<tr><td colspan="7" class="loading">جاري التحميل...</td></tr>`;
+  table.innerHTML = `<tr><td colspan="6" class="loading">جاري التحميل...</td></tr>`;
 
   try {
     const res = await fetch(API + "/admin-withdraws");
     const data = await res.json();
 
+    console.log(data); // 👈 للتأكد
+
     table.innerHTML = "";
 
-    data.withdraws.forEach(w => {
+    if (!data.success || !data.requests.length) {
+      table.innerHTML = `<tr><td colspan="6">لا توجد طلبات</td></tr>`;
+      return;
+    }
+
+    data.requests.forEach(w => {
 
       const row = `
       <tr>
         <td>${w.email}</td>
-        <td>${w.amount}</td>
-        <td>${w.network || "-"}</td>
-        <td>${w.walletAddress || "-"}</td>
-        <td>${w.status || "pending"}</td>
-        <td>${w.date || "-"}</td>
+        <td>${w.amount} USDT</td>
+        <td>${w.wallet || "-"}</td>
+        <td>${w.status}</td>
+        <td>${new Date(w.createdAt).toLocaleString('ar-EG')}</td>
         <td class="actions">
-          <button class="approve" onclick="approve('${w.id}')">قبول</button>
-          <button class="reject" onclick="reject('${w.id}')">رفض</button>
+          ${w.status === "pending" ? `
+            <button class="approve" onclick="approve('${w._id}')">قبول</button>
+            <button class="reject" onclick="reject('${w._id}')">رفض</button>
+          ` : "-"}
         </td>
       </tr>
       `;
@@ -141,7 +148,8 @@ async function loadWithdraws(){
     });
 
   } catch(err) {
-    table.innerHTML = `<tr><td colspan="7">❌ فشل تحميل الطلبات</td></tr>`;
+    console.log(err);
+    table.innerHTML = `<tr><td colspan="6">فشل تحميل الطلبات</td></tr>`;
   }
 }
 
