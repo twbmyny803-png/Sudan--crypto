@@ -84,6 +84,16 @@ const depositSchema = new mongoose.Schema({
 
 const Deposit = mongoose.model("Deposit", depositSchema);
 
+const referralTransactionSchema = new mongoose.Schema({
+  email: String,        // الشخص المستلم العمولة
+  from: String,         // منو جاب العمولة
+  amount: Number,
+  level: Number,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const ReferralTransaction = mongoose.model("ReferralTransaction", referralTransactionSchema);
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -419,6 +429,13 @@ app.post("/admin-approve-deposit", async (req, res) => {
     refUser.incomeBalance += profit;
     await refUser.save();
 
+    await ReferralTransaction.create({
+      email: refUser.email,
+      from: user.email,
+      amount: profit,
+      level: i + 1
+    });
+
     currentRef = refUser.refBy;
   }
 
@@ -638,6 +655,13 @@ app.post("/nowpayments-webhook", async (req, res) => {
         refUser.incomeBalance += profit;
         await refUser.save();
 
+        await ReferralTransaction.create({
+          email: refUser.email,
+          from: user.email,
+          amount: profit,
+          level: i + 1
+        });
+
         // نطلع للمستوى الأعلى
         currentRef = refUser.refBy;
       }
@@ -749,6 +773,17 @@ app.get("/transactions/:email", async (req, res) => {
     
     const withdraws = withdrawRequests.filter(w => w.email === email);
 
+    const referrals = await ReferralTransaction.find({ email });
+
+    const referralFormatted = referrals.map(r => ({
+      type: "referral",
+      amount: r.amount,
+      status: "earned",
+      date: r.createdAt,
+      from: r.from,
+      level: r.level
+    }));
+
     // ندمجهم
     const all = [
       ...deposits.map(d => ({
@@ -764,7 +799,8 @@ app.get("/transactions/:email", async (req, res) => {
         amount: w.amount,
         status: w.status,
         date: new Date(w.id)
-      }))
+      })),
+      ...referralFormatted
     ];
 
     // ترتيب حسب الأحدث
