@@ -97,6 +97,9 @@ function getStatusData(status) {
   if (status === "expired") {
     return { text: "منتهي", color: "red", icon: "fa-hourglass-end" };
   }
+  if (status === "earned") {
+    return { text: "تمت إضافة عمولة", color: "green", icon: "fa-coins" };
+  }
   return { text: status, color: "", icon: "fa-question" };
 }
 
