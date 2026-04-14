@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سجل العمليات</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<style>
+<title>سجل العمليات</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"><style>
 body {
   background: #0a0f2a;
   font-family: Arial;
@@ -61,24 +56,13 @@ h2 {
 .green { color: #22c55e; }
 .red { color: #ef4444; }
 .yellow { color: #f0b90b; }
-</style>
-</head>
-
-<body>
-
-<button class="back-btn" onclick="goBack()">
+</style></head><body><button class="back-btn" onclick="goBack()">
   <i class="fa-solid fa-arrow-right"></i> رجوع
-</button>
-
-<h2>سجل العمليات</h2>
-
-<div id="list"></div>
-
-<script>
+</button><h2>سجل العمليات</h2><div id="list"></div><script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
 const email = localStorage.getItem("userEmail");
 
-// ✅ الحالات
+// الحالات
 function getStatusData(status) {
   if (status === "pending") {
     return { text: "قيد المراجعة", color: "yellow", icon: "fa-clock" };
@@ -129,7 +113,6 @@ async function load() {
     let typeText = "";
     let typeIcon = "";
 
-    // 🔥 fallback ذكي
     let type = t.type;
 
     if (!type && t.from === "transfer") {
@@ -151,6 +134,10 @@ async function load() {
     } else if (type === "referral") {
       typeText = `عمولة إحالة (مستوى ${t.level})`;
       typeIcon = "fa-users";
+
+    } else if (type === "daily_profit") {
+      typeText = "ربح يومي";
+      typeIcon = "fa-coins";
 
     } else {
       typeText = "عملية";
@@ -186,7 +173,5 @@ async function load() {
 }
 
 load();
-</script>
-
-</body>
+</script></body>
 </html>
