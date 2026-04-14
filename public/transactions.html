@@ -127,6 +127,10 @@ async function load() {
       typeText = "سحب";
       typeIcon = "fa-arrow-up";
 
+    } else if (type === "daily_profit") {
+      typeText = "ربح يومي";
+      typeIcon = "fa-coins";
+
     } else if (type === "transfer") {
       typeText = "تحويل أرباح";
       typeIcon = "fa-coins";
@@ -134,14 +138,6 @@ async function load() {
     } else if (type === "referral") {
       typeText = `عمولة إحالة (مستوى ${t.level})`;
       typeIcon = "fa-users";
-
-    } else if (type === "daily_profit") {
-      typeText = "ربح يومي";
-      typeIcon = "fa-coins";
-
-    } else {
-      typeText = "عملية";
-      typeIcon = "fa-circle";
     }
 
     list.innerHTML += `
