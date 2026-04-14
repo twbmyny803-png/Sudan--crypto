@@ -20,7 +20,6 @@ h2 {
   color: #f0b90b;
 }
 
-/* زر الرجوع */
 .back-btn {
   background: rgba(240,185,11,0.15);
   border: 1px solid rgba(240,185,11,0.4);
@@ -62,13 +61,11 @@ h2 {
 .green { color: #22c55e; }
 .red { color: #ef4444; }
 .yellow { color: #f0b90b; }
-
 </style>
 </head>
 
 <body>
 
-<!-- زر الرجوع -->
 <button class="back-btn" onclick="goBack()">
   <i class="fa-solid fa-arrow-right"></i> رجوع
 </button>
@@ -79,11 +76,9 @@ h2 {
 
 <script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
-
-// 🔥 التعديل هنا (المهم)
 const email = localStorage.getItem("userEmail");
 
-// 🔥 ترجمة الحالات + أيقونات
+// ✅ حالات العمليات
 function getStatusData(status) {
   if (status === "pending") {
     return { text: "قيد المراجعة", color: "yellow", icon: "fa-clock" };
@@ -98,16 +93,18 @@ function getStatusData(status) {
     return { text: "منتهي", color: "red", icon: "fa-hourglass-end" };
   }
   if (status === "earned") {
-    return { text: "تمت إضافة عمولة", color: "green", icon: "fa-coins" };
+    return { text: "تم إضافة عمولة الفريق", color: "green", icon: "fa-coins" };
   }
+
   return { text: status, color: "", icon: "fa-question" };
 }
 
-// زر الرجوع
+// رجوع
 function goBack() {
   window.location.href = "dashboard.html";
 }
 
+// تحميل البيانات
 async function load() {
   if (!email) {
     document.getElementById("list").innerHTML = "لم يتم العثور على المستخدم";
@@ -125,7 +122,7 @@ async function load() {
   const list = document.getElementById("list");
   list.innerHTML = "";
 
-    data.data.forEach(t => {
+  data.data.forEach(t => {
 
     const status = getStatusData(t.status);
 
@@ -139,7 +136,7 @@ async function load() {
       typeText = "سحب";
       typeIcon = "fa-arrow-up";
     } else if (t.type === "referral") {
-      typeText = `عمولة إحالة (مستوى ${t.level})`;
+      typeText = `عمولة إحالة (المستوى ${t.level})`;
       typeIcon = "fa-users";
     }
 
