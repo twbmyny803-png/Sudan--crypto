@@ -470,10 +470,9 @@
       const data = await res.json();
       
       if (data.success) {
+        // تعديل: استخدام localStorage دائماً لضمان بقاء الجلسة
         localStorage.setItem("name", data.name);
         localStorage.setItem("userEmail", data.email || email);
-
-        // 🔥 أهم سطر جديد
         localStorage.setItem("isLoggedIn", "true");
 
         showToast('تم تسجيل الدخول بنجاح');
@@ -482,10 +481,11 @@
           window.location.href = 'dashboard.html';
         }, 1000);
       } else {
+        // تعديل: رسالة خطأ أكثر احترافية بدلاً من "بيانات غلط"
         throw new Error(data.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
       }
     } catch (err) {
-      showToast(err.message || 'خطأ في الاتصال', true);
+      showToast(err.message || 'خطأ في الاتصال بالسيرفر', true);
     }
   }
 
