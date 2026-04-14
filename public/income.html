@@ -20,6 +20,25 @@ h2 {
   color: #f0b90b;
 }
 
+.back-btn {
+  background: rgba(240,185,11,0.15);
+  border: 1px solid rgba(240,185,11,0.4);
+  color: #f0b90b;
+  padding: 10px 16px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.back-btn:hover {
+  background: rgba(240,185,11,0.3);
+}
+
 .item {
   background: #1a2447;
   padding: 14px;
@@ -31,6 +50,10 @@ h2 {
 
 <body>
 
+<button class="back-btn" onclick="goBack()">
+  <i class="fa-solid fa-arrow-right"></i> رجوع
+</button>
+
 <h2>الدخل اليومي</h2>
 
 <div id="list">جاري التحميل...</div>
@@ -38,6 +61,10 @@ h2 {
 <script>
 const API = "https://sudan-crypto-4mgt.onrender.com";
 const email = localStorage.getItem("userEmail");
+
+function goBack() {
+  window.location.href = "dashboard.html";
+}
 
 async function load() {
 
@@ -54,7 +81,6 @@ async function load() {
     return;
   }
 
-  // 🔥 فلترة الربح اليومي فقط
   const profits = data.data.filter(t => t.type === "daily_profit");
 
   if (!profits.length) {
@@ -68,8 +94,8 @@ async function load() {
   profits.forEach(p => {
     list.innerHTML += `
       <div class="item">
-        💰 ${p.amount} USDT <br>
-        📅 ${new Date(p.date).toLocaleString('ar-EG')}
+        <i class="fa-solid fa-coins"></i> ${p.amount} USDT <br>
+        <i class="fa-solid fa-calendar"></i> ${new Date(p.date).toLocaleString('ar-EG')}
       </div>
     `;
   });
