@@ -102,6 +102,7 @@ const ReferralTransaction = mongoose.model("ReferralTransaction", referralTransa
 const withdrawSchema = new mongoose.Schema({
   email: String,
   amount: Number,
+  wallet: String,
   status: { type: String, default: "pending" }, // pending / approved / rejected
   createdAt: { type: Date, default: Date.now }
 });
@@ -507,10 +508,15 @@ app.post("/admin-reject-deposit", async (req, res) => {
 
 // 💸 السحب
 app.post("/withdraw-request", async (req, res) => {
-  const { email, amount } = req.body;
+  const { email, amount, wallet, password } = req.body;
 
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
+
+  // 🔐 تحقق كلمة السر
+  if (user.withdrawPassword !== password) {
+    return res.json({ success: true, message: "كلمة السر غير صحيحة" });
+  }
 
   if (user.withdrawBlocked) {
     return res.json({ success: false, message: "السحب موقوف" });
@@ -520,14 +526,18 @@ app.post("/withdraw-request", async (req, res) => {
     return res.json({ success: false, message: "رصيد غير كافي" });
   }
 
-  // 🔥 خصم مباشر
+  // 💸 خصم الرسوم
+  const finalAmount = amount - 1;
+
+  // 🔥 خصم مباشر من رصيد المستخدم (نخصم المبلغ الكلي)
   user.balance -= Number(amount);
   await user.save();
 
-  // 🔥 حفظ في الداتابيز
+  // ✍️ التخزين (نخزن المبلغ بعد خصم الرسوم)
   await Withdraw.create({
     email,
-    amount,
+    amount: finalAmount,
+    wallet,
     status: "pending"
   });
 
