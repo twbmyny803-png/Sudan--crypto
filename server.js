@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema({
   withdrawBlocked: { type: Boolean, default: false },
   withdrawPassword: { type: String, default: null },
 
+  // 📌 حقول عنوان السحب الجديد
+  walletAddress: { type: String, default: null },
+  walletLocked: { type: Boolean, default: false },
+
   packageName: String,
   packageStart: Date,
   packageDurationDays: Number,
@@ -328,7 +332,9 @@ app.post("/user-data", async (req, res) => {
     packageStart: user.packageStart,
     packageDurationDays: user.packageDurationDays,
     verificationRejectReason: user.verificationRejectReason || null,
-    refCode: user.refCode
+    refCode: user.refCode,
+    walletAddress: user.walletAddress,
+    walletLocked: user.walletLocked
   });
 });
 
@@ -369,11 +375,8 @@ app.post("/admin-verify", async (req, res) => {
 
 // 📄 عرض التوثيق
 app.get("/admin-verifications", async (req, res) => {
-  const users = await User.find({
-    verificationStatus: "pending"
-  });
-
-  res.json({ success: true, requests: users }); // 🔥 بدل users → requests
+  const users = await User.find({ verificationStatus: "pending" });
+  res.json({ success: true, requests: users });
 });
 
 // ❌ رفض التوثيق
@@ -513,20 +516,39 @@ app.post("/withdraw-request", async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
 
-  // 🔐 تحقق كلمة السر
-  if (user.withdrawPassword !== password) {
-    return res.json({ success: true, message: "كلمة السر غير صحيحة" });
+  // 🔐 تحقق كلمة المرور (نفس كلمة الحساب)
+  if (user.password !== password) {
+    return res.json({ success: false, message: "كلمة المرور غير صحيحة" });
+  }
+
+  // 📌 تثبيت العنوان أول مرة
+  if (!user.walletLocked) {
+    user.walletAddress = wallet;
+    user.walletLocked = true;
+    await user.save();
+  } else {
+    // ❌ لو حاول يغير العنوان
+    if (wallet !== user.walletAddress) {
+      return res.json({
+        success: false,
+        message: "لا يمكن تغيير عنوان السحب بعد تعيينه"
+      });
+    }
   }
 
   if (user.withdrawBlocked) {
-    return res.json({ success: false, message: "السحب موقوف" });
+    return res.json({ success: false, message: "السحب موقوف لحسابك، تواصل مع الدعم" });
+  }
+
+  if (amount < 10) {
+    return res.json({ success: false, message: "الحد الأدنى للسحب 10 USDT" });
   }
 
   if (amount > user.balance) {
     return res.json({ success: false, message: "رصيد غير كافي" });
   }
 
-  // 💸 خصم الرسوم
+  // 💸 الرسوم + الخصم
   const finalAmount = amount - 1;
 
   // 🔥 خصم مباشر من رصيد المستخدم (نخصم المبلغ الكلي)
@@ -541,7 +563,7 @@ app.post("/withdraw-request", async (req, res) => {
     status: "pending"
   });
 
-  res.json({ success: true });
+  res.json({ success: true, message: "تم تقديم طلب السحب بنجاح" });
 });
 
 // عرض السحب
@@ -572,8 +594,8 @@ app.post("/admin-reject-withdraw", async (req, res) => {
 
   const user = await User.findOne({ email: request.email });
 
-  // 🔥 رجع الفلوس
-  user.balance += request.amount;
+  // 🔥 رجع الفلوس (نرجع المبلغ الأصلي قبل الرسوم)
+  user.balance += (request.amount + 1);
   await user.save();
 
   request.status = "rejected";
