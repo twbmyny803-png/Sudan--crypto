@@ -28,7 +28,7 @@ mongoose.connect("mongodb+srv://maynwsmanswy_db_user:hOrkK68kCma6kJB5@cluster0.w
 // ================== إضافات فوق ==================
 let codes = {};
 let resetCodes = {};
-let withdrawRequests = [];
+
 
 // 📦 Schema (Updated)
 const userSchema = new mongoose.Schema({
@@ -98,6 +98,15 @@ const referralTransactionSchema = new mongoose.Schema({
 });
 
 const ReferralTransaction = mongoose.model("ReferralTransaction", referralTransactionSchema);
+
+const withdrawSchema = new mongoose.Schema({
+  email: String,
+  amount: Number,
+  status: { type: String, default: "pending" }, // pending / approved / rejected
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Withdraw = mongoose.model("Withdraw", withdrawSchema);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -501,7 +510,6 @@ app.post("/withdraw-request", async (req, res) => {
   const { email, amount } = req.body;
 
   const user = await User.findOne({ email });
-
   if (!user) return res.json({ success: false });
 
   if (user.withdrawBlocked) {
@@ -512,8 +520,12 @@ app.post("/withdraw-request", async (req, res) => {
     return res.json({ success: false, message: "رصيد غير كافي" });
   }
 
-  withdrawRequests.push({
-    id: Date.now(),
+  // 🔥 خصم مباشر
+  user.balance -= Number(amount);
+  await user.save();
+
+  // 🔥 حفظ في الداتابيز
+  await Withdraw.create({
     email,
     amount,
     status: "pending"
@@ -523,33 +535,40 @@ app.post("/withdraw-request", async (req, res) => {
 });
 
 // عرض السحب
-app.get("/admin-withdraws", (req, res) => {
-  res.json({ success: true, requests: withdrawRequests });
+app.get("/admin-withdraws", async (req, res) => {
+  const requests = await Withdraw.find().sort({ createdAt: -1 });
+  res.json({ success: true, requests });
 });
 
 // قبول السحب
 app.post("/admin-approve-withdraw", async (req, res) => {
   const { id } = req.body;
-  const request = withdrawRequests.find(r => r.id == id);
+
+  const request = await Withdraw.findById(id);
   if (!request) return res.json({ success: false });
 
-  const user = await User.findOne({ email: request.email });
-  if (!user) return res.json({ success: false });
-
-  user.balance -= Number(request.amount);
-  await user.save();
-
   request.status = "approved";
+  await request.save();
+
   res.json({ success: true });
 });
 
 // رفض السحب
-app.post("/admin-reject-withdraw", (req, res) => {
+app.post("/admin-reject-withdraw", async (req, res) => {
   const { id } = req.body;
-  const request = withdrawRequests.find(r => r.id == id);
+
+  const request = await Withdraw.findById(id);
   if (!request) return res.json({ success: false });
 
+  const user = await User.findOne({ email: request.email });
+
+  // 🔥 رجع الفلوس
+  user.balance += request.amount;
+  await user.save();
+
   request.status = "rejected";
+  await request.save();
+
   res.json({ success: true });
 });
 
@@ -782,7 +801,7 @@ app.get("/transactions/:email", async (req, res) => {
   try {
     const deposits = await Deposit.find({ email });
     
-    const withdraws = withdrawRequests.filter(w => w.email === email);
+    const withdraws = await Withdraw.find({ email });
 
     const referrals = await ReferralTransaction.find({ email });
 
@@ -808,7 +827,7 @@ app.get("/transactions/:email", async (req, res) => {
         type: "withdraw",
         amount: w.amount,
         status: w.status,
-        date: new Date(w.id)
+        date: w.createdAt
       })),
       ...referralFormatted
     ];
