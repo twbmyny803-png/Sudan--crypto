@@ -64,6 +64,7 @@ tr {
 
 .approve { background:#10b981; color:white }
 .reject { background:#ef4444; color:white }
+.edit { background:#f59e0b; color:white }
 
 .loading {
   text-align:center;
@@ -117,8 +118,6 @@ async function loadWithdraws(){
     const res = await fetch(API + "/admin-withdraws");
     const data = await res.json();
 
-    console.log(data); // 👈 للتأكد
-
     table.innerHTML = "";
 
     if (!data.success || !data.requests.length) {
@@ -139,6 +138,9 @@ async function loadWithdraws(){
           ${w.status === "pending" ? `
             <button class="approve" onclick="approve('${w._id}')">قبول</button>
             <button class="reject" onclick="reject('${w._id}')">رفض</button>
+            <button class="edit" onclick="editWallet('${w.email}', '${w.wallet || ""}')">
+              تعديل
+            </button>
           ` : "-"}
         </td>
       </tr>
@@ -173,6 +175,32 @@ async function reject(id){
   });
 
   loadWithdraws();
+}
+
+// ✏️ تعديل العنوان
+async function editWallet(email, currentWallet){
+
+  const newWallet = prompt("أدخل العنوان الجديد", currentWallet);
+
+  if (!newWallet) return;
+
+  const res = await fetch(API + "/admin-update-wallet",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email: email,
+      newWallet: newWallet
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.success){
+    alert("تم تعديل العنوان بنجاح");
+    loadWithdraws();
+  } else {
+    alert(data.message || "فشل التعديل");
+  }
 }
 
 loadWithdraws();
