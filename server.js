@@ -313,6 +313,43 @@ app.post("/user-data", async (req, res) => {
     return res.json({ success: false });
   }
 
+  // 🔁 تحديث الأرباح عند الدخول (مهم)
+  if (user.packageName && user.packageStart && user.dailyProfit) {
+
+    const now = new Date();
+
+    if (!user.lastProfitDate) {
+      user.lastProfitDate = user.packageStart;
+    }
+
+    const diffTime = now - new Date(user.lastProfitDate);
+    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (daysPassed > 0) {
+
+      for (let i = 0; i < daysPassed; i++) {
+
+        const profit = user.dailyProfit;
+
+        // 👇 ينزل في الأرباح
+        user.incomeBalance += profit;
+
+        // 👇 يسجل في العمليات
+        await ReferralTransaction.create({
+          email: user.email,
+          type: "daily_profit",
+          amount: profit,
+          status: "approved",
+          createdAt: new Date()
+        });
+
+      }
+
+      user.lastProfitDate = new Date();
+      await user.save();
+    }
+  }
+
   if (!user.refCode) {
     user.refCode = generateRefCode();
     await user.save();
