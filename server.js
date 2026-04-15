@@ -437,69 +437,6 @@ app.get("/admin-deposits", async (req, res) => {
   }
 });
 
-// ✅ توثيق
-app.post("/admin-verify", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isVerified: true, verificationStatus: "verified" });
-  res.json({ success: true });
-});
-
-// ❌ رفض التوثيق
-app.post("/admin-reject-verification", async (req, res) => {
-  const { email, reason } = req.body;
-  await User.updateOne({ email }, { verificationStatus: "rejected", verificationRejectReason: reason });
-  res.json({ success: true });
-});
-
-// 🚫 حظر
-app.post("/admin-block", async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  user.isBlocked = !user.isBlocked;
-  await user.save();
-  res.json({ success: true });
-});
-
-// 🗑 حذف
-app.post("/admin-delete", async (req, res) => {
-  const { email } = req.body;
-  await User.deleteOne({ email });
-  res.json({ success: true });
-});
-
-// 🔥 تحديث عنوان المحفظة (للأدمن فقط)
-app.post("/admin-update-wallet", async (req, res) => {
-  const { email, newWallet } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "المستخدم غير موجود" });
-    }
-
-    // تحقق العنوان
-    if (!newWallet || !newWallet.startsWith("T") || newWallet.length < 30) {
-      return res.json({ success: false, message: "عنوان غير صحيح" });
-    }
-
-    // 🔥 تحديث العنوان في حساب المستخدم
-    user.walletAddress = newWallet;
-    user.walletLocked = true;
-    await user.save();
-
-    // 🔥 تحديث الطلبات الحالية (المعلقة)
-    await Withdraw.updateMany(
-      { email: email, status: "pending" },
-      { wallet: newWallet }
-    );
-
-    res.json({ success: true });
-
-  } catch (err) {
-    res.json({ success: false });
-  }
-});
-
 // ➕ إضافة رصيد
 app.post("/admin-add-balance", async (req, res) => {
   const { email, amount } = req.body;
@@ -743,190 +680,33 @@ app.post("/submit-verification", upload.array("images"), async (req, res) => {
   }
 });
 
-// ================== NowPayments Webhook ==================
-app.post("/nowpayments-webhook", async (req, res) => {
+// ================== MANUAL DEPOSIT ==================
+app.post("/submit-deposit", upload.single("image"), async (req, res) => {
   try {
-    const ipnSecret = "vbk9TcEg/bvftZWi+O6H2m+DWCBKtosc";
+    const { email, amount, txid } = req.body;
 
-    const hmac = crypto.createHmac("sha512", ipnSecret);
-    hmac.update(JSON.stringify(req.body));
-    const signature = hmac.digest("hex");
-
-    if (signature !== req.headers["x-nowpayments-sig"]) {
-      console.log("❌ Invalid signature");
-      return res.status(400).send("Invalid signature");
+    if (!email || !amount || !txid) {
+      return res.json({ success: false });
     }
 
-    const payment = req.body;
-    console.log("🔥 Payment received:", payment);
+    const imagePath = req.file ? "/uploads/" + req.file.filename : null;
 
-    const parsed = JSON.parse(payment.order_description);
-
-    // 🔥 أنشئ العملية لو ما موجودة
-    let deposit = await Deposit.findOne({ orderId: payment.order_id });
-
-    if (!deposit) {
-      deposit = new Deposit({
-        email: parsed.email,
-        name: "auto",
-        amount: payment.price_amount,
-        txid: payment.payin_hash,
-        image: null,
-        orderId: payment.order_id,
-        packageName: parsed.packageName,
-        network: payment.pay_currency,
-        status: "pending"
-      });
-
-      await deposit.save();
-    }
-
-    // 🔥 تحديث الحالة
-    deposit.status = payment.payment_status === "finished" ? "approved" : "pending";
-    await deposit.save();
-
-    if (payment.payment_status === "finished" || payment.payment_status === "confirmed") {
-      const parsed = JSON.parse(payment.order_description);
-
-      const user = await User.findOne({ email: parsed.email });
-
-      if (!user) return res.sendStatus(200);
-
-      const percentages = [0.10, 0.08, 0.06, 0.04, 0.02];
-
-      let currentRef = user.refBy;
-
-      for (let i = 0; i < 5; i++) {
-        if (!currentRef) break;
-
-        const refUser = await User.findOne({ refCode: currentRef });
-
-        if (!refUser) break;
-
-        const profit = payment.price_amount * percentages[i];
-
-        refUser.incomeBalance += profit;
-        await refUser.save();
-
-        await ReferralTransaction.create({
-          email: refUser.email,
-    
-          amount: profit,
-          type: "referral",
-          status: "approved",
-          level: i + 1,
-          createdAt: new Date()
-        });
-
-        // نطلع للمستوى الأعلى
-        currentRef = refUser.refBy;
-      }
-
-      // 🔥 إضافة الرصيد
-      user.balance += Number(payment.price_amount);
-      await user.save();
-
-      const packages = {
-        "bronze": { name: "البرونزية", price: 50, daily: 2, duration: 280 },
-        "silver": { name: "الفضية", price: 100, daily: 6, duration: 280 },
-        "gold": { name: "الذهبية", price: 250, daily: 10, duration: 280 },
-        "platinum": { name: "البلاتينية", price: 500, daily: 15, duration: 280 },
-        "diamond": { name: "الماسية", price: 1000, daily: 20, duration: 280 }
-      };
-
-      const pkg = packages[parsed.packageName];
-      if (!pkg) return res.sendStatus(200);
-
-      const tolerance = 1;
-      const min = pkg.price - tolerance;
-      const max = pkg.price + tolerance;
-
-      if (payment.price_amount < min || payment.price_amount > max) {
-        console.log("❌ مبلغ خارج النطاق:", payment.price_amount);
-        return res.sendStatus(200);
-      }
-
-      if (pkg) {
-        user.packageName = pkg.name;
-        user.dailyProfit = pkg.daily;
-        user.packageDurationDays = pkg.duration;
-        user.packageStart = new Date();
-
-        user.incomeBalance += pkg.daily; // 🔥 ربح أول يوم فوراً
-        user.lastProfitDate = new Date();
-
-        await ReferralTransaction.create({
-          email: user.email,
-          type: "daily_profit",
-          amount: pkg.daily,
-          status: "approved",
-          createdAt: new Date()
-        });
-
-        await user.save();
-      }
-
-      console.log("🔥 تم التفعيل");
-    }
-
-    res.sendStatus(200);
-
-  } catch (err) {
-    console.log("❌ Webhook error:", err);
-    res.sendStatus(500);
-  }
-});
-
-// ================== CREATE PAYMENT ==================
-app.post("/create-payment", async (req, res) => {
-  const { amount, email, packageName } = req.body;
-
-  try {
-    const orderId = Date.now().toString();
-
-    const response = await fetch("https://api.nowpayments.io/v1/invoice", {
-      method: "POST",
-      headers: {
-        "x-api-key": "ZYE715R-H144D4D-QB66MAZ-XK8YVGP",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        price_amount: Number(amount),
-        price_currency: "usd",
-        pay_currency: "usdttrc20",
-        order_id: orderId,
-
-        order_description: JSON.stringify({
-          email: email,
-          packageName: packageName
-        })
-      })
-    });
-
-    const data = await response.json();
-
-    // 🔥 أهم خطوة (تسجيل العملية فوراً)
     const deposit = new Deposit({
       email,
-      name: "auto",
+      name: "manual",
       amount: Number(amount),
-      txid: null,
-      image: null,
-      orderId: orderId,
-      packageName: packageName,
-      network: "USDT",
+      txid,
+      image: imagePath,
+      orderId: Date.now().toString(),
+      network: "TRC20",
       status: "pending"
     });
 
     await deposit.save();
 
-    res.json({
-      success: true,
-      invoice_url: data.invoice_url
-    });
+    res.json({ success: true });
 
   } catch (err) {
-    console.log(err);
     res.json({ success: false });
   }
 });
