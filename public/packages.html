@@ -1,458 +1,682 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>باقات الاستثمار</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>إيداع USDT</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-        body {
-            background: linear-gradient(145deg, #0a0f1a 0%, #0c1325 100%);
-            font-family: 'Segoe UI', 'Tahoma', system-ui, sans-serif;
-            padding: 40px 20px;
-            min-height: 100vh;
-            position: relative;
-        }
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-        .stars-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(145deg, #0b1120 0%, #152033 50%, #0f172a 100%);
+    min-height: 100vh;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    margin: 0;
+    position: relative;
+  }
 
-        .star-bg {
-            position: absolute;
-            background: radial-gradient(white, rgba(255,255,255,0.3));
-            border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out;
-        }
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 20% 30%, rgba(56, 189, 248, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(34, 197, 94, 0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8);}
-            50% { opacity: 1; transform: scale(1.2);}
-        }
+  .container {
+    max-width: 420px;
+    width: 100%;
+    margin: auto;
+    padding: 4px;
+    position: relative;
+    z-index: 2;
+  }
 
-        .container {
-            max-width: 750px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 2;
-        }
+  .page-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 8px;
+  }
 
-        .top-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 35px;
-            align-items: center;
-        }
+  .page-title h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 22px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
 
-        .back-btn {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(245,176,66,0.4);
-            padding: 14px 24px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #f5b042;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+  .order-badge {
+    background: rgba(245, 158, 11, 0.15);
+    padding: 8px 14px;
+    border-radius: 40px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+  }
 
-        .back-btn:hover {
-            background: rgba(245,176,66,0.2);
-            transform: translateX(-3px);
-        }
+  .order-badge i {
+    color: #fbbf24;
+  }
 
-        .main-invest-btn {
-            flex: 1;
-            background: linear-gradient(95deg, #f5b042, #ffd966);
-            border: none;
-            padding: 14px 20px;
-            font-size: 22px;
-            font-weight: bold;
-            color: #1a1f2f;
-            text-align: center;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+  .timer-wrapper {
+    background: rgba(239, 68, 68, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 60px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
 
-        .main-invest-btn:hover {
-            transform: scale(1.01);
-            box-shadow: 0 10px 25px rgba(245,176,66,0.3);
-        }
+  .timer-wrapper i {
+    color: #ef4444;
+    font-size: 20px;
+    animation: pulse 1.5s infinite;
+  }
 
-        .packages-list {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-        }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
 
-        .package-card {
-            background: rgba(15, 22, 40, 0.85);
-            backdrop-filter: blur(12px);
-            border-radius: 28px;
-            padding: 24px 28px;
-            border: 1px solid rgba(245, 176, 66, 0.3);
-            transition: 0.25s;
-            cursor: pointer;
-        }
+  .timer-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fca5a5;
+  }
 
-        .package-card:hover {
-            border-color: #f5b042;
-            transform: translateY(-4px);
-            box-shadow: 0 18px 35px rgba(0,0,0,0.4);
-        }
+  .timer-text span {
+    color: #fecaca;
+    font-size: 22px;
+    margin: 0 4px;
+  }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
+  .card {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(71, 85, 105, 0.4);
+    padding: 20px 18px;
+    border-radius: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 15px 30px -10px rgba(0,0,0,0.4);
+  }
 
-        .package-name {
-            font-size: 26px;
-            font-weight: bold;
-            background: linear-gradient(90deg, #f5b042, #ffdd88);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+  .network-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
 
-        .package-name i {
-            background: none;
-            -webkit-background-clip: unset;
-            color: #f5b042;
-            margin-left: 10px;
-        }
+  .network-badge {
+    background: rgba(34, 197, 94, 0.1);
+    padding: 8px 16px;
+    border-radius: 40px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-        .package-price {
-            font-size: 32px;
-            font-weight: 800;
-            color: #ffdd88;
-        }
+  .amount-box {
+    background: rgba(245, 158, 11, 0.1);
+    padding: 8px 16px;
+    border-radius: 40px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-        .package-price i {
-            font-size: 24px;
-            margin-left: 6px;
-            color: #ffdd88;
-        }
+  .amount-box input {
+    background: transparent;
+    border: none;
+    color: #fbbf24;
+    font-weight: bold;
+    font-size: 18px;
+    width: 80px;
+    text-align: center;
+    outline: none;
+    pointer-events: none;
+  }
 
-        .package-price small {
-            font-size: 15px;
-            color: #aaa;
-        }
+  .qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px 0 16px;
+  }
 
-        .stars-rating {
-            font-size: 18px;
-            color: #f5b042;
-            letter-spacing: 4px;
-            margin: 10px 0;
-            animation: starPulse 1.8s infinite;
-        }
+  #qr {
+    border-radius: 20px;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    border: 2px solid #334155;
+    width: 200px;
+    height: 200px;
+  }
 
-        @keyframes starPulse {
-            0%, 100% { text-shadow: 0 0 0px #f5b042; opacity: 0.8;}
-            50% { text-shadow: 0 0 8px #f5b042; opacity: 1;}
-        }
+  .address-container {
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 60px;
+    border: 1px solid #475569;
+    padding: 12px 20px;
+    margin: 12px 0;
+  }
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin: 18px 0 12px;
-            gap: 10px;
-        }
+  .address-container code {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #cbd5e1;
+    direction: ltr;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+    font-size: 14px;
+  }
 
-        .daily-profit {
-            background: rgba(0,0,0,0.55);
-            padding: 6px 16px;
-            border-radius: 50px;
-            text-align: center;
-        }
+  .copy-btn {
+    width: 100%;
+    background: #3b82f6;
+    border: none;
+    color: white;
+    padding: 14px;
+    border-radius: 60px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
 
-        .daily-profit i {
-            margin-left: 8px;
-            color: #4caf50;
-        }
+  .copy-btn.copied {
+    background: #22c55e;
+  }
 
-        .daily-profit .profit-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #4caf50;
-            margin-right: 8px;
-        }
+  .strong-warning {
+    background: linear-gradient(90deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));
+    border-right: 4px solid #ef4444;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+  }
 
-        .duration {
-            font-size: 14px;
-            color: #ccc;
-            background: rgba(255,255,255,0.05);
-            padding: 6px 14px;
-            border-radius: 50px;
-        }
+  .input-group {
+    margin-bottom: 16px;
+    position: relative;
+  }
 
-        .duration i {
-            margin-left: 8px;
-            color: #f5b042;
-        }
+  .input-group i {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+  }
 
-        .desc {
-            font-size: 14px;
-            color: #ccd6f0;
-            margin: 12px 0;
-        }
+  .input-group input {
+    width: 100%;
+    padding: 16px 48px 16px 16px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1.5px solid #334155;
+    border-radius: 60px;
+    color: white;
+    font-size: 15px;
+    outline: none;
+  }
+  
+  .input-group input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 
-        .desc i {
-            margin-left: 8px;
-            color: #f5b042;
-        }
+  .file-upload-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
 
-        .buy-now-btn {
-            width: 100%;
-            background: linear-gradient(90deg, #f5b042, #ffd966);
-            border: none;
-            padding: 14px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #111827;
-            border-radius: 40px;
-            cursor: pointer;
-            margin-top: 18px;
-            transition: 0.2s;
-            font-family: inherit;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+  .file-upload-wrapper input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+  
+  .file-upload-wrapper input[type="file"]:disabled {
+    cursor: not-allowed;
+  }
 
-        .buy-now-btn:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
+  .file-upload-custom {
+    background: rgba(15, 23, 42, 0.7);
+    border: 2px dashed #475569;
+    border-radius: 20px;
+    padding: 24px 16px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .file-upload-custom.has-file {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.05);
+  }
 
-        @media (max-width: 550px) {
-            .package-card {
-                padding: 18px;
-            }
-            .package-price {
-                font-size: 26px;
-            }
-            .package-name {
-                font-size: 22px;
-            }
-            .top-bar {
-                flex-direction: column;
-            }
-            .back-btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
+  .file-upload-custom i {
+    font-size: 32px;
+    color: #94a3b8;
+  }
+  
+  .file-upload-custom.has-file i {
+    color: #22c55e;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border: none;
+    border-radius: 60px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 25px -5px #22c55e70;
+    border: 1px solid #4ade80;
+    transition: all 0.3s;
+  }
+  
+  .submit-btn:disabled {
+    background: #334155;
+    border-color: #475569;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .text-muted {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+  }
+  
+  .status-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #22c55e;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  @keyframes slideUp {
+    from { transform: translate(-50%, 100%); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+  }
+</style>
 </head>
+
 <body>
-<div class="stars-bg" id="starsContainer"></div>
 
 <div class="container">
-    <div class="top-bar">
-        <button class="back-btn" id="backBtn">
-            <i class="fas fa-arrow-right"></i> رجوع
-        </button>
-        <button class="main-invest-btn" id="mainPackagesBtn">
-            <i class="fas fa-chart-line"></i> باقات الاستثمار
-        </button>
+
+  <div class="page-title">
+    <h2><i class="fas fa-coins" style="color: #fbbf24;"></i> إيداع USDT</h2>
+    <div class="order-badge">
+      <i class="fas fa-hashtag"></i>
+      <span id="orderIdDisplay">#ORD-</span>
+    </div>
+  </div>
+
+  <div class="timer-wrapper">
+    <i class="fas fa-hourglass-half"></i>
+    <div class="timer-text"><i class="fas fa-clock"></i> متبقي <span id="timerDisplay">15:00</span> دقيقة</div>
+  </div>
+
+  <div class="card">
+    <div class="network-row">
+      <div class="network-badge">
+        <i class="fas fa-link"></i> شبكة <strong>TRC20</strong>
+      </div>
+      <div class="amount-box">
+        <i class="fas fa-tag"></i>
+        <input type="text" id="amountInput" readonly value="50">
+        <span>USDT</span>
+      </div>
     </div>
 
-    <div class="packages-list" id="packagesList">
-        <!-- 1. برونزية 50$ -->
-        <div class="package-card">
-            <div class="card-header">
-                <div class="package-name"><i class="fas fa-medal"></i> الباقة البرونزية</div>
-                <div class="package-price"><i class="fas fa-dollar-sign"></i> 50 <small>USDT</small></div>
-            </div>
-            <div class="stars-rating">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <div class="info-row">
-                <div class="daily-profit">
-                    <i class="fas fa-chart-simple"></i>
-                    <span>الربح اليومي</span>
-                    <span class="profit-value">2 $</span>
-                </div>
-                <div class="duration">
-                    <i class="fas fa-calendar-alt"></i> مدة الباقة 280 يوم
-                </div>
-            </div>
-            <div class="desc">
-                <i class="fas fa-rocket"></i> بداية ذكية - عائد ثابت ومستمر للمستثمرين
-            </div>
-            <button class="buy-now-btn" onclick="window.location.href='payment.html?amount=50'">
-                <i class="fas fa-cart-shopping"></i> شراء الآن
-            </button>
-        </div>
-
-        <!-- 2. فضية 100$ -->
-        <div class="package-card">
-            <div class="card-header">
-                <div class="package-name"><i class="fas fa-gem"></i> الباقة الفضية</div>
-                <div class="package-price"><i class="fas fa-dollar-sign"></i> 100 <small>USDT</small></div>
-            </div>
-            <div class="stars-rating">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <div class="info-row">
-                <div class="daily-profit">
-                    <i class="fas fa-chart-simple"></i>
-                    <span>الربح اليومي</span>
-                    <span class="profit-value">6 $</span>
-                </div>
-                <div class="duration">
-                    <i class="fas fa-calendar-alt"></i> مدة الباقة 280 يوم
-                </div>
-            </div>
-            <div class="desc">
-                <i class="fas fa-bolt"></i> نمو سريع - دعم فوري وإخراج متز
-            </div>
-            <button class="buy-now-btn" onclick="window.location.href='payment.html?amount=100'">
-                <i class="fas fa-cart-shopping"></i> شراء الآن
-            </button>
-        </div>
-
-        <!-- 3. ذهبية 250$ -->
-        <div class="package-card">
-            <div class="card-header">
-                <div class="package-name"><i class="fas fa-crown"></i> الباقة الذهبية</div>
-                <div class="package-price"><i class="fas fa-dollar-sign"></i> 250 <small>USDT</small></div>
-            </div>
-            <div class="stars-rating">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <div class="info-row">
-                <div class="daily-profit">
-                    <i class="fas fa-chart-simple"></i>
-                    <span>الربح اليومي</span>
-                    <span class="profit-value">10 $</span>
-                </div>
-                <div class="duration">
-                    <i class="fas fa-calendar-alt"></i> مدة الباقة 280 يوم
-                </div>
-            </div>
-            <div class="desc">
-                <i class="fas fa-chart-line"></i> إنتاج موصوفة - استثمارات أسبوعية آمنة
-            </div>
-            <button class="buy-now-btn" onclick="window.location.href='payment.html?amount=250'">
-                <i class="fas fa-cart-shopping"></i> شراء الآن
-            </button>
-        </div>
-
-        <!-- 4. بلاتينية 500$ -->
-        <div class="package-card">
-            <div class="card-header">
-                <div class="package-name"><i class="fas fa-star-of-life"></i> الباقة البلاتينية</div>
-                <div class="package-price"><i class="fas fa-dollar-sign"></i> 500 <small>USDT</small></div>
-            </div>
-            <div class="stars-rating">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <div class="info-row">
-                <div class="daily-profit">
-                    <i class="fas fa-chart-simple"></i>
-                    <span>الربح اليومي</span>
-                    <span class="profit-value">15 $</span>
-                </div>
-                <div class="duration">
-                    <i class="fas fa-calendar-alt"></i> مدة الباقة 280 يوم
-                </div>
-            </div>
-            <div class="desc">
-                <i class="fas fa-tachometer-alt"></i> أولوية السحب - أدخل عائد للاستثمار المتوسط
-            </div>
-            <button class="buy-now-btn" onclick="window.location.href='payment.html?amount=500'">
-                <i class="fas fa-cart-shopping"></i> شراء الآن
-            </button>
-        </div>
-
-        <!-- 5. ماسية 1000$ -->
-        <div class="package-card">
-            <div class="card-header">
-                <div class="package-name"><i class="fas fa-diamond"></i> الباقة الماسية</div>
-                <div class="package-price"><i class="fas fa-dollar-sign"></i> 1000 <small>USDT</small></div>
-            </div>
-            <div class="stars-rating">
-                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-            </div>
-            <div class="info-row">
-                <div class="daily-profit">
-                    <i class="fas fa-crown"></i>
-                    <span>الربح اليومي</span>
-                    <span class="profit-value">20 $</span>
-                </div>
-                <div class="duration">
-                    <i class="fas fa-calendar-alt"></i> مدة الباقة 280 يوم
-                </div>
-            </div>
-            <div class="desc">
-                <i class="fas fa-user-tie"></i> إيجار يومية + محفظة استثمارية خاصة
-            </div>
-            <button class="buy-now-btn" onclick="window.location.href='payment.html?amount=1000'">
-                <i class="fas fa-cart-shopping"></i> شراء الآن
-            </button>
-        </div>
+    <div class="qr-section">
+      <img id="qr" width="200" height="200" alt="QR Code">
     </div>
+
+    <div class="address-container">
+      <code id="addressText">TW7D7uRnB99zA7h6iMhVAdxifb9taLzcL5</code>
+    </div>
+    
+    <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
+      <i class="fas fa-copy"></i> نسخ العنوان
+    </button>
+
+    <div class="strong-warning">
+      <i class="fas fa-shield-alt"></i>
+      <div>
+        <p><i class="fas fa-exclamation-triangle"></i> تأكيد المبلغ والمحفظة إجباري</p>
+        <small>أي خطأ في الشبكة أو المبلغ يؤدي لفقدان الأصول بشكل دائم</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+      <i class="fas fa-check-circle" style="color: #22c55e;"></i> تأكيد الدفع
+    </h3>
+
+    <form id="depositForm" enctype="multipart/form-data">
+      <input type="hidden" name="packageName" id="packageNameInput" value="bronze">
+
+      <div class="input-group">
+        <i class="fas fa-fingerprint"></i>
+        <input type="text" name="txid" placeholder="TXID / رقم عملية التحويل" required>
+      </div>
+
+      <div class="file-upload-wrapper">
+        <input type="file" name="image" id="fileInput" accept="image/*" required>
+        <div class="file-upload-custom" id="fileUploadBox">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p><i class="fas fa-paperclip"></i> اسحب الصورة هنا أو اضغط للرفع</p>
+          <span class="file-name" id="fileNameDisplay" style="font-size: 12px; color: #cbd5e1;">لم يتم اختيار ملف</span>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <i class="fas fa-paper-plane"></i> تأكيد الطلب
+      </button>
+
+      <div id="statusBox" style="
+        margin-top:15px;
+        padding:15px;
+        border-radius:12px;
+        text-align:center;
+        font-weight:bold;
+        display:none;
+      "></div>
+    </form>
+
+    <div class="text-muted">
+      <i class="fas fa-lock"></i> جميع البيانات مشفرة وآمنة
+    </div>
+  </div>
 </div>
 
 <script>
-    function createStars() {
-        const starsContainer = document.getElementById('starsContainer');
-        for (let i = 0; i < 150; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star-bg');
-            const size = Math.random() * 3 + 1;
-            star.style.width = size + 'px';
-            star.style.height = size + 'px';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 5 + 's';
-            star.style.animationDuration = Math.random() * 3 + 2 + 's';
-            starsContainer.appendChild(star);
-        }
+  const address = "TW7D7uRnB99zA7h6iMhVAdxifb9taLzcL5";
+  document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${address}`;
+  document.getElementById("addressText").innerText = address;
+
+  // استخدام orderId محفوظ أو إنشاء واحد جديد
+  let orderId = localStorage.getItem("current_order_id");
+  if (!orderId) {
+    orderId = "#ORD-" + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    localStorage.setItem("current_order_id", orderId);
+  }
+  document.getElementById("orderIdDisplay").innerText = orderId;
+
+  window.onload = () => {
+    if (localStorage.getItem("deposit_pending") === "true") {
+      lockFields();
+      showToast("جاري مراجعة طلبك الحالي...");
     }
-    createStars();
+  };
 
-    document.getElementById('mainPackagesBtn').addEventListener('click', () => {
-        document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+  function lockFields() {
+    document.querySelector("input[name='txid']").disabled = true;
+    document.getElementById("fileInput").disabled = true;
+    document.getElementById("submitBtn").disabled = true;
+    document.getElementById("submitBtn").innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المراجعة...';
+  }
 
-    document.getElementById('backBtn').addEventListener('click', () => {
-        window.history.back();
+  function unlockFields() {
+    document.querySelector("input[name='txid']").disabled = false;
+    document.getElementById("fileInput").disabled = false;
+    document.getElementById("submitBtn").disabled = false;
+    document.getElementById("submitBtn").innerHTML = '<i class="fas fa-paper-plane"></i> تأكيد الطلب';
+  }
+
+  function showToast(msg) {
+    const existing = document.querySelector(".status-toast");
+    if (existing) existing.remove();
+    
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="status-toast">
+        ${msg}
+      </div>
+    `);
+  }
+
+  window.copyAddress = function() {
+    navigator.clipboard.writeText(address).then(() => {
+      const btn = document.getElementById("copyBtn");
+      btn.innerHTML = '<i class="fas fa-check"></i> تم نسخ العنوان';
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-copy"></i> نسخ العنوان';
+        btn.classList.remove("copied");
+      }, 2000);
     });
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const urlAmount = params.get("amount");
+  const urlPackage = params.get("package") || "bronze";
+
+  if (urlAmount) document.getElementById("amountInput").value = urlAmount;
+  document.getElementById("packageNameInput").value = urlPackage;
+
+  document.getElementById("fileInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    const display = document.getElementById("fileNameDisplay");
+    const box = document.getElementById("fileUploadBox");
+    
+    if (file) {
+      display.innerText = `✅ تم اختيار: ${file.name}`;
+      display.style.color = "#4ade80";
+      box.classList.add("has-file");
+    } else {
+      display.innerText = "لم يتم اختيار ملف";
+      display.style.color = "#cbd5e1";
+      box.classList.remove("has-file");
+    }
+  });
+
+  let totalSeconds = 900;
+  const timerDisplay = document.getElementById("timerDisplay");
+  const timerInterval = setInterval(() => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    timerDisplay.innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    totalSeconds--;
+    if (totalSeconds < 0) {
+      clearInterval(timerInterval);
+      alert("⛔ انتهى الوقت. لا تقم بالدفع.\nقم بفتح طلب جديد لضمان الأمان.");
+      window.location.reload();
+    }
+  }, 1000);
+
+  // دالة لجلب الإيميل من أي مكان متاح
+  function getUserEmail() {
+    return localStorage.getItem("email") || localStorage.getItem("userEmail");
+  }
+
+  document.getElementById("depositForm").onsubmit = async (e) => {
+    e.preventDefault();
+
+    const email = getUserEmail();
+    if (!email) {
+      alert("لم يتم العثور على بريد إلكتروني، يرجى تسجيل الدخول مرة أخرى");
+      window.location.href = "login.html";
+      return;
+    }
+    
+    const formData = new FormData(e.target);
+    formData.append("email", email);
+    formData.append("orderId", orderId);
+    formData.append("amount", document.getElementById("amountInput").value);
+
+    try {
+      const res = await fetch("/submit-deposit", {
+        method: "POST",
+        body: formData
+      });
+
+      if (!res.ok) throw new Error("Server Error");
+
+      const data = await res.json();
+
+      if (data.success) {
+        const statusBox = document.getElementById("statusBox");
+        statusBox.style.display = "block";
+        statusBox.style.background = "#f59e0b";
+        statusBox.style.color = "#000";
+        statusBox.innerHTML = "<i class=\"fas fa-hourglass-half\"></i> تم إرسال الطلب، جاري المراجعة (قد تستغرق 5 دقائق)";
+        lockFields();
+        localStorage.setItem("deposit_pending", "true");
+      } else {
+        const statusBox = document.getElementById("statusBox");
+        statusBox.style.display = "block";
+        statusBox.style.background = "#dc2626";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> فشل في معالجة الطلب. تأكد من البيانات.";
+      }
+    } catch (error) {
+        const statusBox = document.getElementById("statusBox");
+        statusBox.style.display = "block";
+        statusBox.style.background = "#dc2626";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> فشل الاتصال بالخادم. حاول مجدداً.";
+    }
+  };
+
+  // 🟡 4. Polling المطور لمتابعة الطلب الحالي فقط
+  setInterval(async () => {
+    if (localStorage.getItem("deposit_pending") !== "true") return;
+    
+    try {
+      const email = getUserEmail();
+      if (!email) return;
+
+      const res = await fetch("/transactions/" + email);
+      const data = await res.json();
+
+      const deposits = data.data.filter(t => t.type === "deposit");
+
+      // آخر طلب فقط
+      const lastDeposit = deposits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+      if (!lastDeposit) return;
+
+      // مهم جداً: يتابع نفس الطلب الحالي فقط
+      if (lastDeposit.orderId !== orderId) return;
+
+      const statusBox = document.getElementById("statusBox");
+
+      // ✅ لو تم القبول
+      if (lastDeposit.status === "approved") {
+        localStorage.removeItem("deposit_pending");
+
+        statusBox.style.display = "block";
+        statusBox.style.background = "#16a34a";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-check-circle\"></i> تم تأكيد الدفع بنجاح";
+
+        setTimeout(() => {
+          window.location.href = "success.html";
+        }, 3000);
+      }
+
+      // ❌ لو تم الرفض
+      if (lastDeposit.status === "rejected") {
+        localStorage.removeItem("deposit_pending");
+
+        statusBox.style.display = "block";
+        statusBox.style.background = "#dc2626";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> تم رفض الطلب<br>تأكد من رقم العملية والصورة ثم أعد المحاولة";
+
+        // فتح الحقول
+        unlockFields();
+      }
+    } catch (e) {
+      console.log("Polling error...");
+    }
+  }, 5000);
+
+  const uploadBox = document.getElementById("fileUploadBox");
+  uploadBox.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    uploadBox.style.borderColor = "#3b82f6";
+  });
+  uploadBox.addEventListener("dragleave", () => {
+    uploadBox.style.borderColor = "#475569";
+  });
+  uploadBox.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      document.getElementById("fileInput").files = files;
+      document.getElementById("fileInput").dispatchEvent(new Event('change'));
+    }
+  });
 </script>
+
 </body>
-    </html>
+</html>
