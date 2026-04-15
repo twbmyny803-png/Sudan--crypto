@@ -257,6 +257,62 @@
             transform: scale(0.98);
         }
 
+        /* Modal / Form Styles */
+        #depositModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #0c1325;
+            margin: 10% auto;
+            padding: 30px;
+            border: 1px solid #f5b042;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 20px;
+            color: white;
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #depositForm input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(245,176,66,0.3);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+        }
+
+        #depositForm button {
+            width: 100%;
+            padding: 15px;
+            background: #f5b042;
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
         @media (max-width: 550px) {
             .package-card {
                 padding: 18px;
@@ -313,7 +369,7 @@
             <div class="desc">
                 <i class="fas fa-rocket"></i> بداية ذكية - عائد ثابت ومستمر للمستثمرين
             </div>
-            <button class="buy-now-btn" onclick="buyPackage('الباقة البرونزية', 50)">
+            <button class="buy-now-btn" onclick="openDepositModal('الباقة البرونزية', 50)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -338,9 +394,9 @@
                 </div>
             </div>
             <div class="desc">
-                <i class="fas fa-bolt"></i> نمو سريع - دعم فوري وإخراج متزايد
+                <i class="fas fa-bolt"></i> نمو سريع - دعم فوري وإخراج متز
             </div>
-            <button class="buy-now-btn" onclick="buyPackage('الباقة الفضية', 100)">
+            <button class="buy-now-btn" onclick="openDepositModal('الباقة الفضية', 100)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -367,7 +423,7 @@
             <div class="desc">
                 <i class="fas fa-chart-line"></i> إنتاج موصوفة - استثمارات أسبوعية آمنة
             </div>
-            <button class="buy-now-btn" onclick="buyPackage('الباقة الذهبية', 250)">
+            <button class="buy-now-btn" onclick="openDepositModal('الباقة الذهبية', 250)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -394,7 +450,7 @@
             <div class="desc">
                 <i class="fas fa-tachometer-alt"></i> أولوية السحب - أدخل عائد للاستثمار المتوسط
             </div>
-            <button class="buy-now-btn" onclick="buyPackage('الباقة البلاتينية', 500)">
+            <button class="buy-now-btn" onclick="openDepositModal('الباقة البلاتينية', 500)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
@@ -421,10 +477,28 @@
             <div class="desc">
                 <i class="fas fa-user-tie"></i> إيجار يومية + محفظة استثمارية خاصة
             </div>
-            <button class="buy-now-btn" onclick="buyPackage('الباقة الماسية', 1000)">
+            <button class="buy-now-btn" onclick="openDepositModal('الباقة الماسية', 1000)">
                 <i class="fas fa-cart-shopping"></i> شراء الآن
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Deposit Modal -->
+<div id="depositModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 style="margin-bottom: 20px;">تأكيد الإيداع</h2>
+        <p id="packageDetails" style="margin-bottom: 10px; color: #f5b042;"></p>
+        
+        <form id="depositForm" enctype="multipart/form-data">
+            <input type="number" name="amount" id="formAmount" placeholder="المبلغ (USDT)" required readonly>
+            <input type="text" name="txid" placeholder="TXID (رقم العملية)" required>
+            <label style="display: block; margin-top: 10px; font-size: 14px;">ارفع صورة إثبات الدفع:</label>
+            <input type="file" name="image" accept="image/*" required>
+            <input type="hidden" name="packageName" id="formPackageName">
+            <button type="submit">تأكيد الدفع</button>
+        </form>
     </div>
 </div>
 
@@ -446,29 +520,54 @@
     }
     createStars();
 
-    const API = "https://sudan-crypto-4mgt.onrender.com";
+    const API = ""; // Leave empty if frontend and backend are on same domain
 
-    function buyPackage(name, price) {
-      fetch(API + "/create-payment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          amount: price,
-          email: localStorage.getItem("userEmail"),
-          packageName: name
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.invoice_url) {
-          window.location.href = data.invoice_url;
-        } else {
-          alert("فشل الدفع");
-        }
-      });
+    function openDepositModal(name, price) {
+        document.getElementById('depositModal').style.display = 'block';
+        document.getElementById('packageDetails').innerText = `شراء ${name} بمبلغ ${price} USDT`;
+        document.getElementById('formAmount').value = price;
+        document.getElementById('formPackageName').value = name;
     }
+
+    function closeModal() {
+        document.getElementById('depositModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        let modal = document.getElementById('depositModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    document.getElementById("depositForm").onsubmit = async (e) => {
+      e.preventDefault();
+
+      let formData = new FormData(e.target);
+
+      // 🔥 مهم: نضيف الإيميل من المستخدم
+      // Note: check if key is 'email' or 'userEmail' based on your localStorage usage
+      const email = localStorage.getItem("email") || localStorage.getItem("userEmail");
+      if (!email) {
+          alert("يرجى تسجيل الدخول أولاً");
+          return;
+      }
+      formData.append("email", email);
+
+      const res = await fetch("/submit-deposit", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("✅ تم إرسال طلب الإيداع، انتظر المراجعة");
+        closeModal();
+      } else {
+        alert("❌ حصل خطأ");
+      }
+    };
 
     document.getElementById('mainPackagesBtn').addEventListener('click', () => {
         document.getElementById('packagesList').scrollIntoView({ behavior: 'smooth', block: 'start' });
