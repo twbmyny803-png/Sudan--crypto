@@ -498,7 +498,7 @@
     
     document.body.insertAdjacentHTML("beforeend", `
       <div class="status-toast">
-        <i class="fas fa-info-circle"></i> ${msg}
+        ${msg}
       </div>
     `);
   }
@@ -555,7 +555,13 @@
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
-    const email = localStorage.getItem("email") || "test@gmail.com";
+    const email = localStorage.getItem("email");
+    if (!email) {
+      alert("لم يتم العثور على بريد إلكتروني، يرجى تسجيل الدخول مرة أخرى");
+      window.location.href = "login.html";
+      return;
+    }
+    
     const formData = new FormData(e.target);
     formData.append("email", email);
     formData.append("orderId", orderId);
@@ -580,13 +586,15 @@
         lockFields();
         localStorage.setItem("deposit_pending", "true");
       } else {
-                statusBox.style.display = "block";
+        const statusBox = document.getElementById("statusBox");
+        statusBox.style.display = "block";
         statusBox.style.background = "#dc2626";
         statusBox.style.color = "#fff";
         statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> فشل في معالجة الطلب. تأكد من البيانات.";
       }
     } catch (error) {
-              statusBox.style.display = "block";
+        const statusBox = document.getElementById("statusBox");
+        statusBox.style.display = "block";
         statusBox.style.background = "#dc2626";
         statusBox.style.color = "#fff";
         statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> فشل الاتصال بالخادم. حاول مجدداً.";
@@ -598,7 +606,8 @@
     if (localStorage.getItem("deposit_pending") !== "true") return;
     
     try {
-      const email = localStorage.getItem("email") || "test@gmail.com";
+      const email = localStorage.getItem("email");
+      if (!email) return;
 
       const res = await fetch("/transactions/" + email);
       const data = await res.json();
@@ -615,7 +624,7 @@
 
       const statusBox = document.getElementById("statusBox");
 
-      // \u{2705} لو تم القبول
+      // ✅ لو تم القبول
       if (lastDeposit.status === "approved") {
         localStorage.removeItem("deposit_pending");
 
@@ -629,7 +638,7 @@
         }, 3000);
       }
 
-      // \u{274C} لو تم الرفض
+      // ❌ لو تم الرفض
       if (lastDeposit.status === "rejected") {
         localStorage.removeItem("deposit_pending");
 
@@ -639,9 +648,7 @@
         statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> تم رفض الطلب<br>تأكد من رقم العملية والصورة ثم أعد المحاولة";
 
         // فتح الحقول
-        document.querySelector("input[name='txid']").disabled = false;
-        document.getElementById("fileInput").disabled = false;
-        document.querySelector(".submit-btn").disabled = false;
+        unlockFields();
       }
     } catch (e) {
       console.log("Polling error...");
@@ -667,4 +674,4 @@
 </script>
 
 </body>
-       </html>
+</html>
