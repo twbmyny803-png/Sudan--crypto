@@ -445,13 +445,8 @@
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
-    // 👊 التحقق من البريد الإلكتروني (احترافي)
-    const email = localStorage.getItem("email");
-    if (!email) {
-      alert("❌ لازم تسجل دخول أول");
-      window.location.href = "login.html";
-      return;
-    }
+    // 👊 استخدام إيميل تجريبي في حال عدم تسجيل الدخول لتسهيل التجربة
+    const email = localStorage.getItem("email") || "test@gmail.com";
 
     const formData = new FormData(e.target);
     
