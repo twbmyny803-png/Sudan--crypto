@@ -197,9 +197,10 @@
     font-size: 13px;
     color: #cbd5e1;
     direction: ltr;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+    font-size: 14px;
   }
 
   .copy-btn {
@@ -440,6 +441,15 @@
       <button type="submit" class="submit-btn" id="submitBtn">
         <i class="fas fa-paper-plane"></i> تأكيد الطلب
       </button>
+
+      <div id="statusBox" style="
+        margin-top:15px;
+        padding:15px;
+        border-radius:12px;
+        text-align:center;
+        font-weight:bold;
+        display:none;
+      "></div>
     </form>
 
     <div class="text-muted">
@@ -562,14 +572,24 @@
       const data = await res.json();
 
       if (data.success) {
-        showToast("✅ تم إرسال الطلب، جاري المراجعة");
+        const statusBox = document.getElementById("statusBox");
+        statusBox.style.display = "block";
+        statusBox.style.background = "#f59e0b";
+        statusBox.style.color = "#000";
+        statusBox.innerHTML = "<i class=\"fas fa-hourglass-half\"></i> تم إرسال الطلب، جاري المراجعة (قد تستغرق 5 دقائق)";
         lockFields();
         localStorage.setItem("deposit_pending", "true");
       } else {
-        alert("❌ فشل في معالجة الطلب. تأكد من البيانات.");
+                statusBox.style.display = "block";
+        statusBox.style.background = "#dc2626";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> فشل في معالجة الطلب. تأكد من البيانات.";
       }
     } catch (error) {
-      alert("❌ فشل الاتصال بالخادم. حاول مجدداً.");
+              statusBox.style.display = "block";
+        statusBox.style.background = "#dc2626";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> فشل الاتصال بالخادم. حاول مجدداً.";
     }
   };
 
@@ -579,32 +599,49 @@
     
     try {
       const email = localStorage.getItem("email") || "test@gmail.com";
+
       const res = await fetch("/transactions/" + email);
       const data = await res.json();
 
-      // فلترة الإيداعات فقط
       const deposits = data.data.filter(t => t.type === "deposit");
 
-      // ترتيب لجلب آخر طلب زمني
+      // آخر طلب فقط
       const lastDeposit = deposits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
 
       if (!lastDeposit) return;
 
-      // 👈 أهم سطر: التأكد أن الرد يخص الطلب الحالي المفتوح في الصفحة
+      // مهم جداً: يتابع نفس الطلب الحالي فقط
       if (lastDeposit.orderId !== orderId) return;
 
+      const statusBox = document.getElementById("statusBox");
+
+      // \u{2705} لو تم القبول
       if (lastDeposit.status === "approved") {
         localStorage.removeItem("deposit_pending");
-        localStorage.removeItem("current_order_id"); // مسح الـ ID بعد النجاح
-        alert("✅ تم تأكيد الدفع بنجاح!");
-        window.location.href = "success.html";
+
+        statusBox.style.display = "block";
+        statusBox.style.background = "#16a34a";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-check-circle\"></i> تم تأكيد الدفع بنجاح";
+
+        setTimeout(() => {
+          window.location.href = "success.html";
+        }, 3000);
       }
 
+      // \u{274C} لو تم الرفض
       if (lastDeposit.status === "rejected") {
         localStorage.removeItem("deposit_pending");
-        // لا نمسح الـ orderId هنا لنسمح بإعادة المحاولة بنفس الرقم أو تغييره حسب رغبتك
-        alert("❌ تم رفض طلب الإيداع. يرجى المحاولة مرة أخرى.");
-        unlockFields();
+
+        statusBox.style.display = "block";
+        statusBox.style.background = "#dc2626";
+        statusBox.style.color = "#fff";
+        statusBox.innerHTML = "<i class=\"fas fa-times-circle\"></i> تم رفض الطلب<br>تأكد من رقم العملية والصورة ثم أعد المحاولة";
+
+        // فتح الحقول
+        document.querySelector("input[name='txid']").disabled = false;
+        document.getElementById("fileInput").disabled = false;
+        document.querySelector(".submit-btn").disabled = false;
       }
     } catch (e) {
       console.log("Polling error...");
