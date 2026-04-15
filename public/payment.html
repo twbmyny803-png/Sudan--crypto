@@ -2,8 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>الدفع - تأكيد USDT</title>
-<!-- Font Awesome للأيقونات البرمجية -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>إيداع USDT</title>
+<!-- Font Awesome للأيقونات -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
@@ -14,21 +15,18 @@
   }
 
   body {
-    font-family: 'Segoe UI', 'Arial', sans-serif;
-    /* خلفية متطورة: تدرج لوني احترافي بدلاً من اللون الثابت */
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     background: linear-gradient(145deg, #0b1120 0%, #152033 50%, #0f172a 100%);
     min-height: 100vh;
     color: #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 12px;
     margin: 0;
-    /* تأثير نسيج خفيف */
     position: relative;
   }
 
-  /* طبقة شفافة إضافية لتحسين المظهر */
   body::before {
     content: "";
     position: fixed;
@@ -40,7 +38,7 @@
   }
 
   .container {
-    max-width: 440px;
+    max-width: 420px;
     width: 100%;
     margin: auto;
     padding: 4px;
@@ -48,178 +46,362 @@
     z-index: 2;
   }
 
-  h2 {
+  /* Header */
+  .page-title {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 8px;
+  }
+
+  .page-title h2 {
+    display: flex;
+    align-items: center;
     gap: 8px;
     font-weight: 600;
-    letter-spacing: -0.3px;
+    font-size: 22px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    margin-bottom: 8px;
   }
 
-  h2 i {
-    color: #fbbf24; /* لون ذهبي للتميز */
+  .order-badge {
+    background: rgba(245, 158, 11, 0.15);
+    padding: 8px 14px;
+    border-radius: 40px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
   }
 
-  h3 {
+  .order-badge i {
+    color: #fbbf24;
+  }
+
+  /* Timer عصري */
+  .timer-wrapper {
+    background: rgba(239, 68, 68, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 60px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin-bottom: 16px;
+    gap: 10px;
   }
 
-  /* خلفية زجاجية متطورة للكروت */
+  .timer-wrapper i {
+    color: #ef4444;
+    font-size: 20px;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .timer-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fca5a5;
+  }
+
+  .timer-text span {
+    color: #fecaca;
+    font-size: 22px;
+    margin: 0 4px;
+  }
+
+  /* Cards */
   .card {
     background: rgba(30, 41, 59, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(71, 85, 105, 0.4);
-    padding: 24px 20px;
+    padding: 20px 18px;
     border-radius: 24px;
-    margin-top: 20px;
-    box-shadow: 0 20px 35px -8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.02);
-    transition: transform 0.2s ease;
+    margin-bottom: 16px;
+    box-shadow: 0 15px 30px -10px rgba(0,0,0,0.4);
   }
 
-  .card:first-of-type {
-    margin-top: 8px;
+  .network-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
   }
 
-  .address {
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 1px solid #334155;
-    padding: 14px 12px;
-    border-radius: 16px;
-    word-break: break-all;
-    font-family: 'Courier New', monospace;
-    font-size: 15px;
-    text-align: center;
-    direction: ltr;
-    color: #cbd5e1;
-    letter-spacing: 0.5px;
-    box-shadow: inset 0 4px 6px rgba(0,0,0,0.2);
-  }
-
-  /* صورة QR */
-  #qr {
-    border-radius: 18px;
-    background: white;
-    padding: 8px;
-    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.4);
-    border: 1px solid #334155;
-    margin: 8px 0;
-  }
-
-  /* تنسيق الحقول */
-  input {
-    width: 100%;
-    padding: 14px 16px;
-    margin: 10px 0;
+  .network-badge {
+    background: rgba(34, 197, 94, 0.1);
+    padding: 8px 16px;
     border-radius: 40px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .network-badge i {
+    color: #22c55e;
+  }
+
+  .amount-box {
+    background: rgba(245, 158, 11, 0.1);
+    padding: 8px 16px;
+    border-radius: 40px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .amount-box i {
+    color: #fbbf24;
+  }
+
+  .amount-box input {
+    background: transparent;
+    border: none;
+    color: #fbbf24;
+    font-weight: bold;
+    font-size: 18px;
+    width: 80px;
+    text-align: center;
+    outline: none;
+    pointer-events: none;
+  }
+
+  /* QR Code Section */
+  .qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px 0 16px;
+  }
+
+  #qr {
+    border-radius: 20px;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+    border: 2px solid #334155;
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Address with Copy */
+  .address-container {
+    display: flex;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 60px;
+    border: 1px solid #475569;
+    padding: 4px 4px 4px 16px;
+    margin: 12px 0;
+  }
+
+  .address-container code {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #cbd5e1;
+    direction: ltr;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 8px 0;
+  }
+
+  .copy-btn {
+    background: #3b82f6;
+    border: none;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 60px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+  }
+
+  .copy-btn:hover {
+    background: #2563eb;
+  }
+
+  .copy-btn.copied {
+    background: #22c55e;
+  }
+
+  /* رسالة تحذيرية قوية */
+  .strong-warning {
+    background: linear-gradient(90deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05));
+    border-right: 4px solid #ef4444;
+    padding: 14px 16px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0 8px;
+  }
+
+  .strong-warning i {
+    color: #ef4444;
+    font-size: 22px;
+  }
+
+  .strong-warning p {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fecaca;
+  }
+
+  .strong-warning small {
+    color: #f87171;
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  /* Form Inputs */
+  .input-group {
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .input-group i {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 16px;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 16px 48px 16px 16px;
+    background: rgba(15, 23, 42, 0.7);
     border: 1.5px solid #334155;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
+    border-radius: 60px;
     color: white;
     font-size: 15px;
     outline: none;
     transition: all 0.2s;
   }
 
-  input:focus {
-    border-color: #22c55e;
-    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  .input-group input:focus {
+    border-color: #3b82f6;
     background: #0f172a;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
   }
 
-  input[type="file"] {
-    padding: 10px;
-    background: rgba(15, 23, 42, 0.3);
+  /* File Upload عصري */
+  .file-upload-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .file-upload-wrapper input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
     cursor: pointer;
   }
 
-  input::file-selector-button {
-    background: #334155;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 30px;
-    color: white;
-    margin-left: 12px;
+  .file-upload-custom {
+    background: rgba(15, 23, 42, 0.7);
+    border: 2px dashed #475569;
+    border-radius: 20px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: all 0.2s;
     cursor: pointer;
-    font-weight: bold;
   }
 
-  button {
-    padding: 14px 24px;
+  .file-upload-custom:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .file-upload-custom i {
+    font-size: 32px;
+    color: #64748b;
+    margin-bottom: 8px;
+  }
+
+  .file-upload-custom p {
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 4px;
+  }
+
+  .file-upload-custom .file-name {
+    color: #22c55e;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
     background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
     border: none;
     border-radius: 60px;
-    cursor: pointer;
+    color: white;
     font-weight: bold;
     font-size: 18px;
-    color: white;
-    width: 100%;
-    margin-top: 8px;
-    box-shadow: 0 8px 20px -6px #22c55e70;
-    transition: all 0.15s;
-    border: 1px solid #4ade80;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-
-  button:hover {
-    background: #16a34a;
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px -2px #16a34a;
-  }
-
-  .timer {
-    color: #facc15;
-    font-size: 28px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 5px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background: rgba(0,0,0,0.2);
-    padding: 8px 20px;
-    border-radius: 60px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    backdrop-filter: blur(4px);
-    border: 1px solid #facc1533;
+    box-shadow: 0 10px 25px -5px #22c55e70;
+    border: 1px solid #4ade80;
+    transition: all 0.15s;
   }
 
-  /* أيقونات برمجية إضافية */
-  .network-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 12px;
+  .submit-btn:hover {
+    background: #16a34a;
+    transform: scale(0.98);
   }
 
-  .warning-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: #f87171;
-    font-size: 14px;
-    margin: 12px 0 4px;
+  .submit-btn i {
+    font-size: 18px;
   }
 
-  i {
-    margin: 0 4px;
+  /* Helper */
+  .text-muted {
+    color: #94a3b8;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 380px) {
+    .container {
+      padding: 2px;
+    }
+    .card {
+      padding: 16px 14px;
+    }
+    .address-container code {
+      font-size: 11px;
+    }
+    .copy-btn {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
   }
 </style>
 </head>
@@ -228,145 +410,231 @@
 
 <div class="container">
 
-  <h2>
-    <i class="fas fa-coins"></i> 
-    إيداع USDT
-    <i class="fas fa-arrow-down"></i>
-  </h2>
-
-  <!-- التايمر مع أيقونة الساعة البرمجية بدل الإيموجي 🔥 -->
-  <div class="timer" id="timer">
-    <i class="far fa-clock"></i> 
-    <span>10:00</span>
+  <!-- Header مع رقم الطلب -->
+  <div class="page-title">
+    <h2>
+      <i class="fas fa-coins" style="color: #fbbf24;"></i>
+      إيداع USDT
+    </h2>
+    <div class="order-badge">
+      <i class="fas fa-hashtag"></i>
+      <span id="orderIdDisplay">#ORD-</span>
+    </div>
   </div>
 
+  <!-- Timer: متبقي 15 دقيقة -->
+  <div class="timer-wrapper">
+    <i class="fas fa-hourglass-half"></i>
+    <div class="timer-text">
+      ⏳ متبقي <span id="timerDisplay">15:00</span> دقيقة
+    </div>
+  </div>
+
+  <!-- Card: QR & Address -->
   <div class="card">
 
-    <div class="network-badge">
-      <i class="fas fa-network-wired"></i>
-      <span>الشبكة: <b>TRC20</b></span>
+    <div class="network-row">
+      <div class="network-badge">
+        <i class="fas fa-link"></i>
+        <span>شبكة <strong>TRC20</strong></span>
+      </div>
+      <div class="amount-box">
+        <i class="fas fa-tag"></i>
+        <input type="text" id="amountInput" readonly value="50">
+        <span style="color: #fbbf24;">USDT</span>
+      </div>
+    </div>
+
+    <!-- QR Code حقيقي -->
+    <div class="qr-section">
+      <img id="qr" width="200" height="200" alt="USDT QR Code">
+    </div>
+
+    <!-- Address + Copy Button -->
+    <div class="address-container">
+      <code id="addressText">TW7D7uRnB99zA7h6iMhVAdxifb9taLzcL5</code>
+      <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
+        <i class="fas fa-copy"></i>
+        نسخ
+      </button>
+    </div>
+
+    <!-- تحذير قوي بدل "أرسل نفس المبلغ بالضبط" -->
+    <div class="strong-warning">
+      <i class="fas fa-shield-hal"></i>
+      <div>
+        <p>⚠️ تأكيد المبلغ والمحفظة إجباري</p>
+        <small>أي خطأ في الشبكة أو المبلغ يؤدي لفقدان الأصول بشكل دائم</small>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Card: نموذج التأكيد -->
+  <div class="card">
+
+    <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 20px;">
       <i class="fas fa-check-circle" style="color: #22c55e;"></i>
-    </div>
-
-    <div class="address" id="address">
-      <i class="fas fa-qrcode" style="margin-left: 6px;"></i> 
-      TW7D7uRnB99zA7h6iMhVAdxifb9taLzcL5
-    </div>
-
-    <br>
-
-    <!-- QR Code مع أيقونة -->
-    <div style="position: relative; display: inline-block;">
-      <img id="qr" width="200" alt="QR Code">
-    </div>
-
-    <!-- تحذير مع أيقونة -->
-    <div class="warning-text">
-      <i class="fas fa-exclamation-triangle"></i>
-      <span>أرسل نفس المبلغ بالضبط</span>
-      <i class="fas fa-exclamation-triangle"></i>
-    </div>
-
-  </div>
-
-  <div class="card">
-
-    <h3>
-      <i class="fas fa-check-double"></i>
       تأكيد الدفع
-      <i class="fas fa-pen"></i>
     </h3>
 
     <form id="depositForm" enctype="multipart/form-data">
 
-      <div style="position: relative;">
-        <i class="fas fa-dollar-sign" style="position: absolute; right: 16px; top: 24px; color: #94a3b8;"></i>
-        <input type="number" name="amount" placeholder="المبلغ" style="padding-right: 40px;" required>
+      <!-- حقل TXID -->
+      <div class="input-group">
+        <i class="fas fa-fingerprint"></i>
+        <input type="text" name="txid" placeholder="TXID / رقم عملية التحويل" required>
       </div>
 
-      <div style="position: relative;">
-        <i class="fas fa-hashtag" style="position: absolute; right: 16px; top: 24px; color: #94a3b8;"></i>
-        <input type="text" name="txid" placeholder="TXID" style="padding-right: 40px;" required>
+      <!-- File Upload عصري -->
+      <div class="file-upload-wrapper">
+        <input type="file" name="image" id="fileInput" accept="image/*" required>
+        <div class="file-upload-custom" id="fileUploadBox">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>📎 اسحب الصورة هنا أو اضغط للرفع</p>
+          <span class="file-name" id="fileNameDisplay">لم يتم اختيار ملف</span>
+        </div>
       </div>
 
-      <div style="position: relative;">
-        <i class="fas fa-image" style="position: absolute; right: 16px; top: 22px; color: #94a3b8; z-index: 2;"></i>
-        <input type="file" name="image" style="padding-right: 44px;" required>
-      </div>
-
-      <button type="submit">
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn">
         <i class="fas fa-paper-plane"></i>
         تأكيد الطلب
-        <i class="fas fa-chevron-left" style="font-size: 14px;"></i>
       </button>
 
     </form>
 
+    <div class="text-muted">
+      <i class="fas fa-lock" style="margin-left: 6px;"></i>
+      جميع البيانات مشفرة وآمنة
+    </div>
+
   </div>
+
 </div>
 
 <script>
-  // QR Code
+  // ========== إعدادات أساسية ==========
   const address = "TW7D7uRnB99zA7h6iMhVAdxifb9taLzcL5";
-  document.getElementById("qr").src =
-    "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + address;
+  
+  // QR Code حقيقي
+  document.getElementById("qr").src = 
+    `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${address}`;
 
-  // Timer
-  let time = 600;
-  const timerDisplay = document.querySelector("#timer span");
+  // عرض العنوان
+  document.getElementById("addressText").innerText = address;
 
-  const timer = setInterval(() => {
-    let minutes = Math.floor(time / 60);
-    let seconds = time % 60;
+  // ========== رقم طلب عشوائي ==========
+  function generateOrderId() {
+    const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    return `#ORD-${random}`;
+  }
+  const orderId = generateOrderId();
+  document.getElementById("orderIdDisplay").innerText = orderId;
 
-    if (timerDisplay) {
-      timerDisplay.innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  // ========== نسخ العنوان ==========
+  window.copyAddress = function() {
+    navigator.clipboard.writeText(address).then(() => {
+      const btn = document.getElementById("copyBtn");
+      btn.innerHTML = '<i class="fas fa-check"></i> تم النسخ';
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-copy"></i> نسخ';
+        btn.classList.remove("copied");
+      }, 2000);
+    });
+  };
+
+  // ========== استقبال المبلغ من الرابط ==========
+  const params = new URLSearchParams(window.location.search);
+  const urlAmount = params.get("amount");
+  if (urlAmount) {
+    document.getElementById("amountInput").value = urlAmount;
+  }
+
+  // ========== File Upload Display ==========
+  const fileInput = document.getElementById("fileInput");
+  const fileNameDisplay = document.getElementById("fileNameDisplay");
+  
+  fileInput.addEventListener("change", function() {
+    if (this.files && this.files[0]) {
+      fileNameDisplay.innerText = this.files[0].name;
+      fileNameDisplay.style.color = "#4ade80";
     } else {
-      document.getElementById("timer").innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      fileNameDisplay.innerText = "لم يتم اختيار ملف";
+      fileNameDisplay.style.color = "#94a3b8";
     }
+  });
 
-    time--;
+  // ========== تايمر 15 دقيقة ==========
+  let totalSeconds = 900; // 15 دقيقة
+  const timerDisplay = document.getElementById("timerDisplay");
 
-    if (time < 0) {
-      clearInterval(timer);
-      alert("انتهى الوقت، العملية ألغيت");
+  const timerInterval = setInterval(() => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    timerDisplay.innerText = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    
+    totalSeconds--;
+
+    if (totalSeconds < 0) {
+      clearInterval(timerInterval);
+      alert("⏰ انتهى الوقت المخصص للعملية. يرجى إعادة المحاولة.");
       window.location.reload();
     }
-
   }, 1000);
 
-  // إرسال النموذج
+  // ========== إرسال النموذج ==========
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
-    let formData = new FormData(e.target);
+    const formData = new FormData(e.target);
+    
+    // إضافة بيانات إضافية
     formData.append("email", localStorage.getItem("email") || "");
+    formData.append("orderId", orderId);
+    formData.append("expectedAmount", document.getElementById("amountInput").value);
 
-    const res = await fetch("/submit-deposit", {
-      method: "POST",
-      body: formData
-    });
+    try {
+      const res = await fetch("/submit-deposit", {
+        method: "POST",
+        body: formData
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      alert("تم إرسال الطلب بنجاح");
-    } else {
-      alert("حدث خطأ");
+      if (data.success) {
+        alert("✅ تم استلام طلبك بنجاح\nرقم الطلب: " + orderId);
+        // ممكن توجيه المستخدم لصفحة نجاح
+      } else {
+        alert("❌ حدث خطأ. يرجى المحاولة مرة أخرى.");
+      }
+    } catch (error) {
+      alert("❌ فشل الاتصال بالخادم.");
     }
   };
-</script>
 
-<!-- ملاحظة: السكربت الخاص باستلام المبلغ عبر URL -->
-<script>
-  // (اختياري) لتحديث حقل المبلغ من رابط الصفحة إن وُجد
-  const params = new URLSearchParams(window.location.search);
-  const amountParam = params.get("amount");
-  if (amountParam) {
-    const amountInput = document.querySelector('input[name="amount"]');
-    if (amountInput) amountInput.value = amountParam;
-  }
+  // ========== إيقاف التفاعل مع السحب والإفلات ==========
+  const uploadBox = document.getElementById("fileUploadBox");
+  uploadBox.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    uploadBox.style.borderColor = "#3b82f6";
+  });
+  uploadBox.addEventListener("dragleave", () => {
+    uploadBox.style.borderColor = "#475569";
+  });
+  uploadBox.addEventListener("drop", (e) => {
+    e.preventDefault();
+    uploadBox.style.borderColor = "#475569";
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      fileNameDisplay.innerText = files[0].name;
+      fileNameDisplay.style.color = "#4ade80";
+    }
+  });
 </script>
 
 </body>
-      </html>
+ </html>
