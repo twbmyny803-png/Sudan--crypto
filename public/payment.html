@@ -445,10 +445,22 @@
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
+    // 👊 التحقق من البريد الإلكتروني (احترافي)
+    const email = localStorage.getItem("email");
+    if (!email) {
+      alert("❌ لازم تسجل دخول أول");
+      window.location.href = "login.html";
+      return;
+    }
+
     const formData = new FormData(e.target);
-    formData.append("email", localStorage.getItem("email") || "");
+    
+    // ✅ إضافة البريد الإلكتروني ورقم الطلب
+    formData.append("email", email);
     formData.append("orderId", orderId);
-    formData.append("expectedAmount", document.getElementById("amountInput").value);
+    
+    // ✅ تصحيح اسم الحقل من expectedAmount إلى amount
+    formData.append("amount", document.getElementById("amountInput").value);
 
     const USE_MOCK = false;
 
