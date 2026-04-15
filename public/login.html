@@ -473,6 +473,7 @@
         // تعديل: استخدام localStorage دائماً لضمان بقاء الجلسة
         localStorage.setItem("name", data.name);
         localStorage.setItem("userEmail", data.email || email);
+        localStorage.setItem("email", data.email);
         localStorage.setItem("isLoggedIn", "true");
 
         showToast('تم تسجيل الدخول بنجاح');
