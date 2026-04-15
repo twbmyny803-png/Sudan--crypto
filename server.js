@@ -539,7 +539,8 @@ app.get("/transactions/:email", async (req, res) => {
         status: d.status,
         date: d.createdAt,
         txid: d.txid,
-        network: d.network
+        network: d.network,
+        orderId: d.orderId
       })),
       ...withdraws.map(w => ({
         type: "withdraw",
