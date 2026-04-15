@@ -362,6 +362,9 @@
     </h3>
 
     <form id="depositForm" enctype="multipart/form-data">
+      <!-- ✅ حقل مخفي لاسم الباقة -->
+      <input type="hidden" name="packageName" id="packageNameInput" value="bronze">
+
       <div class="input-group">
         <i class="fas fa-fingerprint"></i>
         <input type="text" name="txid" placeholder="TXID / رقم عملية التحويل" required>
@@ -409,10 +412,13 @@
     });
   };
 
-  // استقبال المبلغ
+  // ✅ استقبال المبلغ واسم الباقة من الرابط
   const params = new URLSearchParams(window.location.search);
   const urlAmount = params.get("amount");
+  const urlPackage = params.get("package") || "bronze";
+
   if (urlAmount) document.getElementById("amountInput").value = urlAmount;
+  document.getElementById("packageNameInput").value = urlPackage;
 
   // File name display
   document.getElementById("fileInput").addEventListener("change", function(e) {
@@ -435,7 +441,7 @@
     }
   }, 1000);
 
-  // ========== إرسال النموذج (معدل) ==========
+  // ========== إرسال النموذج ==========
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
@@ -444,19 +450,16 @@
     formData.append("orderId", orderId);
     formData.append("expectedAmount", document.getElementById("amountInput").value);
 
-    // ✅ وضع الاختبار: لو عايز تنجح تلقائيًا من غير سيرفر، غير const USE_MOCK = true
-    const USE_MOCK = false; // اجعلها true لو حابب تجرب بدون سيرفر
+    const USE_MOCK = false;
 
     if (USE_MOCK) {
-      // محاكاة نجاح للاختبار
       setTimeout(() => {
         alert(`✅ تم استلام طلبك بنجاح (تجريبي)\nرقم الطلب: ${orderId}`);
-        window.location.href = "success.html"; // ممكن تحوله لصفحة نجاح
+        window.location.href = "success.html";
       }, 1000);
       return;
     }
 
-    // الإرسال الحقيقي للسيرفر
     try {
       const res = await fetch("/submit-deposit", {
         method: "POST",
@@ -469,7 +472,7 @@
 
       if (data.success) {
         alert(`✅ تم استلام طلبك بنجاح\nرقم الطلب: ${orderId}`);
-        window.location.href = "dashboard.html"; // غيرها لصفحة لوحة التحكم
+        window.location.href = "dashboard.html";
       } else {
         alert("❌ فشل في معالجة الطلب. تأكد من البيانات.");
       }
