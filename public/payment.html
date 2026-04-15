@@ -453,14 +453,18 @@
   document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${address}`;
   document.getElementById("addressText").innerText = address;
 
-  const orderId = "#ORD-" + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+  // استخدام orderId محفوظ أو إنشاء واحد جديد
+  let orderId = localStorage.getItem("current_order_id");
+  if (!orderId) {
+    orderId = "#ORD-" + Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    localStorage.setItem("current_order_id", orderId);
+  }
   document.getElementById("orderIdDisplay").innerText = orderId;
 
-  // 🥉 حفظ الحالة عند التحميل
   window.onload = () => {
     if (localStorage.getItem("deposit_pending") === "true") {
       lockFields();
-      showToast("جاري مراجعة طلبك السابق...");
+      showToast("جاري مراجعة طلبك الحالي...");
     }
   };
 
@@ -508,7 +512,6 @@
   if (urlAmount) document.getElementById("amountInput").value = urlAmount;
   document.getElementById("packageNameInput").value = urlPackage;
 
-  // Modern File upload UI
   document.getElementById("fileInput").addEventListener("change", function(e) {
     const file = e.target.files[0];
     const display = document.getElementById("fileNameDisplay");
@@ -525,7 +528,6 @@
     }
   });
 
-  // Timer 15 min
   let totalSeconds = 900;
   const timerDisplay = document.getElementById("timerDisplay");
   const timerInterval = setInterval(() => {
@@ -540,7 +542,6 @@
     }
   }, 1000);
 
-  // ========== إرسال النموذج ==========
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
@@ -561,13 +562,8 @@
       const data = await res.json();
 
       if (data.success) {
-        // 🥇 1. إشعار بدون تحويل
         showToast("✅ تم إرسال الطلب، جاري المراجعة");
-        
-        // 🥈 2. قفل الحقول
         lockFields();
-        
-        // 🥉 3. حفظ الحالة
         localStorage.setItem("deposit_pending", "true");
       } else {
         alert("❌ فشل في معالجة الطلب. تأكد من البيانات.");
@@ -577,7 +573,7 @@
     }
   };
 
-  // 🟡 4. Polling للتحديث التلقائي
+  // 🟡 4. Polling المطور لمتابعة الطلب الحالي فقط
   setInterval(async () => {
     if (localStorage.getItem("deposit_pending") !== "true") return;
     
@@ -586,17 +582,27 @@
       const res = await fetch("/transactions/" + email);
       const data = await res.json();
 
-      const lastDeposit = data.data.find(t => t.type === "deposit");
+      // فلترة الإيداعات فقط
+      const deposits = data.data.filter(t => t.type === "deposit");
+
+      // ترتيب لجلب آخر طلب زمني
+      const lastDeposit = deposits.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
       if (!lastDeposit) return;
+
+      // 👈 أهم سطر: التأكد أن الرد يخص الطلب الحالي المفتوح في الصفحة
+      if (lastDeposit.orderId !== orderId) return;
 
       if (lastDeposit.status === "approved") {
         localStorage.removeItem("deposit_pending");
+        localStorage.removeItem("current_order_id"); // مسح الـ ID بعد النجاح
         alert("✅ تم تأكيد الدفع بنجاح!");
         window.location.href = "success.html";
       }
 
       if (lastDeposit.status === "rejected") {
         localStorage.removeItem("deposit_pending");
+        // لا نمسح الـ orderId هنا لنسمح بإعادة المحاولة بنفس الرقم أو تغييره حسب رغبتك
         alert("❌ تم رفض طلب الإيداع. يرجى المحاولة مرة أخرى.");
         unlockFields();
       }
@@ -605,7 +611,6 @@
     }
   }, 5000);
 
-  // Drag & Drop
   const uploadBox = document.getElementById("fileUploadBox");
   uploadBox.addEventListener("dragover", (e) => {
     e.preventDefault();
@@ -625,4 +630,4 @@
 </script>
 
 </body>
-</html>
+       </html>
