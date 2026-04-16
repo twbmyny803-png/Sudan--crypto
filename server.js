@@ -324,6 +324,50 @@ app.get("/admin-verifications", async (req, res) => {
   }
 });
 
+// 🟢 موافقة التوثيق
+app.post("/admin-verify", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "المستخدم غير موجود" });
+    }
+
+    user.isVerified = true;
+    user.verificationStatus = "verified";
+    await user.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+});
+
+// 🔴 رفض التوثيق
+app.post("/admin-reject-verification", async (req, res) => {
+  try {
+    const { email, reason } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false });
+    }
+
+    user.verificationStatus = "rejected";
+    user.verificationRejectReason = reason || "تم الرفض";
+    await user.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
+});
+
 app.get("/admin-deposits", async (req, res) => {
   try {
     const deposits = await Deposit.find().sort({ createdAt: -1 });
