@@ -390,7 +390,7 @@
       </div>
       <div class="amount-box">
         <i class="fas fa-tag"></i>
-        <input type="text" id="amountInput" readonly value="50">
+        <input type="text" id="amountInput" readonly>
         <span>USDT</span>
       </div>
     </div>
@@ -519,7 +519,9 @@
   const urlAmount = params.get("amount");
   const urlPackage = params.get("package") || "bronze";
 
-  if (urlAmount) document.getElementById("amountInput").value = urlAmount;
+  if (urlAmount) {
+    document.getElementById("amountInput").value = urlAmount;
+  }
   document.getElementById("packageNameInput").value = urlPackage;
 
   document.getElementById("fileInput").addEventListener("change", function(e) {
