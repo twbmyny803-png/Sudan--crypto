@@ -555,12 +555,26 @@
   document.getElementById("depositForm").onsubmit = async (e) => {
     e.preventDefault();
 
-    const email = localStorage.getItem("email");
-    if (!email) {
-      alert("لم يتم العثور على بريد إلكتروني، يرجى تسجيل الدخول مرة أخرى");
-      window.location.href = "login.html";
+    let email = "";
+
+    const userData = await fetch("/user-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: localStorage.getItem("email")
+      })
+    });
+
+    const user = await userData.json();
+
+    if (!user.success) {
+      alert("❌ لازم تسجل دخول أول");
       return;
     }
+
+    email = user.email;
     
     const formData = new FormData(e.target);
     formData.append("email", email);
