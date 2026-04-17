@@ -295,7 +295,7 @@ app.post("/user-data", async (req, res) => {
     verificationStatus: user.verificationStatus || 'none',
     balance: user.balance || 0,
     incomeBalance: user.incomeBalance || 0,
-    referralBalance: user.referralBalance || 0,
+    referralBalance: 0,
     isBlocked: user.isBlocked || false,
     isFrozen: user.isFrozen || false,
     withdrawBlocked: user.withdrawBlocked || false,
@@ -492,7 +492,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
       const bonus = Number(deposit.amount) * refPercents[i];
 
       // 👇 تنزل في أرباح الإحالات
-      refUser.referralBalance += bonus;
+      refUser.incomeBalance += bonus;
       await refUser.save();
 
       await ReferralTransaction.create({
@@ -500,7 +500,8 @@ app.post("/admin-approve-deposit", async (req, res) => {
         type: "referral",
         amount: bonus,
         status: "approved",
-        level: i + 1
+        level: i + 1,
+        createdAt: new Date()
       });
 
       currentRef = refUser.refBy;
@@ -670,7 +671,7 @@ app.get("/referrals/:email", async (req, res) => {
     res.json({
       success: true,
       refCode: user.refCode,
-      income: user.referralBalance,
+      income: 0,
       levels: { level1, level2, level3, level4, level5 }
     });
   } catch (err) {
@@ -683,7 +684,7 @@ app.post("/transfer-profit", async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
   
-  const totalProfit = (user.incomeBalance || 0) + (user.referralBalance || 0);
+  const totalProfit = user.incomeBalance || 0;
   
   if (totalProfit <= 0) {
     return res.json({ success: false, message: "لا توجد أرباح للتحويل" });
@@ -692,7 +693,6 @@ app.post("/transfer-profit", async (req, res) => {
   const amount = totalProfit;
   user.balance += amount;
   user.incomeBalance = 0;
-  user.referralBalance = 0;
   await user.save();
   await ReferralTransaction.create({
     email: user.email,
