@@ -467,9 +467,6 @@
             const user = await response.json();
 
             if (user.hasActivePackage) {
-                alert("لديك باقة نشطة، لا يمكنك شراء باقة جديدة إلا بعد انتهاء الباقة الحالية");
-                window.location.href = "dashboard.html";
-                
                 document.querySelectorAll(".buy-now-btn").forEach(btn => {
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fas fa-lock"></i> لديك باقة نشطة';
@@ -485,4 +482,4 @@
     checkActivePackage();
 </script>
 </body>
-                                                                      </html>
+</html>
