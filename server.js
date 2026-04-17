@@ -6,8 +6,15 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
 const crypto = require("crypto");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+
 app.use(express.json());
 app.use(cors());
 
@@ -129,6 +136,13 @@ function generateRefCode() {
   }
   return code;
 }
+
+// 🔥 2. ربط المستخدمين
+io.on("connection", (socket) => {
+  socket.on("join", (email) => {
+    socket.join(email);
+  });
+});
 
 // ================== إرسال كود ==================
 app.post("/send-code", async (req, res) => {
@@ -265,6 +279,10 @@ app.post("/user-data", async (req, res) => {
           amount: profit,
           status: "approved",
           createdAt: new Date()
+        });
+        // 🔥 4. الأرباح اليومية
+        io.to(user.email).emit("profit_added", {
+          amount: profit
         });
       }
       user.lastProfitDate = new Date();
@@ -453,6 +471,11 @@ app.post("/admin-approve-deposit", async (req, res) => {
 
   user.balance += Number(deposit.amount);
   await user.save();
+
+  // 🔥 3. إرسال التحديث (أهم نقطة)
+  io.to(user.email).emit("deposit_approved", {
+    amount: deposit.amount
+  });
 
   const packages = {
     "bronze": { name: "البرونزية", price: 50, daily: 2, duration: 280 },
@@ -726,6 +749,10 @@ setInterval(async () => {
         status: "approved",
         createdAt: new Date()
       });
+      // 🔥 4. الأرباح اليومية
+      io.to(user.email).emit("profit_added", {
+        amount: profit
+      });
     }
   } catch (err) {
     console.log("Daily profit error:", err);
@@ -733,6 +760,7 @@ setInterval(async () => {
 }, 60000);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// ✅ 5. تغيير تشغيل السيرفر
+server.listen(PORT, () => {
+  console.log("Server running");
 });
