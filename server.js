@@ -329,71 +329,84 @@ app.get("/admin-users", async (req, res) => {
   res.json({ success: true, users });
 });
 
-app.get("/admin-verifications", async (req, res) => {
-  try {
-    const users = await User.find({ verificationStatus: "pending" });
-    res.json({ success: true, requests: users });
-  } catch (err) {
-    res.json({ success: false });
-  }
+app.post("/admin-block", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isBlocked: true });
+  res.json({ success: true });
 });
 
-// 🟢 موافقة التوثيق
-app.post("/admin-verify", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "المستخدم غير موجود" });
-    }
-
-    user.isVerified = true;
-    user.verificationStatus = "verified";
-    await user.save();
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
-  }
+app.post("/admin-unblock", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isBlocked: false });
+  res.json({ success: true });
 });
 
-// 🔴 رفض التوثيق
-app.post("/admin-reject-verification", async (req, res) => {
-  try {
-    const { email, reason } = req.body;
+app.post("/admin-freeze", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isFrozen: true });
+  res.json({ success: true });
+});
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false });
-    }
+app.post("/admin-unfreeze", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isFrozen: false });
+  res.json({ success: true });
+});
 
-    user.verificationStatus = "rejected";
-    user.verificationRejectReason = reason || "تم الرفض";
-    await user.save();
+app.post("/admin-block-withdraw", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { withdrawBlocked: true });
+  res.json({ success: true });
+});
 
-    res.json({ success: true });
+app.post("/admin-unblock-withdraw", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { withdrawBlocked: false });
+  res.json({ success: true });
+});
 
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
-  }
+app.post("/admin-verify-user", async (req, res) => {
+  const { email } = req.body;
+  await User.updateOne({ email }, { isVerified: true, verificationStatus: "verified" });
+  res.json({ success: true });
+});
+
+app.post("/admin-reject-verify", async (req, res) => {
+  const { email, reason } = req.body;
+  await User.updateOne({ email }, { verificationStatus: "rejected", verificationRejectReason: reason });
+  res.json({ success: true });
 });
 
 app.get("/admin-deposits", async (req, res) => {
-  try {
-    const deposits = await Deposit.find().sort({ createdAt: -1 });
-    res.json({ success: true, deposits });
-  } catch (err) {
-    res.json({ success: false });
-  }
+  const deposits = await Deposit.find({});
+  res.json({ success: true, deposits });
 });
 
-app.post("/admin-add-balance", async (req, res) => {
-  const { email, amount } = req.body;
-  await User.updateOne({ email }, { $inc: { balance: Number(amount) } });
+app.get("/admin-withdraws", async (req, res) => {
+  const withdraws = await Withdraw.find({});
+  res.json({ success: true, withdraws });
+});
+
+app.post("/admin-approve-withdraw", async (req, res) => {
+  const { id } = req.body;
+  const withdraw = await Withdraw.findById(id);
+  if (!withdraw) return res.json({ success: false });
+  const user = await User.findOne({ email: withdraw.email });
+  if (!user) return res.json({ success: false });
+  if (user.balance < withdraw.amount) return res.json({ success: false, message: "رصيد غير كافٍ" });
+  user.balance -= withdraw.amount;
+  await user.save();
+  withdraw.status = "approved";
+  await withdraw.save();
+  res.json({ success: true });
+});
+
+app.post("/admin-reject-withdraw", async (req, res) => {
+  const { id } = req.body;
+  const withdraw = await Withdraw.findById(id);
+  if (!withdraw) return res.json({ success: false });
+  withdraw.status = "rejected";
+  await withdraw.save();
   res.json({ success: true });
 });
 
@@ -442,6 +455,33 @@ app.post("/admin-approve-deposit", async (req, res) => {
       createdAt: new Date()
     });
     await user.save();
+
+    // ================== نظام الإحالات ==================
+    const refPercents = [0.1, 0.05, 0.03, 0.02, 0.01];
+    let currentRef = user.refBy;
+
+    for (let i = 0; i < refPercents.length; i++) {
+      if (!currentRef) break;
+
+      const refUser = await User.findOne({ refCode: currentRef });
+      if (!refUser) break;
+
+      const bonus = Number(deposit.amount) * refPercents[i];
+
+      // 👇 تنزل في أرباح الإحالات
+      refUser.referralBalance += bonus;
+      await refUser.save();
+
+      await ReferralTransaction.create({
+        email: refUser.email,
+        type: "referral",
+        amount: bonus,
+        status: "approved",
+        level: i + 1
+      });
+
+      currentRef = refUser.refBy;
+    }
   }
   res.json({ success: true });
 });
@@ -458,47 +498,13 @@ app.post("/withdraw-request", async (req, res) => {
     user.walletLocked = true;
     await user.save();
   } else {
-    if (wallet !== user.walletAddress) {
-      return res.json({ success: false, message: "لا يمكن تغيير عنوان السحب بعد تعيينه" });
+    if (user.walletAddress !== wallet) {
+      return res.json({ success: false, message: "لا يمكنك السحب لعنوان محفظة مختلف" });
     }
   }
-  if (user.withdrawBlocked) return res.json({ success: false, message: "السحب موقوف لحسابك، تواصل مع الدعم" });
-  if (amount < 10) return res.json({ success: false, message: "الحد الأدنى للسحب 10 USDT" });
-  if (amount > user.balance) return res.json({ success: false, message: "رصيد غير كافي" });
-  const finalAmount = amount - 1;
-  user.balance -= Number(amount);
-  await user.save();
-  await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
-  res.json({ success: true, message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة." });
-});
-
-app.get("/admin-withdraws", async (req, res) => {
-  try {
-    const data = await Withdraw.find().sort({ createdAt: -1 });
-    res.json({ success: true, requests: data });
-  } catch (err) {
-    res.json({ success: false });
-  }
-});
-
-app.post("/admin-approve-withdraw", async (req, res) => {
-  const { id } = req.body;
-  const request = await Withdraw.findById(id);
-  if (!request) return res.json({ success: false });
-  request.status = "approved";
-  await request.save();
-  res.json({ success: true });
-});
-
-app.post("/admin-reject-withdraw", async (req, res) => {
-  const { id } = req.body;
-  const request = await Withdraw.findById(id);
-  if (!request) return res.json({ success: false });
-  const user = await User.findOne({ email: request.email });
-  user.balance += (request.amount + 1);
-  await user.save();
-  request.status = "rejected";
-  await request.save();
+  if (user.balance < amount) return res.json({ success: false, message: "رصيد غير كافٍ" });
+  const withdraw = new Withdraw({ email, amount, wallet });
+  await withdraw.save();
   res.json({ success: true });
 });
 
