@@ -329,135 +329,176 @@ app.get("/admin-users", async (req, res) => {
   res.json({ success: true, users });
 });
 
-app.post("/admin-update-balance", async (req, res) => {
-  const { email, balance, incomeBalance } = req.body;
-  await User.updateOne({ email }, { balance, incomeBalance });
-  res.json({ success: true });
+app.get("/admin-verifications", async (req, res) => {
+  try {
+    const users = await User.find({ verificationStatus: "pending" });
+    res.json({ success: true, requests: users });
+  } catch (err) {
+    res.json({ success: false });
+  }
 });
 
-app.post("/admin-block-user", async (req, res) => {
-  const { email, isBlocked } = req.body;
-  await User.updateOne({ email }, { isBlocked });
-  res.json({ success: true });
+// 🟢 موافقة التوثيق
+app.post("/admin-verify", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "المستخدم غير موجود" });
+    }
+
+    user.isVerified = true;
+    user.verificationStatus = "verified";
+    await user.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
 });
 
-app.post("/admin-freeze-user", async (req, res) => {
-  const { email, isFrozen } = req.body;
-  await User.updateOne({ email }, { isFrozen });
-  res.json({ success: true });
-});
+// 🔴 رفض التوثيق
+app.post("/admin-reject-verification", async (req, res) => {
+  try {
+    const { email, reason } = req.body;
 
-app.post("/admin-withdraw-block", async (req, res) => {
-  const { email, withdrawBlocked } = req.body;
-  await User.updateOne({ email }, { withdrawBlocked });
-  res.json({ success: true });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false });
+    }
+
+    user.verificationStatus = "rejected";
+    user.verificationRejectReason = reason || "تم الرفض";
+    await user.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
 });
 
 app.get("/admin-deposits", async (req, res) => {
-  const deposits = await Deposit.find({ status: "pending" });
-  res.json({ success: true, deposits });
+  try {
+    const deposits = await Deposit.find().sort({ createdAt: -1 });
+    res.json({ success: true, deposits });
+  } catch (err) {
+    res.json({ success: false });
+  }
 });
 
-// ✅ تعديل Approve Deposit (الحل الصحيح بدون خلط)
-app.post("/approve-deposit", async (req, res) => {
-  const { depositId } = req.body;
-  const deposit = await Deposit.findById(depositId);
+app.post("/admin-add-balance", async (req, res) => {
+  const { email, amount } = req.body;
+  await User.updateOne({ email }, { $inc: { balance: Number(amount) } });
+  res.json({ success: true });
+});
+
+app.post("/admin-reject-deposit", async (req, res) => {
+  const { id } = req.body;
+  const deposit = await Deposit.findById(id);
   if (!deposit) return res.json({ success: false });
+  deposit.status = "rejected";
+  await deposit.save();
+  res.json({ success: true });
+});
 
-  const user = await User.findOne({ email: deposit.email });
-  if (!user) return res.json({ success: false });
-
+app.post("/admin-approve-deposit", async (req, res) => {
+  const { id } = req.body;
+  const deposit = await Deposit.findById(id);
+  if (!deposit) return res.json({ success: false });
+  if (deposit.status === "approved") return res.json({ success: false });
   deposit.status = "approved";
   await deposit.save();
-
-  // تفعيل الباقة للمستخدم
-  user.packageName = deposit.packageName;
-  user.packageStart = new Date();
-  user.lastProfitDate = new Date();
-  
-  // إعدادات الباقات (يمكنك تعديلها حسب الحاجة)
-  if (deposit.packageName === "bronze") {
-    user.packageDurationDays = 30;
-    user.dailyProfit = deposit.amount * 0.05;
-  } else if (deposit.packageName === "silver") {
-    user.packageDurationDays = 30;
-    user.dailyProfit = deposit.amount * 0.07;
-  } else if (deposit.packageName === "gold") {
-    user.packageDurationDays = 30;
-    user.dailyProfit = deposit.amount * 0.10;
-  }
-
+  const user = await User.findOne({ email: deposit.email });
+  if (!user) return res.json({ success: false });
+  user.balance += Number(deposit.amount);
   await user.save();
 
-  // 🔥 توزيع أرباح الإحالات (5 مستويات) - الحل الصحيح
-  const refPercents = [0.1, 0.05, 0.03, 0.02, 0.01];
-  let currentRef = user.refBy;
+  const packages = {
+    "bronze": { name: "البرونزية", price: 50, daily: 2, duration: 280 },
+    "silver": { name: "الفضية", price: 100, daily: 6, duration: 280 },
+    "gold": { name: "الذهبية", price: 250, daily: 10, duration: 280 },
+    "platinum": { name: "البلاتينية", price: 500, daily: 15, duration: 280 },
+    "diamond": { name: "الماسية", price: 1000, daily: 20, duration: 280 }
+  };
 
-  for (let i = 0; i < refPercents.length; i++) {
-    if (!currentRef) break;
-
-    const refUser = await User.findOne({ refCode: currentRef });
-    if (!refUser) break;
-
-    const bonus = Number(deposit.amount) * refPercents[i];
-
-    // ✅ تنزل في أرباح الإحالات (NOT balance)
-    refUser.incomeBalance += bonus;
-    await refUser.save();
-
+  const pkg = packages[deposit.packageName];
+  if (pkg) {
+    user.packageName = pkg.name;
+    user.dailyProfit = pkg.daily;
+    user.packageDurationDays = pkg.duration;
+    user.packageStart = new Date();
+    user.incomeBalance += pkg.daily;
+    user.lastProfitDate = new Date();
     await ReferralTransaction.create({
-      email: refUser.email,
-      type: "referral",
-      amount: bonus,
+      email: user.email,
+      type: "daily_profit",
+      amount: pkg.daily,
       status: "approved",
-      level: i + 1
+      createdAt: new Date()
     });
-
-    currentRef = refUser.refBy;
+    await user.save();
   }
-
   res.json({ success: true });
 });
 
-app.post("/reject-deposit", async (req, res) => {
-  const { depositId } = req.body;
-  await Deposit.updateOne({ _id: depositId }, { status: "rejected" });
-  res.json({ success: true });
+app.post("/withdraw-request", async (req, res) => {
+  const { email, amount, wallet, password } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.json({ success: false });
+  const existing = await Withdraw.findOne({ email, status: "pending" });
+  if (existing) return res.json({ success: false, message: "لديك طلب سحب قيد المعالجة حالياً" });
+  if (user.password !== password) return res.json({ success: false, message: "كلمة المرور غير صحيحة" });
+  if (!user.walletLocked) {
+    user.walletAddress = wallet;
+    user.walletLocked = true;
+    await user.save();
+  } else {
+    if (wallet !== user.walletAddress) {
+      return res.json({ success: false, message: "لا يمكن تغيير عنوان السحب بعد تعيينه" });
+    }
+  }
+  if (user.withdrawBlocked) return res.json({ success: false, message: "السحب موقوف لحسابك، تواصل مع الدعم" });
+  if (amount < 10) return res.json({ success: false, message: "الحد الأدنى للسحب 10 USDT" });
+  if (amount > user.balance) return res.json({ success: false, message: "رصيد غير كافي" });
+  const finalAmount = amount - 1;
+  user.balance -= Number(amount);
+  await user.save();
+  await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
+  res.json({ success: true, message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة." });
 });
 
 app.get("/admin-withdraws", async (req, res) => {
-  const withdraws = await Withdraw.find({ status: "pending" });
-  res.json({ success: true, withdraws });
+  try {
+    const data = await Withdraw.find().sort({ createdAt: -1 });
+    res.json({ success: true, requests: data });
+  } catch (err) {
+    res.json({ success: false });
+  }
 });
 
-app.post("/approve-withdraw", async (req, res) => {
-  const { withdrawId } = req.body;
-  await Withdraw.updateOne({ _id: withdrawId }, { status: "approved" });
+app.post("/admin-approve-withdraw", async (req, res) => {
+  const { id } = req.body;
+  const request = await Withdraw.findById(id);
+  if (!request) return res.json({ success: false });
+  request.status = "approved";
+  await request.save();
   res.json({ success: true });
 });
 
-app.post("/reject-withdraw", async (req, res) => {
-  const { withdrawId } = req.body;
-  const withdraw = await Withdraw.findById(withdrawId);
-  await User.updateOne({ email: withdraw.email }, { $inc: { balance: withdraw.amount } });
-  await Withdraw.updateOne({ _id: withdrawId }, { status: "rejected" });
-  res.json({ success: true });
-});
-
-app.get("/admin-verifications", async (req, res) => {
-  const users = await User.find({ verificationStatus: "pending" });
-  res.json({ success: true, users });
-});
-
-app.post("/approve-verification", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { verificationStatus: "verified", isVerified: true });
-  res.json({ success: true });
-});
-
-app.post("/reject-verification", async (req, res) => {
-  const { email, reason } = req.body;
-  await User.updateOne({ email }, { verificationStatus: "rejected", verificationRejectReason: reason });
+app.post("/admin-reject-withdraw", async (req, res) => {
+  const { id } = req.body;
+  const request = await Withdraw.findById(id);
+  if (!request) return res.json({ success: false });
+  const user = await User.findOne({ email: request.email });
+  user.balance += (request.amount + 1);
+  await user.save();
+  request.status = "rejected";
+  await request.save();
   res.json({ success: true });
 });
 
@@ -600,7 +641,7 @@ app.get("/referrals/:email", async (req, res) => {
     res.json({
       success: true,
       refCode: user.refCode,
-      income: user.incomeBalance,
+      income: user.referralBalance,
       levels: { level1, level2, level3, level4, level5 }
     });
   } catch (err) {
@@ -608,19 +649,21 @@ app.get("/referrals/:email", async (req, res) => {
   }
 });
 
-// ✅ التحويل الصحيح كما طلبت
 app.post("/transfer-profit", async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
   
-  const amount = user.incomeBalance;
-  if (amount <= 0) {
+  const totalProfit = (user.incomeBalance || 0) + (user.referralBalance || 0);
+  
+  if (totalProfit <= 0) {
     return res.json({ success: false, message: "لا توجد أرباح للتحويل" });
   }
   
+  const amount = totalProfit;
   user.balance += amount;
   user.incomeBalance = 0;
+  user.referralBalance = 0;
   await user.save();
   await ReferralTransaction.create({
     email: user.email,
