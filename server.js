@@ -6,15 +6,8 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
 const crypto = require("crypto");
-const http = require("http");
-const { Server } = require("socket.io");
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*" }
-});
-
 app.use(express.json());
 app.use(cors());
 
@@ -136,13 +129,6 @@ function generateRefCode() {
   }
   return code;
 }
-
-// 🔥 2. ربط المستخدمين
-io.on("connection", (socket) => {
-  socket.on("join", (email) => {
-    socket.join(email);
-  });
-});
 
 // ================== إرسال كود ==================
 app.post("/send-code", async (req, res) => {
@@ -280,10 +266,6 @@ app.post("/user-data", async (req, res) => {
           status: "approved",
           createdAt: new Date()
         });
-        // 🔥 4. الأرباح اليومية
-        io.to(user.email).emit("profit_added", {
-          amount: profit
-        });
       }
       user.lastProfitDate = new Date();
       await user.save();
@@ -313,7 +295,7 @@ app.post("/user-data", async (req, res) => {
     verificationStatus: user.verificationStatus || 'none',
     balance: user.balance || 0,
     incomeBalance: user.incomeBalance || 0,
-    referralBalance: 0,
+    referralBalance: user.referralBalance || 0,
     isBlocked: user.isBlocked || false,
     isFrozen: user.isFrozen || false,
     withdrawBlocked: user.withdrawBlocked || false,
@@ -347,135 +329,94 @@ app.get("/admin-users", async (req, res) => {
   res.json({ success: true, users });
 });
 
-app.post("/admin-block", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isBlocked: true });
-  res.json({ success: true });
+app.get("/admin-verifications", async (req, res) => {
+  try {
+    const users = await User.find({ verificationStatus: "pending" });
+    res.json({ success: true, requests: users });
+  } catch (err) {
+    res.json({ success: false });
+  }
 });
 
-app.post("/admin-unblock", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isBlocked: false });
-  res.json({ success: true });
+// 🟢 موافقة التوثيق
+app.post("/admin-verify", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "المستخدم غير موجود" });
+    }
+
+    user.isVerified = true;
+    user.verificationStatus = "verified";
+    await user.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
 });
 
-app.post("/admin-freeze", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isFrozen: true });
-  res.json({ success: true });
-});
+// 🔴 رفض التوثيق
+app.post("/admin-reject-verification", async (req, res) => {
+  try {
+    const { email, reason } = req.body;
 
-app.post("/admin-unfreeze", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isFrozen: false });
-  res.json({ success: true });
-});
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false });
+    }
 
-app.post("/admin-block-withdraw", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { withdrawBlocked: true });
-  res.json({ success: true });
-});
+    user.verificationStatus = "rejected";
+    user.verificationRejectReason = reason || "تم الرفض";
+    await user.save();
 
-app.post("/admin-unblock-withdraw", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { withdrawBlocked: false });
-  res.json({ success: true });
-});
+    res.json({ success: true });
 
-app.post("/admin-verify-user", async (req, res) => {
-  const { email } = req.body;
-  await User.updateOne({ email }, { isVerified: true, verificationStatus: "verified" });
-  res.json({ success: true });
-});
-
-app.post("/admin-reject-verify", async (req, res) => {
-  const { email, reason } = req.body;
-  await User.updateOne({ email }, { verificationStatus: "rejected", verificationRejectReason: reason });
-  res.json({ success: true });
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false });
+  }
 });
 
 app.get("/admin-deposits", async (req, res) => {
-  const deposits = await Deposit.find({}).sort({ createdAt: -1 });
-  res.json({ success: true, deposits });
+  try {
+    const deposits = await Deposit.find().sort({ createdAt: -1 });
+    res.json({ success: true, deposits });
+  } catch (err) {
+    res.json({ success: false });
+  }
 });
 
-app.get("/admin-withdraws", async (req, res) => {
-  const withdraws = await Withdraw.find({});
-  res.json({ success: true, withdraws });
-});
-
-app.post("/admin-approve-withdraw", async (req, res) => {
-  const { id } = req.body;
-  const withdraw = await Withdraw.findById(id);
-  if (!withdraw) return res.json({ success: false });
-  const user = await User.findOne({ email: withdraw.email });
-  if (!user) return res.json({ success: false });
-  if (user.balance < withdraw.amount) return res.json({ success: false, message: "رصيد غير كافٍ" });
-  user.balance -= withdraw.amount;
-  await user.save();
-  withdraw.status = "approved";
-  await withdraw.save();
-  res.json({ success: true });
-});
-
-app.post("/admin-reject-withdraw", async (req, res) => {
-  const { id } = req.body;
-  const withdraw = await Withdraw.findById(id);
-  if (!withdraw) return res.json({ success: false });
-  withdraw.status = "rejected";
-  await withdraw.save();
+app.post("/admin-add-balance", async (req, res) => {
+  const { email, amount } = req.body;
+  await User.updateOne({ email }, { $inc: { balance: Number(amount) } });
   res.json({ success: true });
 });
 
 app.post("/admin-reject-deposit", async (req, res) => {
-  console.log("Reject request:", req.body);
   const { id } = req.body;
-
-  if (!id) {
-    return res.json({ success: false, message: "ID مفقود" });
-  }
-
   const deposit = await Deposit.findById(id);
-  if (!deposit) {
-    return res.json({ success: false, message: "الإيداع غير موجود" });
-  }
-
+  if (!deposit) return res.json({ success: false });
   deposit.status = "rejected";
   await deposit.save();
   res.json({ success: true });
 });
 
 app.post("/admin-approve-deposit", async (req, res) => {
-  console.log("Approve request:", req.body);
   const { id } = req.body;
-
-  if (!id) {
-    return res.json({ success: false, message: "ID مفقود" });
-  }
-
   const deposit = await Deposit.findById(id);
-  if (!deposit) {
-    return res.json({ success: false, message: "الإيداع غير موجود" });
-  }
-
-  if (deposit.status === "approved") {
-    return res.json({ success: false, message: "تم قبولو مسبقاً" });
-  }
-
+  if (!deposit) return res.json({ success: false });
+  if (deposit.status === "approved") return res.json({ success: false });
   deposit.status = "approved";
   await deposit.save();
-
   const user = await User.findOne({ email: deposit.email });
-  if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
-
+  if (!user) return res.json({ success: false });
   user.balance += Number(deposit.amount);
   await user.save();
-
-  // 🔥 3. إرسال التحديث (أهم نقطة)
-  io.to(user.email).emit("deposit_approved", {
-    amount: deposit.amount
-  });
 
   const packages = {
     "bronze": { name: "البرونزية", price: 50, daily: 2, duration: 280 },
@@ -501,34 +442,6 @@ app.post("/admin-approve-deposit", async (req, res) => {
       createdAt: new Date()
     });
     await user.save();
-
-    // ================== نظام الإحالات ==================
-    const refPercents = [0.1, 0.05, 0.03, 0.02, 0.01];
-    let currentRef = user.refBy;
-
-    for (let i = 0; i < refPercents.length; i++) {
-      if (!currentRef) break;
-
-      const refUser = await User.findOne({ refCode: currentRef });
-      if (!refUser) break;
-
-      const bonus = Number(deposit.amount) * refPercents[i];
-
-      // 👇 تنزل في أرباح الإحالات
-      refUser.incomeBalance += bonus;
-      await refUser.save();
-
-      await ReferralTransaction.create({
-        email: refUser.email,
-        type: "referral",
-        amount: bonus,
-        status: "approved",
-        level: i + 1,
-        createdAt: new Date()
-      });
-
-      currentRef = refUser.refBy;
-    }
   }
   res.json({ success: true });
 });
@@ -545,13 +458,47 @@ app.post("/withdraw-request", async (req, res) => {
     user.walletLocked = true;
     await user.save();
   } else {
-    if (user.walletAddress !== wallet) {
-      return res.json({ success: false, message: "لا يمكنك السحب لعنوان محفظة مختلف" });
+    if (wallet !== user.walletAddress) {
+      return res.json({ success: false, message: "لا يمكن تغيير عنوان السحب بعد تعيينه" });
     }
   }
-  if (user.balance < amount) return res.json({ success: false, message: "رصيد غير كافٍ" });
-  const withdraw = new Withdraw({ email, amount, wallet });
-  await withdraw.save();
+  if (user.withdrawBlocked) return res.json({ success: false, message: "السحب موقوف لحسابك، تواصل مع الدعم" });
+  if (amount < 10) return res.json({ success: false, message: "الحد الأدنى للسحب 10 USDT" });
+  if (amount > user.balance) return res.json({ success: false, message: "رصيد غير كافي" });
+  const finalAmount = amount - 1;
+  user.balance -= Number(amount);
+  await user.save();
+  await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
+  res.json({ success: true, message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة." });
+});
+
+app.get("/admin-withdraws", async (req, res) => {
+  try {
+    const data = await Withdraw.find().sort({ createdAt: -1 });
+    res.json({ success: true, requests: data });
+  } catch (err) {
+    res.json({ success: false });
+  }
+});
+
+app.post("/admin-approve-withdraw", async (req, res) => {
+  const { id } = req.body;
+  const request = await Withdraw.findById(id);
+  if (!request) return res.json({ success: false });
+  request.status = "approved";
+  await request.save();
+  res.json({ success: true });
+});
+
+app.post("/admin-reject-withdraw", async (req, res) => {
+  const { id } = req.body;
+  const request = await Withdraw.findById(id);
+  if (!request) return res.json({ success: false });
+  const user = await User.findOne({ email: request.email });
+  user.balance += (request.amount + 1);
+  await user.save();
+  request.status = "rejected";
+  await request.save();
   res.json({ success: true });
 });
 
@@ -694,7 +641,7 @@ app.get("/referrals/:email", async (req, res) => {
     res.json({
       success: true,
       refCode: user.refCode,
-      income: 0,
+      income: user.referralBalance,
       levels: { level1, level2, level3, level4, level5 }
     });
   } catch (err) {
@@ -707,7 +654,7 @@ app.post("/transfer-profit", async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
   
-  const totalProfit = user.incomeBalance || 0;
+  const totalProfit = (user.incomeBalance || 0) + (user.referralBalance || 0);
   
   if (totalProfit <= 0) {
     return res.json({ success: false, message: "لا توجد أرباح للتحويل" });
@@ -716,6 +663,7 @@ app.post("/transfer-profit", async (req, res) => {
   const amount = totalProfit;
   user.balance += amount;
   user.incomeBalance = 0;
+  user.referralBalance = 0;
   await user.save();
   await ReferralTransaction.create({
     email: user.email,
@@ -749,10 +697,6 @@ setInterval(async () => {
         status: "approved",
         createdAt: new Date()
       });
-      // 🔥 4. الأرباح اليومية
-      io.to(user.email).emit("profit_added", {
-        amount: profit
-      });
     }
   } catch (err) {
     console.log("Daily profit error:", err);
@@ -760,7 +704,6 @@ setInterval(async () => {
 }, 60000);
 
 const PORT = process.env.PORT || 3000;
-// ✅ 5. تغيير تشغيل السيرفر
-server.listen(PORT, () => {
-  console.log("Server running");
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
