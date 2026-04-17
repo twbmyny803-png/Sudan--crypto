@@ -194,7 +194,7 @@
       color: #aaa;
     }
     .next-profit-timer {
-      background: rgba(240,185,11,0.2);
+      background: rgba(240, 185, 11, 0.2);
       border-radius: 16px;
       padding: 10px;
       margin-top: 10px;
@@ -420,6 +420,7 @@
   <span id="toastText"></span>
 </div>
 
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
   const API_BASE = "https://sudan-crypto-4mgt.onrender.com";
   const email = localStorage.getItem("userEmail");
@@ -431,6 +432,34 @@
   if (!email) {
     window.location.replace("login.html");
   }
+
+  // 🔥 2. ربط Socket.io
+  const socket = io(API_BASE);
+  if (email) {
+    socket.emit("join", email);
+  }
+
+  // 🔥 3. استقبال التحديث (إيداع مقبول)
+  socket.on("deposit_approved", (data) => {
+    alert("تم تأكيد الدفع");
+    const balanceElement = document.getElementById("balance");
+    if (balanceElement) {
+      let current = parseFloat(balanceElement.innerText) || 0;
+      balanceElement.innerText = (current + data.amount).toFixed(2);
+    }
+    // إعادة تحميل البيانات لتحديث حالة الباقة وغيرها
+    loadUserData();
+  });
+
+  // 🔥 4. استقبال التحديث (ربح جديد)
+  socket.on("profit_added", (data) => {
+    console.log("ربح جديد:", data.amount);
+    const incomeElement = document.getElementById("income");
+    if (incomeElement) {
+      let current = parseFloat(incomeElement.innerText) || 0;
+      incomeElement.innerText = (current + data.amount).toFixed(2);
+    }
+  });
 
   function showToast(message, isError = false) {
     const toast = document.getElementById('toastMessage');
@@ -462,19 +491,13 @@
       return;
     }
 
-    // 🔥 العدد الحقيقي للأيام (بدون نقص)
     const totalDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
-
-    // 🔥 التفاصيل الدقيقة
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    // 🔥 عرض الأيام (بدون نقص)
     document.getElementById('remainingDays').innerText = totalDays;
-
-    // 🔥 عرض الوقت
     document.getElementById('remainingTime').innerHTML =
       `${days} يوم - ${hours} س - ${minutes} د - ${seconds} ث`;
   }
@@ -522,7 +545,6 @@
       box.className = "error";
     }
 
-    // 🔥 تختفي بعد 3 ثواني
     setTimeout(() => {
       box.style.display = "none";
     }, 3000);
