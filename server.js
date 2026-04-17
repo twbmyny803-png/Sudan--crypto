@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema({
 
   balance: { type: Number, default: 0 },
   incomeBalance: { type: Number, default: 0 },
+  referralBalance: { type: Number, default: 0 },
 
   isVerified: { type: Boolean, default: false },
   verificationStatus: { type: String, default: 'none' },
@@ -294,6 +295,7 @@ app.post("/user-data", async (req, res) => {
     verificationStatus: user.verificationStatus || 'none',
     balance: user.balance || 0,
     incomeBalance: user.incomeBalance || 0,
+    referralBalance: user.referralBalance || 0,
     isBlocked: user.isBlocked || false,
     isFrozen: user.isFrozen || false,
     withdrawBlocked: user.withdrawBlocked || false,
@@ -639,7 +641,7 @@ app.get("/referrals/:email", async (req, res) => {
     res.json({
       success: true,
       refCode: user.refCode,
-      income: user.incomeBalance,
+      income: user.referralBalance,
       levels: { level1, level2, level3, level4, level5 }
     });
   } catch (err) {
@@ -651,12 +653,17 @@ app.post("/transfer-profit", async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
-  if (user.incomeBalance <= 0) {
+  
+  const totalProfit = (user.incomeBalance || 0) + (user.referralBalance || 0);
+  
+  if (totalProfit <= 0) {
     return res.json({ success: false, message: "لا توجد أرباح للتحويل" });
   }
-  const amount = user.incomeBalance;
+  
+  const amount = totalProfit;
   user.balance += amount;
   user.incomeBalance = 0;
+  user.referralBalance = 0;
   await user.save();
   await ReferralTransaction.create({
     email: user.email,
