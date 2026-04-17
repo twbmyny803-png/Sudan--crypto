@@ -187,7 +187,19 @@ async function load() {
   const link = window.location.origin + "/index.html?ref=" + data.refCode;
 
   document.getElementById("link").innerText = link;
-  document.getElementById("income").innerText = data.income.toFixed(2) + " USDT";
+
+  // 1. جيب العمليات
+  const transRes = await fetch(API + "/transactions/" + email);
+  const transData = await transRes.json();
+  
+  if (transData.success) {
+    // 2. فلتر الإحالات
+    const referrals = transData.data.filter(t => t.type === "referral");
+    // 3. اجمع الأرباح
+    const total = referrals.reduce((sum, r) => sum + r.amount, 0);
+    // 4. اعرضها
+    document.getElementById("income").innerText = total.toFixed(2) + " USDT";
+  }
 
   document.getElementById("qrcode").innerHTML = "";
   new QRCode(document.getElementById("qrcode"), {
