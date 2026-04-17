@@ -274,6 +274,17 @@ app.post("/user-data", async (req, res) => {
     user.refCode = generateRefCode();
     await user.save();
   }
+
+  const now = new Date();
+  let hasActivePackage = false;
+  if (user.packageStart && user.packageDurationDays) {
+    const endDate = new Date(user.packageStart);
+    endDate.setDate(endDate.getDate() + user.packageDurationDays);
+    if (now < endDate) {
+      hasActivePackage = true;
+    }
+  }
+
   res.json({
     success: true,
     name: user.name,
@@ -292,7 +303,8 @@ app.post("/user-data", async (req, res) => {
     verificationRejectReason: user.verificationRejectReason || null,
     refCode: user.refCode,
     walletAddress: user.walletAddress,
-    walletLocked: user.walletLocked
+    walletLocked: user.walletLocked,
+    hasActivePackage
   });
 });
 
@@ -519,6 +531,20 @@ app.post("/submit-verification", upload.array("images"), async (req, res) => {
 app.post("/submit-deposit", upload.single("image"), async (req, res) => {
   try {
     const { email, amount, txid, orderId, packageName } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (user.packageStart && user.packageDurationDays) {
+      const endDate = new Date(user.packageStart);
+      endDate.setDate(endDate.getDate() + user.packageDurationDays);
+
+      if (new Date() < endDate) {
+        return res.json({
+          success: false,
+          message: "لديك باقة نشطة بالفعل"
+        });
+      }
+    }
 
     if (!email || !amount || !txid) {
       return res.json({ success: false, message: "بيانات ناقصة" });
