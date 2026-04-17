@@ -378,7 +378,7 @@ app.post("/admin-reject-verify", async (req, res) => {
 });
 
 app.get("/admin-deposits", async (req, res) => {
-  const deposits = await Deposit.find({});
+  const deposits = await Deposit.find({}).sort({ createdAt: -1 });
   res.json({ success: true, deposits });
 });
 
@@ -411,23 +411,46 @@ app.post("/admin-reject-withdraw", async (req, res) => {
 });
 
 app.post("/admin-reject-deposit", async (req, res) => {
+  console.log("Reject request:", req.body);
   const { id } = req.body;
+
+  if (!id) {
+    return res.json({ success: false, message: "ID مفقود" });
+  }
+
   const deposit = await Deposit.findById(id);
-  if (!deposit) return res.json({ success: false });
+  if (!deposit) {
+    return res.json({ success: false, message: "الإيداع غير موجود" });
+  }
+
   deposit.status = "rejected";
   await deposit.save();
   res.json({ success: true });
 });
 
 app.post("/admin-approve-deposit", async (req, res) => {
+  console.log("Approve request:", req.body);
   const { id } = req.body;
+
+  if (!id) {
+    return res.json({ success: false, message: "ID مفقود" });
+  }
+
   const deposit = await Deposit.findById(id);
-  if (!deposit) return res.json({ success: false });
-  if (deposit.status === "approved") return res.json({ success: false });
+  if (!deposit) {
+    return res.json({ success: false, message: "الإيداع غير موجود" });
+  }
+
+  if (deposit.status === "approved") {
+    return res.json({ success: false, message: "تم قبولو مسبقاً" });
+  }
+
   deposit.status = "approved";
   await deposit.save();
+
   const user = await User.findOne({ email: deposit.email });
-  if (!user) return res.json({ success: false });
+  if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
+
   user.balance += Number(deposit.amount);
   await user.save();
 
