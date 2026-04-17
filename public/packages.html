@@ -453,6 +453,36 @@
     document.getElementById('backBtn').addEventListener('click', () => {
         window.history.back();
     });
+
+    async function checkActivePackage() {
+        const email = localStorage.getItem("userEmail");
+        if (!email) return;
+
+        try {
+            const response = await fetch("https://sudancrypto.com/user-data", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email })
+            });
+            const user = await response.json();
+
+            if (user.hasActivePackage) {
+                alert("لديك باقة نشطة، لا يمكنك شراء باقة جديدة إلا بعد انتهاء الباقة الحالية");
+                window.location.href = "dashboard.html";
+                
+                document.querySelectorAll(".buy-now-btn").forEach(btn => {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-lock"></i> لديك باقة نشطة';
+                    btn.style.background = "#334155";
+                    btn.style.cursor = "not-allowed";
+                    btn.onclick = null;
+                });
+            }
+        } catch (err) {
+            console.error("Error checking package:", err);
+        }
+    }
+    checkActivePackage();
 </script>
 </body>
-</html>
+                                                                      </html>
