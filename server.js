@@ -11,12 +11,21 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
+
+// 🔵 تعديل socket.io (مهم جداً)
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  },
+  transports: ["websocket", "polling"]
 });
 
 app.use(express.json());
 app.use(cors());
+
+// 🟢 بعد cors مباشرة
+app.set("trust proxy", true);
 
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
@@ -395,9 +404,31 @@ app.post("/admin-reject-verify", async (req, res) => {
   res.json({ success: true });
 });
 
+// 🟡 أهم تعديل (سبب المشكلة) - admin-deposits
 app.get("/admin-deposits", async (req, res) => {
-  const deposits = await Deposit.find({}).sort({ createdAt: -1 });
-  res.json({ success: true, deposits });
+  try {
+    const deposits = await Deposit.find().sort({ createdAt: -1 });
+    res.json({
+      success: true,
+      deposits: deposits || []
+    });
+  } catch (err) {
+    console.log("❌ admin error:", err);
+    res.json({
+      success: false,
+      deposits: []
+    });
+  }
+});
+
+// 💣 تعديل إضافي: جلب طلبات التوثيق للأدمن
+app.get("/admin-verifications", async (req, res) => {
+  try {
+    const users = await User.find({ verificationStatus: "pending" });
+    res.json({ success: true, users });
+  } catch (err) {
+    res.json({ success: false, users: [] });
+  }
 });
 
 app.get("/admin-withdraws", async (req, res) => {
@@ -759,8 +790,9 @@ setInterval(async () => {
   }
 }, 60000);
 
+// ✅ الصحيح (آخر الملف فقط):
 const PORT = process.env.PORT || 3000;
-// ✅ 5. تغيير تشغيل السيرفر
-server.listen(PORT, () => {
-  console.log("Server running");
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log("🚀 Server running on port " + PORT);
 });
