@@ -40,6 +40,7 @@ const userSchema = new mongoose.Schema({
   refBy: String,
 
   balance: { type: Number, default: 0 },
+  investedAmount: { type: Number, default: 0 },
   incomeBalance: { type: Number, default: 0 },
   referralBalance: { type: Number, default: 0 },
 
@@ -293,7 +294,8 @@ app.post("/user-data", async (req, res) => {
     phone: user.phone,
     isVerified: user.isVerified || false,
     verificationStatus: user.verificationStatus || 'none',
-    balance: user.balance || 0,
+    balance: user.balance || 0, // للرئيسية
+    withdrawable: (user.balance || 0) - (user.investedAmount || 0),
     incomeBalance: user.incomeBalance || 0,
     referralBalance: user.referralBalance || 0,
     isBlocked: user.isBlocked || false,
@@ -416,6 +418,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
   user.balance += Number(deposit.amount);
+  user.investedAmount += Number(deposit.amount);
   await user.save();
 
   const packages = {
