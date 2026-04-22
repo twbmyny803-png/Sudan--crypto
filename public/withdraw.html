@@ -1,1 +1,196 @@
-.
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سحب الرصيد - Sudan Crypto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background-color: #0f172a; color: white; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .input-style { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; width: 100%; outline: none; transition: 0.3s; }
+        .input-style:focus { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .input-style:disabled { background: #0f172a; border-color: #1e293b; color: #94a3b8; cursor: not-allowed; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px; padding: 14px; font-weight: bold; transition: 0.3s; width: 100%; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
+        .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px 16px; border-radius: 10px; font-size: 14px; transition: 0.3s; cursor: pointer; }
+        .back-btn:hover { background: rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="glass w-full max-w-md p-8 rounded-2xl shadow-2xl relative">
+        <!-- زر الرجوع -->
+        <div class="absolute top-6 right-6">
+            <button onclick="goBack()" class="back-btn flex items-center gap-2">
+                <i class="fas fa-arrow-right"></i>
+                رجوع
+            </button>
+        </div>
+
+        <div class="text-center mb-8 mt-4">
+            <div class="bg-blue-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-wallet text-blue-500 text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold">سحب الرصيد</h1>
+            <p class="text-gray-400 text-sm mt-2">اسحب أرباحك إلى محفظة USDT (TRC20)</p>
+        </div>
+
+        <div id="balanceDisplay" class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl mb-6 text-center">
+            <span class="text-gray-400 block text-xs mb-1">الرصيد المتاح</span>
+            <span id="userBalance" class="text-2xl font-bold text-blue-400">0.00</span> <span class="text-blue-400 font-bold">USDT</span>
+        </div>
+
+        <form id="withdrawForm" class="space-y-5">
+            <div>
+                <label class="block text-sm text-gray-400 mb-2 mr-1">عنوان المحفظة (TRC20)</label>
+                <input type="text" id="wallet" placeholder="يبدأ بـ T وطوله 34 حرف" class="input-style" required>
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2 mr-1">المبلغ المراد سحبه</label>
+                <div class="relative">
+                    <input type="number" id="amount" placeholder="الحد الأدنى 10 USDT" class="input-style pr-4" required min="10">
+                    <span class="absolute left-4 top-3 text-gray-500 text-sm">USDT</span>
+                </div>
+                <p class="text-[10px] text-yellow-500 mt-1 mr-1">* سيتم خصم 1 USDT رسوم شبكة</p>
+            </div>
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-2 mr-1">كلمة سر الحساب</label>
+                <input type="password" id="password" placeholder="••••••" class="input-style" required>
+            </div>
+
+            <div id="finalReceive" class="bg-slate-800/50 p-3 rounded-lg flex justify-between items-center text-sm border border-slate-700">
+                <span class="text-gray-400">ستستلم فعلياً:</span>
+                <span class="font-bold text-green-400"><span id="finalAmount">0</span> USDT</span>
+            </div>
+
+            <div class="text-[11px] text-gray-400 bg-blue-500/5 p-3 rounded-lg border border-blue-500/10 leading-relaxed">
+                🔒 كلمة مرور السحب هي نفس كلمة مرور حسابك<br>
+                ⚠️ لا يمكن تغيير عنوان المحفظة بعد إضافته لأول مرة
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-primary">
+                تأكيد طلب السحب
+            </button>
+        </form>
+
+        <div id="msgBox" class="mt-4 text-center text-sm hidden p-3 rounded-lg"></div>
+    </div>
+
+    <script>
+        const amountInput = document.getElementById('amount');
+        const finalAmountSpan = document.getElementById('finalAmount');
+        const userBalanceSpan = document.getElementById('userBalance');
+        const withdrawForm = document.getElementById('withdrawForm');
+        const msgBox = document.getElementById('msgBox');
+        
+        // تعديل: استخدام userEmail بدلاً من email ليتوافق مع التوجيهات
+        const userEmail = localStorage.getItem("userEmail");
+        
+        function goBack() {
+            window.history.back();
+        }
+
+        async function loadUserData() {
+            if(!userEmail) {
+                window.location.href = "index.html";
+                return;
+            }
+            try {
+                // ملاحظة: API هنا مفترض أنه مسار نسبي كما في الكود الأصلي
+                const res = await fetch("/user-data", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: userEmail })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    userBalanceSpan.innerText = data.withdrawable;
+                    
+                    // 🔥 قفل العنوان إذا كان محفوظاً
+                    if (data.walletAddress) {
+                        const walletInput = document.getElementById('wallet');
+                        walletInput.value = data.walletAddress;
+                        walletInput.disabled = true;
+                    }
+                } else {
+                    window.location.href = "index.html";
+                }
+            } catch(e) {
+                console.error("Error loading user data:", e);
+            }
+        }
+        loadUserData();
+
+        amountInput.addEventListener('input', () => {
+            const val = parseFloat(amountInput.value) || 0;
+            const final = val > 1 ? val - 1 : 0;
+            finalAmountSpan.innerText = final.toFixed(2);
+        });
+
+        // 💬 تنبيهات واضحة واحترافية
+        function showMsg(text, success = false) {
+            msgBox.innerHTML = text;
+            msgBox.style.color = success ? "#22c55e" : "#ef4444";
+            msgBox.className = `mt-4 text-center text-sm p-3 rounded-lg ${success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`;
+            msgBox.classList.remove('hidden');
+        }
+
+        withdrawForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const walletInput = document.getElementById('wallet');
+            const wallet = walletInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const password = document.getElementById('password').value;
+            const balance = parseFloat(userBalanceSpan.innerText);
+
+            // التحقق من TRC20 فقط إذا لم يكن الحقل معطلاً (أي في المرة الأولى)
+            if (!walletInput.disabled) {
+                if (!wallet.startsWith('T') || wallet.length < 30 || wallet.length > 45) {
+                    showMsg("عنوان المحفظة TRC20 غير صحيح");
+                    return;
+                }
+            }
+
+            if (amount < 10) {
+                showMsg("الحد الأدنى للسحب 10 USDT");
+                return;
+            }
+
+            if (amount > balance) {
+                showMsg("رصيد غير كافي");
+                return;
+            }
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerText = "جاري المعالجة...";
+
+            try {
+                const res = await fetch("/withdraw-request", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: userEmail, amount, wallet, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showMsg("تم إرسال طلب السحب بنجاح", true);
+                    withdrawForm.reset();
+                    loadUserData(); // لتحديث الرصيد وقفل المحفظة
+                } else {
+                    showMsg(data.message || "فشل تقديم الطلب");
+                }
+            } catch (err) {
+                showMsg("خطأ في الاتصال بالسيرفر");
+            } finally {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').innerText = "تأكيد طلب السحب";
+            }
+        };
+    </script>
+</body>
+</html>
