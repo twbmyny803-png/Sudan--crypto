@@ -294,9 +294,9 @@ app.post("/user-data", async (req, res) => {
     phone: user.phone,
     isVerified: user.isVerified || false,
     verificationStatus: user.verificationStatus || 'none',
-    balance: user.balance || 0, // للرئيسية
-    withdrawable: (user.balance || 0) - (user.investedAmount || 0),
-    incomeBalance: user.incomeBalance || 0,
+    balance: user.balance || 0,          // يظهر في الرئيسية
+    incomeBalance: user.incomeBalance || 0, // الأرباح
+    withdrawable: user.incomeBalance || 0, // 👈 ده المهم
     referralBalance: user.referralBalance || 0,
     isBlocked: user.isBlocked || false,
     isFrozen: user.isFrozen || false,
@@ -467,9 +467,10 @@ app.post("/withdraw-request", async (req, res) => {
   }
   if (user.withdrawBlocked) return res.json({ success: false, message: "السحب موقوف لحسابك، تواصل مع الدعم" });
   if (amount < 10) return res.json({ success: false, message: "الحد الأدنى للسحب 10 USDT" });
-  if (amount > user.balance) return res.json({ success: false, message: "رصيد غير كافي" });
+  if (amount > user.incomeBalance) return res.json({ success: false, message: "رصيد غير كافي" });
   const finalAmount = amount - 1;
-  user.balance -= Number(amount);
+  user.incomeBalance -= Number(amount);
+  user.balance -= Number(amount); // نخصم من الرصيد الكلي أيضاً للحفاظ على التزامن
   await user.save();
   await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
   res.json({ success: true, message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة." });
