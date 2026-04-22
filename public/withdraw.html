@@ -109,7 +109,7 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    userBalanceSpan.innerText = data.balance;
+                    userBalanceSpan.innerText = data.withdrawable;
                     
                     // 🔥 قفل العنوان إذا كان محفوظاً
                     if (data.walletAddress) {
