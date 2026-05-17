@@ -960,9 +960,9 @@ app.post("/withdraw-request", async (req, res) => {
   const existing = await Withdraw.findOne({ email, status: "pending" });
   if (existing) return res.json({ success: false, message: "لديك طلب سحب قيد المعالجة حالياً" });
   if (user.password !== password) return res.json({ success: false, message: "كلمة المرور غير صحيحة" });
-  if (user.incomeBalance < amount) return res.json({ success: false, message: "رصيد الأرباح غير كافٍ" });
+  if (user.incomeBalance < Number(amount)) return res.json({ success: false, message: "رصيد الأرباح غير كافٍ" });
 
-  user.incomeBalance -= amount;
+  user.incomeBalance -= Number(amount);
   await user.save();
 
   await Withdraw.create({ email, amount, wallet });
@@ -1057,6 +1057,132 @@ app.post("/submit-verification", upload.array("images", 2), async (req, res) => 
     res.json({ success: false, message: "حدث خطأ أثناء الرفع" });
   }
 });
+
+// 📥 تقديم طلب إيداع
+app.post("/submit-deposit", upload.single("image"), async (req, res) => {
+
+  try {
+
+    const {
+      email,
+      amount,
+      txid,
+      orderId,
+      packageName
+    } = req.body;
+
+    if (!email || !amount || !txid) {
+
+      return res.json({
+        success:false,
+        message:"بيانات ناقصة"
+      });
+
+    }
+
+    const imagePath = req.file
+      ? "/uploads/" + req.file.filename
+      : null;
+
+    const deposit = new Deposit({
+
+      email,
+      name: "manual",
+      amount: Number(amount),
+      txid,
+      image: imagePath,
+      orderId: orderId || Date.now().toString(),
+      packageName: packageName || "bronze",
+      network: "TRC20",
+      status: "pending"
+
+    });
+
+    await deposit.save();
+
+    res.json({
+      success:true,
+      message:"تم استلام الطلب بنجاح"
+    });
+
+  } catch(err){
+
+    console.log(err);
+
+    res.json({
+      success:false,
+      message:"خطأ في السيرفر"
+    });
+
+  }
+
+});
+
+// 💰 نظام الأرباح التلقائي
+setInterval(async () => {
+
+  try {
+
+    const users = await User.find({
+      packageName: { $ne: null }
+    });
+
+    const now = new Date();
+
+    for (let user of users) {
+
+      if (!user.packageStart || !user.dailyProfit) {
+        continue;
+      }
+
+      const daysPassed = Math.floor(
+        (now - user.packageStart)
+        / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysPassed >= user.packageDurationDays) {
+        continue;
+      }
+
+      if (!user.lastProfitDate) {
+        user.lastProfitDate = user.packageStart;
+      }
+
+      const hoursPassed =
+        (now - new Date(user.lastProfitDate))
+        / (1000 * 60 * 60);
+
+      if (hoursPassed < 24) {
+        continue;
+      }
+
+      const profit = user.dailyProfit;
+
+      user.incomeBalance += profit;
+
+      user.lastProfitDate = new Date();
+
+      await user.save();
+
+      await ReferralTransaction.create({
+
+        email: user.email,
+        type: "daily_profit",
+        amount: profit,
+        status: "approved",
+        createdAt: new Date()
+
+      });
+
+    }
+
+  } catch(err){
+
+    console.log("Daily profit error:", err);
+
+  }
+
+}, 60000);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(\`🚀 Server running on port \${PORT}\`));
