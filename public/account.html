@@ -322,7 +322,6 @@
   <div class="glass-card">
     <h2><i class="fa-solid fa-shield-alt"></i> الأمان</h2>
     <button class="btn btn-gold" onclick="openPasswordModal()"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</button>
-    <button class="btn btn-outline" onclick="openWithdrawPasswordModal()"><i class="fa-solid fa-lock"></i> تعيين كلمة السحب</button>
   </div>
 
   <div class="glass-card">
@@ -353,24 +352,61 @@
 <!-- مودال تغيير كلمة المرور -->
 <div id="passwordModal" class="modal">
   <div class="modal-content">
-    <h3><i class="fa-solid fa-key"></i> تغيير كلمة المرور</h3>
-    <input type="password" id="currentPassword" placeholder="كلمة المرور الحالية">
-    <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة (8 أحرف)">
-    <input type="password" id="confirmNewPassword" placeholder="تأكيد كلمة المرور الجديدة">
-    <button class="btn-gold" onclick="changePassword()">تغيير</button>
-    <button class="btn-outline" onclick="closePasswordModal()">إلغاء</button>
-  </div>
-</div>
 
-<!-- مودال تعيين كلمة السحب -->
-<div id="withdrawPasswordModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fa-solid fa-lock"></i> تعيين كلمة السحب</h3>
-    <p style="color:#aaa; font-size:12px; margin-bottom:8px;"><i class="fa-solid fa-triangle-exclamation"></i> كلمة السحب مكونة من 6 أرقام، لا يمكن تغييرها بعد الحفظ</p>
-    <input type="password" id="withdrawPass" placeholder="كلمة السحب (6 أرقام)" maxlength="6" inputmode="numeric">
-    <input type="password" id="confirmWithdrawPass" placeholder="تأكيد كلمة السحب" maxlength="6">
-    <button class="btn-gold" onclick="setWithdrawPassword()">حفظ</button>
-    <button class="btn-outline" onclick="closeWithdrawPasswordModal()">إلغاء</button>
+    <h3>
+      <i class="fa-solid fa-key"></i>
+      تغيير كلمة المرور
+    </h3>
+
+    <input
+      type="password"
+      id="currentPassword"
+      placeholder="كلمة المرور الحالية"
+    >
+
+    <input
+      type="password"
+      id="newPassword"
+      placeholder="كلمة المرور الجديدة"
+    >
+
+    <input
+      type="password"
+      id="confirmNewPassword"
+      placeholder="تأكيد كلمة المرور الجديدة"
+    >
+
+    <input
+      type="text"
+      id="verificationCode"
+      placeholder="كود التحقق"
+      style="display:none;"
+    >
+
+    <button
+      class="btn-gold"
+      id="sendCodeBtn"
+      onclick="sendChangePasswordCode()"
+    >
+      إرسال كود التحقق
+    </button>
+
+    <button
+      class="btn-gold"
+      id="confirmBtn"
+      onclick="confirmPasswordChange()"
+      style="display:none;"
+    >
+      تأكيد تغيير كلمة المرور
+    </button>
+
+    <button
+      class="btn-outline"
+      onclick="closePasswordModal()"
+    >
+      إلغاء
+    </button>
+
   </div>
 </div>
 
@@ -454,51 +490,37 @@
       const res = await fetch(`${API_BASE}/user-data`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: localStorage.getItem("userEmail") })
+        body: JSON.stringify({ email })
       });
-
       const data = await res.json();
-
       if (data.success) {
         document.getElementById('userName').innerText = data.name;
         document.getElementById('userEmail').innerText = data.email;
         document.getElementById('userPhone').innerText = data.phone;
-        
-        if (typeof updateVerificationStatus === 'function') {
-          updateVerificationStatus(data);
-        }
+        updateVerificationStatus(data.verificationStatus, data.verificationRejectReason);
       }
-
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
-  // ============================================
-  // 🔐 دالة تحديث حالة التوثيق
-  // ============================================
-  function updateVerificationStatus(user) {
+  function updateVerificationStatus(status, reason) {
     const statusDiv = document.getElementById('verificationStatus');
-    const uploadSection = document.getElementById("uploadSection");
-    const statusMessage = document.getElementById("statusMessage");
+    const uploadSection = document.getElementById('uploadSection');
+    const statusMessage = document.getElementById('statusMessage');
     
-    if (!statusDiv) return;
-
-    const status = user.verificationStatus;
-
-    if (user.isVerified || status === 'verified') {
-      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
+    if (status === 'verified') {
+      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-circle-check"></i> موثق</span>';
       if(uploadSection) uploadSection.style.display = "none";
-      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> تم التوثيق بنجاح";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> حسابك موثق بالكامل";
     } else if (status === 'pending') {
       statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
       if(uploadSection) uploadSection.style.display = "none";
-      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-hourglass-half'></i> طلبك قيد المراجعة";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-clock'></i> طلبك قيد المراجعة حالياً";
     } else if (status === 'rejected') {
       statusDiv.innerHTML = `
-        <span class="unverified-badge">
-          <i class="fa-solid fa-circle-xmark"></i> مرفوض - ${user.verificationRejectReason || ""}
-        </span>
+        <span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> تم الرفض</span>
+        <p style="color:#ef4444; font-size:11px; margin-top:4px;">السبب: ${reason || 'غير محدد'}</p>
       `;
       if(uploadSection) uploadSection.style.display = "block";
       if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> تم رفض الطلب، يمكنك إعادة المحاولة";
@@ -520,9 +542,6 @@
 
   function openPasswordModal() { document.getElementById('passwordModal').style.display = 'flex'; }
   function closePasswordModal() { document.getElementById('passwordModal').style.display = 'none'; }
-
-  function openWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'flex'; }
-  function closeWithdrawPasswordModal() { document.getElementById('withdrawPasswordModal').style.display = 'none'; }
 
   function selectFile(type) {
     document.getElementById(type + "File").click();
@@ -553,9 +572,10 @@
   function closeVerificationModal() { document.getElementById('verificationModal').style.display = 'none'; }
 
   // ============================================
-  // 🔑 دالة تغيير كلمة المرور
+  // 🔑 دوال تغيير كلمة المرور الجديدة
   // ============================================
-  async function changePassword() {
+  async function sendChangePasswordCode() {
+
     const oldPass = document.getElementById('currentPassword').value;
     const newPass = document.getElementById('newPassword').value;
     const confirmPass = document.getElementById('confirmNewPassword').value;
@@ -564,71 +584,116 @@
       showToast('يرجى ملء جميع الحقول', true);
       return;
     }
+
     if (newPass !== confirmPass) {
-      showToast('كلمات المرور الجديدة غير متطابقة', true);
+      showToast('كلمات المرور غير متطابقة', true);
       return;
     }
+
     if (newPass.length < 8) {
       showToast('كلمة المرور يجب أن تكون 8 أحرف على الأقل', true);
       return;
     }
 
     try {
-      const res = await fetch(`${API_BASE}/change-password`, {
+
+      const res = await fetch(`${API_BASE}/send-change-password-code`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, oldPass, newPass })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          oldPass
+        })
       });
+
       const data = await res.json();
+
       if (data.success) {
-        showToast('تم تغيير كلمة المرور بنجاح');
-        closePasswordModal();
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmNewPassword').value = '';
+
+        showToast('تم إرسال كود التحقق إلى بريدك');
+
+        document.getElementById('verificationCode').style.display = 'block';
+
+        document.getElementById('confirmBtn').style.display = 'block';
+
+        document.getElementById('sendCodeBtn').style.display = 'none';
+
       } else {
-        showToast(data.message || 'فشل تغيير كلمة المرور', true);
+
+        showToast(data.message || 'فشل إرسال الكود', true);
+
       }
+
     } catch (err) {
-      console.error(err);
+
+      console.log(err);
+
       showToast('خطأ في الاتصال', true);
+
     }
   }
 
-  // ============================================
-  // 🔐 دالة تعيين كلمة السحب
-  // ============================================
-  async function setWithdrawPassword() {
-    const pass = document.getElementById('withdrawPass').value;
-    const confirm = document.getElementById('confirmWithdrawPass').value;
+  async function confirmPasswordChange() {
 
-    if (pass.length !== 6 || isNaN(pass)) {
-      showToast('كلمة السحب يجب أن تكون 6 أرقام', true);
-      return;
-    }
-    if (pass !== confirm) {
-      showToast('كلمات المرور غير متطابقة', true);
+    const code = document.getElementById('verificationCode').value;
+
+    const newPass = document.getElementById('newPassword').value;
+
+    if (!code) {
+      showToast('أدخل كود التحقق', true);
       return;
     }
 
     try {
-      const res = await fetch(`${API_BASE}/set-withdraw-password`, {
+
+      const res = await fetch(`${API_BASE}/confirm-change-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, withdrawPassword: pass })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email,
+          code,
+          newPass
+        })
       });
+
       const data = await res.json();
+
       if (data.success) {
-        showToast('تم تعيين كلمة السحب بنجاح');
-        closeWithdrawPasswordModal();
-        document.getElementById('withdrawPass').value = '';
-        document.getElementById('confirmWithdrawPass').value = '';
+
+        showToast('تم تغيير كلمة المرور بنجاح');
+
+        closePasswordModal();
+
+        document.getElementById('currentPassword').value = '';
+
+        document.getElementById('newPassword').value = '';
+
+        document.getElementById('confirmNewPassword').value = '';
+
+        document.getElementById('verificationCode').value = '';
+
+        document.getElementById('verificationCode').style.display = 'none';
+
+        document.getElementById('confirmBtn').style.display = 'none';
+
+        document.getElementById('sendCodeBtn').style.display = 'block';
+
       } else {
-        showToast(data.message || 'فشل تعيين كلمة السحب', true);
+
+        showToast(data.message || 'فشل التحقق', true);
+
       }
+
     } catch (err) {
-      console.error(err);
+
+      console.log(err);
+
       showToast('خطأ في الاتصال', true);
+
     }
   }
 
