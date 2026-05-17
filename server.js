@@ -5,6 +5,7 @@ const { Resend } = require("resend");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
+const crypto = require("crypto");
 
 const app = express();
 app.use(express.json());
@@ -254,26 +255,10 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email, password });
-
   if (!user) {
-    return res.json({
-      success: false,
-      message: "البريد الإلكتروني أو كلمة المرور غير صحيحة"
-    });
+    return res.json({ success: false, message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
   }
-
-  if (user.isBlocked) {
-    return res.json({
-      success: false,
-      message: "تم حظر هذا الحساب"
-    });
-  }
-
-  res.json({
-    success: true,
-    name: user.name,
-    email: user.email
-  });
+  res.json({ success: true, name: user.name, email: user.email });
 });
 
 // ================== نسيت كلمة السر ==================
@@ -586,152 +571,6 @@ app.post("/set-withdraw-password", async (req, res) => {
   res.json({ success: true });
 });
 
-// 📜 سجل العمليات (Updated to GET /transactions/:email)
-app.get("/transactions/:email", async (req, res) => {
-
-  try {
-
-    const email = req.params.email;
-
-    const deposits = await Deposit.find({ email });
-    const withdraws = await Withdraw.find({ email });
-    const profits = await ReferralTransaction.find({ email });
-
-    let all = [];
-
-    deposits.forEach(d => {
-      all.push({
-        type: "deposit",
-        amount: d.amount,
-        status: d.status,
-        date: d.createdAt
-      });
-    });
-
-    withdraws.forEach(w => {
-      all.push({
-        type: "withdraw",
-        amount: w.amount,
-        status: w.status,
-        date: w.createdAt
-      });
-    });
-
-    profits.forEach(p => {
-      all.push({
-        type: p.type,
-        amount: p.amount,
-        status: p.status,
-        date: p.createdAt
-      });
-    });
-
-    all.sort((a,b)=> new Date(b.date) - new Date(a.date));
-
-    res.json({
-      success:true,
-      data: all
-    });
-
-  } catch(err){
-
-    console.log(err);
-
-    res.json({
-      success:false
-    });
-
-  }
-
-});
-
-// 💰 الدخل اليومي
-app.post("/daily-income", async (req, res) => {
-
-  try {
-
-    const { email } = req.body;
-
-    const profits = await ReferralTransaction.find({
-      email,
-      type: "daily_profit"
-    }).sort({ createdAt:-1 });
-
-    res.json({
-      success:true,
-      profits
-    });
-
-  } catch(err){
-
-    console.log(err);
-
-    res.json({
-      success:false
-    });
-
-  }
-
-});
-
-// 🔗 الإحالات (Added)
-app.get("/referrals/:email", async (req, res) => {
-
-  try {
-
-    const user = await User.findOne({
-      email: req.params.email
-    });
-
-    if (!user) {
-      return res.json({ success:false });
-    }
-
-    const level1 = await User.find({
-      refBy: user.refCode
-    });
-
-    const level2 = await User.find({
-      refBy: { $in: level1.map(u => u.refCode) }
-    });
-
-    const level3 = await User.find({
-      refBy: { $in: level2.map(u => u.refCode) }
-    });
-
-    const level4 = await User.find({
-      refBy: { $in: level3.map(u => u.refCode) }
-    });
-
-    const level5 = await User.find({
-      refBy: { $in: level4.map(u => u.refCode) }
-    });
-
-    res.json({
-      success: true,
-      refCode: user.refCode,
-      income: user.referralBalance,
-      levels: {
-        level1,
-        level2,
-        level3,
-        level4,
-        level5
-      }
-    });
-
-  } catch(err){
-
-    console.log(err);
-
-    res.json({
-      success:false
-    });
-
-  }
-
-});
-
 app.get("/admin-users", async (req, res) => {
   const users = await User.find({});
   res.json({ success: true, users });
@@ -793,7 +632,7 @@ app.post("/admin-reject-verification", async (req, res) => {
 app.get("/admin-deposits", async (req, res) => {
   try {
     const deposits = await Deposit.find().sort({ createdAt: -1 });
-    res.json({ success: true, requests: deposits });
+    res.json({ success: true, deposits });
   } catch (err) {
     res.json({ success: false });
   }
@@ -921,7 +760,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
   await deposit.save();
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
-  user.balance += Number(deposit.amount);
+  user.balance = Number(deposit.amount);
   user.investedAmount += Number(deposit.amount);
   await user.save();
 
@@ -960,36 +799,18 @@ app.post("/withdraw-request", async (req, res) => {
   const existing = await Withdraw.findOne({ email, status: "pending" });
   if (existing) return res.json({ success: false, message: "لديك طلب سحب قيد المعالجة حالياً" });
   if (user.password !== password) return res.json({ success: false, message: "كلمة المرور غير صحيحة" });
-  if (user.incomeBalance < Number(amount)) return res.json({ success: false, message: "رصيد الأرباح غير كافٍ" });
+  if (user.incomeBalance < amount) return res.json({ success: false, message: "رصيد الأرباح غير كافٍ" });
 
-  user.incomeBalance -= Number(amount);
+  user.incomeBalance -= amount;
   await user.save();
 
   await Withdraw.create({ email, amount, wallet });
   res.json({ success: true });
 });
 
-// 💸 طلبات السحب (Updated to requests)
 app.get("/admin-withdraws", async (req, res) => {
-
-  try {
-
-    const data = await Withdraw.find()
-      .sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      requests: data
-    });
-
-  } catch (err) {
-
-    res.json({
-      success: false
-    });
-
-  }
-
+  const withdraws = await Withdraw.find().sort({ createdAt: -1 });
+  res.json({ success: true, withdraws });
 });
 
 app.post("/admin-approve-withdraw", async (req, res) => {
@@ -1058,131 +879,5 @@ app.post("/submit-verification", upload.array("images", 2), async (req, res) => 
   }
 });
 
-// 📥 تقديم طلب إيداع
-app.post("/submit-deposit", upload.single("image"), async (req, res) => {
-
-  try {
-
-    const {
-      email,
-      amount,
-      txid,
-      orderId,
-      packageName
-    } = req.body;
-
-    if (!email || !amount || !txid) {
-
-      return res.json({
-        success:false,
-        message:"بيانات ناقصة"
-      });
-
-    }
-
-    const imagePath = req.file
-      ? "/uploads/" + req.file.filename
-      : null;
-
-    const deposit = new Deposit({
-
-      email,
-      name: "manual",
-      amount: Number(amount),
-      txid,
-      image: imagePath,
-      orderId: orderId || Date.now().toString(),
-      packageName: packageName || "bronze",
-      network: "TRC20",
-      status: "pending"
-
-    });
-
-    await deposit.save();
-
-    res.json({
-      success:true,
-      message:"تم استلام الطلب بنجاح"
-    });
-
-  } catch(err){
-
-    console.log(err);
-
-    res.json({
-      success:false,
-      message:"خطأ في السيرفر"
-    });
-
-  }
-
-});
-
-// 💰 نظام الأرباح التلقائي
-setInterval(async () => {
-
-  try {
-
-    const users = await User.find({
-      packageName: { $ne: null }
-    });
-
-    const now = new Date();
-
-    for (let user of users) {
-
-      if (!user.packageStart || !user.dailyProfit) {
-        continue;
-      }
-
-      const daysPassed = Math.floor(
-        (now - user.packageStart)
-        / (1000 * 60 * 60 * 24)
-      );
-
-      if (daysPassed >= user.packageDurationDays) {
-        continue;
-      }
-
-      if (!user.lastProfitDate) {
-        user.lastProfitDate = user.packageStart;
-      }
-
-      const hoursPassed =
-        (now - new Date(user.lastProfitDate))
-        / (1000 * 60 * 60);
-
-      if (hoursPassed < 24) {
-        continue;
-      }
-
-      const profit = user.dailyProfit;
-
-      user.incomeBalance += profit;
-
-      user.lastProfitDate = new Date();
-
-      await user.save();
-
-      await ReferralTransaction.create({
-
-        email: user.email,
-        type: "daily_profit",
-        amount: profit,
-        status: "approved",
-        createdAt: new Date()
-
-      });
-
-    }
-
-  } catch(err){
-
-    console.log("Daily profit error:", err);
-
-  }
-
-}, 60000);
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(\`🚀 Server running on port \${PORT}\`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
