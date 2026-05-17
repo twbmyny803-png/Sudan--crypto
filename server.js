@@ -451,7 +451,7 @@ app.post("/withdraw-request", async (req, res) => {
   if (user.withdrawBlocked) return res.json({ success: false, message: "السحب موقوف لحسابك، تواصل مع الدعم" });
   if (amount < 10) return res.json({ success: false, message: "الحد الأدنى للسحب 10 USDT" });
   if (amount > user.incomeBalance) return res.json({ success: false, message: "رصيد غير كافي" });
-  const finalAmount = amount - 1;
+  
   user.incomeBalance -= Number(amount);
   await user.save();
   await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
