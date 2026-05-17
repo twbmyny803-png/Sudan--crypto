@@ -304,6 +304,8 @@ app.post("/user-data", async (req, res) => {
     packageName: user.packageName,
     packageStart: user.packageStart,
     packageDurationDays: user.packageDurationDays,
+    dailyProfit: user.dailyProfit || 0,
+    lastProfitAt: user.lastProfitDate || null,
     verificationRejectReason: user.verificationRejectReason || null,
     refCode: user.refCode,
     walletAddress: user.walletAddress,
@@ -652,31 +654,7 @@ app.get("/referrals/:email", async (req, res) => {
   }
 });
 
-app.post("/transfer-profit", async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ success: false });
-  
-  const totalProfit = (user.incomeBalance || 0) + (user.referralBalance || 0);
-  
-  if (totalProfit <= 0) {
-    return res.json({ success: false, message: "لا توجد أرباح للتحويل" });
-  }
-  
-  const amount = totalProfit;
-  user.balance += amount;
-  user.incomeBalance = 0;
-  user.referralBalance = 0;
-  await user.save();
-  await ReferralTransaction.create({
-    email: user.email,
-    type: "transfer",
-    amount: amount,
-    status: "approved",
-    createdAt: new Date()
-  });
-  res.json({ success: true, amount: amount });
-});
+
 
 setInterval(async () => {
   try {
