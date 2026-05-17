@@ -417,7 +417,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
   await deposit.save();
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
-  user.balance += Number(deposit.amount);
+  user.balance = Number(deposit.amount);
   user.investedAmount += Number(deposit.amount);
   await user.save();
 
@@ -470,7 +470,6 @@ app.post("/withdraw-request", async (req, res) => {
   if (amount > user.incomeBalance) return res.json({ success: false, message: "رصيد غير كافي" });
   const finalAmount = amount - 1;
   user.incomeBalance -= Number(amount);
-  user.balance -= Number(amount); // نخصم من الرصيد الكلي أيضاً للحفاظ على التزامن
   await user.save();
   await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
   res.json({ success: true, message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة." });
@@ -499,7 +498,7 @@ app.post("/admin-reject-withdraw", async (req, res) => {
   const request = await Withdraw.findById(id);
   if (!request) return res.json({ success: false });
   const user = await User.findOne({ email: request.email });
-  user.balance += (request.amount + 1);
+  user.incomeBalance += (request.amount + 1);
   await user.save();
   request.status = "rejected";
   await request.save();
