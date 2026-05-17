@@ -590,6 +590,11 @@
       return;
     }
 
+    if (oldPass === newPass) {
+      showToast('لا يمكن استخدام نفس كلمة المرور الحالية', true);
+      return;
+    }
+
     if (newPass.length < 8) {
       showToast('كلمة المرور يجب أن تكون 8 أحرف على الأقل', true);
       return;
