@@ -251,27 +251,7 @@ app.post("/user-data", async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
-  if (user.packageName && user.packageStart && user.dailyProfit) {
-    const now = new Date();
-    if (!user.lastProfitDate) user.lastProfitDate = user.packageStart;
-    const diffTime = now - new Date(user.lastProfitDate);
-    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (daysPassed > 0) {
-      for (let i = 0; i < daysPassed; i++) {
-        const profit = user.dailyProfit;
-        user.incomeBalance += profit;
-        await ReferralTransaction.create({
-          email: user.email,
-          type: "daily_profit",
-          amount: profit,
-          status: "approved",
-          createdAt: new Date()
-        });
-      }
-      user.lastProfitDate = new Date();
-      await user.save();
-    }
-  }
+
   if (!user.refCode) {
     user.refCode = generateRefCode();
     await user.save();
@@ -419,7 +399,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
   await deposit.save();
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
-  user.balance = Number(deposit.amount);
+  user.balance += Number(deposit.amount);
   user.investedAmount += Number(deposit.amount);
   await user.save();
 
@@ -452,8 +432,9 @@ app.post("/admin-approve-deposit", async (req, res) => {
 });
 
 app.post("/withdraw-request", async (req, res) => {
-  const { email, amount, wallet, password } = req.body;
-  const user = await User.findOne({ email });
+    const { email, amount, wallet, password } = req.body;
+    const finalAmount = Number(amount) - 1;
+    const user = await User.findOne({ email });
   if (!user) return res.json({ success: false });
   const existing = await Withdraw.findOne({ email, status: "pending" });
   if (existing) return res.json({ success: false, message: "لديك طلب سحب قيد المعالجة حالياً" });
@@ -551,6 +532,12 @@ app.post("/submit-deposit", upload.single("image"), async (req, res) => {
           message: "لديك باقة نشطة بالفعل"
         });
       }
+    }
+
+    // ✅ إضافة: حماية منع تكرار الإيداع بنفس txid
+    const existing = await Deposit.findOne({ txid });
+    if (existing) {
+      return res.json({ success: false, message: "هذا TXID مستخدم بالفعل" });
     }
 
     if (!email || !amount || !txid) {
