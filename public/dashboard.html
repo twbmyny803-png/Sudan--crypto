@@ -17,8 +17,9 @@
       font-family: 'Cairo', 'Tahoma', sans-serif;
       background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
       min-height: 100vh;
-      padding: 20px;
+      padding: 8px;
       position: relative;
+      overflow-x: hidden;
     }
 
     .stars {
@@ -52,10 +53,10 @@
     .glass-card {
       background: rgba(15, 25, 45, 0.65);
       backdrop-filter: blur(16px);
-      border-radius: 32px;
-      border: 1px solid rgba(255,255,255,0.2);
-      padding: 20px;
-      margin-bottom: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 10px;
+      margin-bottom: 8px;
       transition: transform 0.2s;
     }
 
@@ -63,23 +64,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
     .welcome h2 {
       color: white;
-      font-size: 20px;
+      font-size: 16px;
     }
     .welcome p {
       color: #F0B90B;
-      font-size: 13px;
+      font-size: 11px;
     }
     .social-icons {
       display: flex;
-      gap: 12px;
+      gap: 8px;
     }
     .social-icons a {
       color: white;
-      font-size: 22px;
+      font-size: 18px;
       transition: 0.2s;
     }
     .social-icons a:hover {
@@ -90,26 +91,26 @@
     .main-grid {
       display: flex;
       justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 4px;
     }
     .main-btn {
       background: rgba(240, 185, 11, 0.15);
       border: 1px solid rgba(240, 185, 11, 0.3);
-      border-radius: 20px;
-      padding: 12px 24px;
+      border-radius: 15px;
+      padding: 8px 16px;
       text-align: center;
       cursor: pointer;
       transition: 0.2s;
-      width: 50%;
+      width: 60%;
     }
     .main-btn i {
-      font-size: 24px;
+      font-size: 18px;
       color: #F0B90B;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       display: block;
     }
     .main-btn span {
-      font-size: 14px;
+      font-size: 12px;
       color: white;
     }
     .main-btn:hover {
@@ -120,24 +121,24 @@
     /* أزرار إضافية */
     .extra-buttons {
       display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 4px;
     }
     .extra-btn {
       flex: 1;
       background: linear-gradient(95deg, #F0B90B, #FFD966);
       border: none;
-      border-radius: 40px;
-      padding: 12px;
+      border-radius: 30px;
+      padding: 8px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
       color: #0a0f2a;
       cursor: pointer;
       transition: 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
     }
     .extra-btn:hover {
       transform: translateY(-2px);
@@ -145,68 +146,68 @@
 
     /* بطاقة الباقة */
     .package-card {
-      background: linear-gradient(135deg, rgba(240,185,11,0.2), rgba(255,217,102,0.1));
-      border: 1px solid rgba(240,185,11,0.4);
-      border-radius: 28px;
-      padding: 16px;
-      margin-bottom: 16px;
+      background: linear-gradient(135deg, rgba(240,185,11,0.15), rgba(255,217,102,0.08));
+      border: 1px solid rgba(240,185,11,0.3);
+      border-radius: 20px;
+      padding: 12px;
+      margin-bottom: 8px;
     }
     .package-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .package-name {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: bold;
       color: #F0B90B;
     }
     .package-status {
       background: #10b981;
       color: white;
-      padding: 4px 12px;
-      border-radius: 40px;
-      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 30px;
+      font-size: 11px;
     }
     .package-info {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       color: #ccc;
-      font-size: 13px;
+      font-size: 11px;
     }
     .timer-box {
-      background: rgba(0,0,0,0.5);
-      border-radius: 20px;
-      padding: 12px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 15px;
+      padding: 8px;
       text-align: center;
-      margin-top: 12px;
+      margin-top: 8px;
     }
     .timer-value {
-      font-size: 28px;
+      font-size: 22px;
       font-weight: bold;
       color: #F0B90B;
       font-family: monospace;
     }
     .timer-label {
-      font-size: 12px;
+      font-size: 10px;
       color: #aaa;
     }
     .next-profit-timer {
-      background: rgba(240, 185, 11, 0.2);
-      border-radius: 16px;
-      padding: 10px;
-      margin-top: 10px;
+      background: rgba(240, 185, 11, 0.15);
+      border-radius: 12px;
+      padding: 6px;
+      margin-top: 6px;
       text-align: center;
     }
     .next-profit-label {
-      font-size: 12px;
+      font-size: 10px;
       color: #F0B90B;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
     }
     .next-profit-time {
-      font-size: 18px;
+      font-size: 14px;
       font-weight: bold;
       color: #FFD966;
       font-family: monospace;
@@ -215,23 +216,23 @@
     /* إحصائيات */
     .stats-row {
       display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     .stat-card {
       flex: 1;
       background: rgba(255,255,255,0.05);
-      border-radius: 20px;
-      padding: 12px;
+      border-radius: 15px;
+      padding: 8px;
       text-align: center;
     }
     .stat-value {
-      font-size: 24px;
+      font-size: 18px;
       font-weight: bold;
       color: #F0B90B;
     }
     .stat-label {
-      font-size: 12px;
+      font-size: 10px;
       color: #aaa;
     }
 
@@ -239,23 +240,25 @@
     .bottom-nav {
       display: flex;
       justify-content: space-around;
-      background: rgba(15,25,45,0.9);
+      background: rgba(15,25,45,0.95);
       backdrop-filter: blur(12px);
-      border-radius: 40px;
-      padding: 10px;
-      margin-top: 10px;
+      border-radius: 30px;
+      padding: 6px;
+      margin-top: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
     }
     .bottom-nav a {
       text-align: center;
       color: #aaa;
       text-decoration: none;
-      font-size: 12px;
+      font-size: 10px;
       transition: 0.2s;
+      flex: 1;
     }
     .bottom-nav a i {
-      font-size: 22px;
+      font-size: 18px;
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .bottom-nav a.active {
       color: #F0B90B;
@@ -263,30 +266,31 @@
 
     .toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       background: #1e293b;
       color: white;
-      padding: 12px 24px;
-      border-radius: 50px;
-      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 12px;
       z-index: 1000;
       display: none;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .toast.success { background: #10b981; }
     .toast.error { background: #ef4444; }
 
     #msgBox {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 10px;
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 8px;
       text-align: center;
       font-weight: bold;
       display: none;
       color: white;
+      font-size: 12px;
     }
 
     .success {
@@ -298,9 +302,9 @@
     }
 
     @media (max-width: 500px) {
-      .main-btn { padding: 10px 16px; }
-      .main-btn i { font-size: 20px; }
-      .extra-btn { font-size: 12px; padding: 10px; }
+      .main-btn { padding: 6px 12px; }
+      .main-btn i { font-size: 16px; }
+      .extra-btn { font-size: 11px; padding: 8px; }
     }
   </style>
 </head>
@@ -373,7 +377,7 @@
     <div class="timer-box">
       <div class="timer-value" id="remainingDays">0</div>
       <div class="timer-label">الأيام المتبقية</div>
-      <div class="timer-value" id="remainingTime" style="font-size: 18px; margin-top: 5px;">--:--:--:--</div>
+      <div class="timer-value" id="remainingTime" style="font-size: 14px; margin-top: 4px;">--:--:--:--</div>
       <div class="timer-label">الوقت المتبقي (يوم - ساعة - دقيقة - ثانية)</div>
     </div>
     <div class="next-profit-timer" id="nextProfitTimer">
@@ -579,7 +583,7 @@
 
   function createStars() {
     const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 60; i++) {
       const star = document.createElement('div');
       star.classList.add('star');
       star.style.width = (Math.random() * 3 + 1) + 'px';
