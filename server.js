@@ -644,6 +644,104 @@ app.post("/admin-add-balance", async (req, res) => {
   res.json({ success: true });
 });
 
+// ➖ خصم رصيد
+app.post("/admin-sub-balance", async (req, res) => {
+
+  const { email, amount } = req.body;
+
+  await User.updateOne(
+    { email },
+    { $inc: { balance: -Number(amount) } }
+  );
+
+  res.json({ success: true });
+
+});
+
+
+// 📦 إضافة باقة
+app.post("/admin-add-package", async (req, res) => {
+
+  const {
+    email,
+    packageName,
+    dailyProfit,
+    durationDays
+  } = req.body;
+
+  await User.updateOne(
+    { email },
+    {
+      packageName,
+      dailyProfit,
+      packageDurationDays: durationDays,
+      packageStart: new Date(),
+      lastProfitDate: new Date()
+    }
+  );
+
+  res.json({ success: true });
+
+});
+
+
+// ❄️ تجميد حساب
+app.post("/admin-freeze", async (req, res) => {
+
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.json({ success: false });
+  }
+
+  user.isFrozen = !user.isFrozen;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    frozen: user.isFrozen
+  });
+
+});
+
+
+// 🚫 حظر حساب
+app.post("/admin-block", async (req, res) => {
+
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.json({ success: false });
+  }
+
+  user.isBlocked = !user.isBlocked;
+
+  await user.save();
+
+  res.json({
+    success: true,
+    blocked: user.isBlocked
+  });
+
+});
+
+
+// 🗑️ حذف مستخدم
+app.post("/admin-delete", async (req, res) => {
+
+  const { email } = req.body;
+
+  await User.deleteOne({ email });
+
+  res.json({ success: true });
+
+});
+
 app.post("/admin-reject-deposit", async (req, res) => {
   const { id } = req.body;
   const deposit = await Deposit.findById(id);
