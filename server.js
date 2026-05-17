@@ -144,7 +144,60 @@ app.post("/send-code", async (req, res) => {
       from: "Sudan Crypto <noreply@sudancrypto.com>",
       to: email,
       subject: "كود التحقق",
-      html: `<h2>كود التحقق: ${code}</h2>`
+      html: `
+<div style="
+background:#0a0f2a;
+padding:40px;
+font-family:Cairo,sans-serif;
+text-align:center;
+color:white;
+">
+
+<h1 style="color:#F0B90B;">
+Sudan Crypto
+</h1>
+
+<p style="font-size:20px;">
+كود التحقق للتسجيل
+</p>
+
+<div style="
+background:#111827;
+border:1px solid #F0B90B;
+padding:20px;
+border-radius:18px;
+display:inline-block;
+margin-top:20px;
+">
+
+<span style="
+font-size:42px;
+font-weight:bold;
+letter-spacing:6px;
+color:#F0B90B;
+">
+${code}
+</span>
+
+</div>
+
+<p style="
+margin-top:25px;
+color:#aaa;
+font-size:14px;
+">
+صلاحية الكود 10 دقائق
+</p>
+
+<p style="
+color:#777;
+font-size:13px;
+">
+لا تشارك هذا الكود مع أي شخص
+</p>
+
+</div>
+`
     });
     res.json({ success: true });
   } catch (err) {
@@ -219,7 +272,60 @@ app.post("/forgot-password", async (req, res) => {
     from: "Sudan Crypto <noreply@sudancrypto.com>",
     to: email,
     subject: "Reset Password",
-    html: `<h1>${code}</h1>`
+    html: `
+<div style="
+background:#0a0f2a;
+padding:40px;
+font-family:Cairo,sans-serif;
+text-align:center;
+color:white;
+">
+
+<h1 style="color:#F0B90B;">
+Sudan Crypto Security
+</h1>
+
+<p style="font-size:20px;">
+كود إعادة تعيين كلمة المرور
+</p>
+
+<div style="
+background:#111827;
+border:1px solid #F0B90B;
+padding:20px;
+border-radius:18px;
+display:inline-block;
+margin-top:20px;
+">
+
+<span style="
+font-size:42px;
+font-weight:bold;
+letter-spacing:6px;
+color:#F0B90B;
+">
+${code}
+</span>
+
+</div>
+
+<p style="
+margin-top:25px;
+color:#aaa;
+font-size:14px;
+">
+صلاحية الكود 10 دقائق
+</p>
+
+<p style="
+color:#777;
+font-size:13px;
+">
+إذا لم تطلب إعادة تعيين كلمة المرور تجاهل الرسالة
+</p>
+
+</div>
+`
   });
   res.json({ success: true });
 });
@@ -345,12 +451,59 @@ app.post("/send-change-password-code", async (req, res) => {
       to: email,
       subject: "كود تغيير كلمة المرور",
       html: `
-        <div style="font-family:sans-serif;text-align:center">
-          <h2>كود تغيير كلمة المرور</h2>
-          <h1>${code}</h1>
-          <p>لا تشارك هذا الكود مع أي شخص</p>
-        </div>
-      `
+<div style="
+background:#0a0f2a;
+padding:40px;
+font-family:Cairo,sans-serif;
+text-align:center;
+color:white;
+">
+
+<h1 style="color:#F0B90B;">
+Sudan Crypto Security
+</h1>
+
+<p style="font-size:20px;">
+كود تغيير كلمة المرور
+</p>
+
+<div style="
+background:#111827;
+border:1px solid #F0B90B;
+padding:20px;
+border-radius:18px;
+display:inline-block;
+margin-top:20px;
+">
+
+<span style="
+font-size:42px;
+font-weight:bold;
+letter-spacing:6px;
+color:#F0B90B;
+">
+${code}
+</span>
+
+</div>
+
+<p style="
+margin-top:25px;
+color:#aaa;
+font-size:14px;
+">
+صلاحية الكود 10 دقائق
+</p>
+
+<p style="
+color:#777;
+font-size:13px;
+">
+لا تشارك هذا الكود مع أي شخص
+</p>
+
+</div>
+`
     });
 
     res.json({
