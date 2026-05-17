@@ -119,18 +119,18 @@ async function loadUsers(){
 
     table.innerHTML += `
     <tr>
-      <td>${u.name}</td>
-      <td>${u.email}</td>
-      <td>${u.phone}</td>
-      <td>${u.balance}</td>
+      <td>\${u.name}</td>
+      <td>\${u.email}</td>
+      <td>\${u.phone}</td>
+      <td>\${u.balance}</td>
 
       <td>
-        <button class="add" onclick="add('${u.email}')">+ رصيد</button>
-        <button class="sub" onclick="sub('${u.email}')">- رصيد</button>
-        <button class="pkg" onclick="pkg('${u.email}')">باقه</button>
-        <button class="freeze" onclick="freeze('${u.email}')">تجميد</button>
-        <button class="block" onclick="block('${u.email}')">حظر</button>
-        <button class="del" onclick="delUser('${u.email}')">حذف</button>
+        <button class="add" onclick="add('\${u.email}')">+ رصيد</button>
+        <button class="sub" onclick="sub('\${u.email}')">- رصيد</button>
+        <button class="pkg" onclick="pkg('\${u.email}')">باقه</button>
+        <button class="freeze" onclick="freeze('\${u.email}')">تجميد</button>
+        <button class="block" onclick="block('\${u.email}')">حظر</button>
+        <button class="del" onclick="delUser('\${u.email}')">حذف</button>
       </td>
     </tr>
     `;
@@ -189,31 +189,65 @@ async function pkg(email){
 
 // ❄️ تجميد
 async function freeze(email){
-  await fetch(API+"/admin-freeze",{
+
+  const res = await fetch(API+"/admin-freeze",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({email})
   });
+
+  const data = await res.json();
+
+  if(data.success){
+    alert(data.frozen ? "تم تجميد الحساب" : "تم فك التجميد");
+  }else{
+    alert("فشل العملية");
+  }
+
   loadUsers();
 }
 
 // 🚫 حظر
 async function block(email){
-  await fetch(API+"/admin-block",{
+
+  const res = await fetch(API+"/admin-block",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({email})
   });
+
+  const data = await res.json();
+
+  if(data.success){
+    alert(data.blocked ? "تم حظر الحساب" : "تم فك الحظر");
+  }else{
+    alert("فشل العملية");
+  }
+
   loadUsers();
 }
 
 // 🗑️ حذف
 async function delUser(email){
-  await fetch(API+"/admin-delete",{
+
+  const ok = confirm("متأكد من حذف المستخدم؟");
+
+  if(!ok) return;
+
+  const res = await fetch(API+"/admin-delete",{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({email})
   });
+
+  const data = await res.json();
+
+  if(data.success){
+    alert("تم حذف المستخدم");
+  }else{
+    alert("فشل الحذف");
+  }
+
   loadUsers();
 }
 
