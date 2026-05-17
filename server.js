@@ -586,6 +586,94 @@ app.post("/set-withdraw-password", async (req, res) => {
   res.json({ success: true });
 });
 
+// 📜 سجل العمليات
+app.post("/transactions", async (req, res) => {
+
+  try {
+
+    const { email } = req.body;
+
+    const deposits = await Deposit.find({ email });
+    const withdraws = await Withdraw.find({ email });
+    const profits = await ReferralTransaction.find({ email });
+
+    let all = [];
+
+    deposits.forEach(d => {
+      all.push({
+        type: "deposit",
+        amount: d.amount,
+        status: d.status,
+        createdAt: d.createdAt
+      });
+    });
+
+    withdraws.forEach(w => {
+      all.push({
+        type: "withdraw",
+        amount: w.amount,
+        status: w.status,
+        createdAt: w.createdAt
+      });
+    });
+
+    profits.forEach(p => {
+      all.push({
+        type: p.type,
+        amount: p.amount,
+        status: p.status,
+        createdAt: p.createdAt
+      });
+    });
+
+    all.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.json({
+      success:true,
+      transactions: all
+    });
+
+  } catch(err){
+
+    console.log(err);
+
+    res.json({
+      success:false
+    });
+
+  }
+
+});
+
+// 💰 الدخل اليومي
+app.post("/daily-income", async (req, res) => {
+
+  try {
+
+    const { email } = req.body;
+
+    const profits = await ReferralTransaction.find({
+      email,
+      type: "daily_profit"
+    }).sort({ createdAt:-1 });
+
+    res.json({
+      success:true,
+      profits
+    });
+
+  } catch(err){
+
+    console.log(err);
+
+    res.json({
+      success:false
+    });
+
+  }
+
+});
+
 app.get("/admin-users", async (req, res) => {
   const users = await User.find({});
   res.json({ success: true, users });
