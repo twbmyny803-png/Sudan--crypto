@@ -451,33 +451,49 @@
   // ============================================
   async function loadUserData() {
     try {
-      const res = await fetch(`${API_BASE}/user-data?email=${email}`);
+      const res = await fetch(`${API_BASE}/user-data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: localStorage.getItem("userEmail") })
+      });
+
       const data = await res.json();
+
       if (data.success) {
-        document.getElementById('userName').innerText = data.user.fullName;
-        document.getElementById('userEmail').innerText = data.user.email;
-        document.getElementById('userPhone').innerText = data.user.phone;
-        updateVerificationUI(data.user);
+        document.getElementById('userName').innerText = data.name;
+        document.getElementById('userEmail').innerText = data.email;
+        document.getElementById('userPhone').innerText = data.phone;
+        
+        if (typeof updateVerificationStatus === 'function') {
+          updateVerificationStatus(data);
+        }
       }
+
     } catch (err) {
-      console.error(err);
+      console.log(err);
     }
   }
 
-  function updateVerificationUI(user) {
-    const status = user.verificationStatus;
+  // ============================================
+  // 🔐 دالة تحديث حالة التوثيق
+  // ============================================
+  function updateVerificationStatus(user) {
     const statusDiv = document.getElementById('verificationStatus');
-    const uploadSection = document.getElementById('uploadSection');
-    const statusMessage = document.getElementById('statusMessage');
+    const uploadSection = document.getElementById("uploadSection");
+    const statusMessage = document.getElementById("statusMessage");
+    
+    if (!statusDiv) return;
 
-    if (status === 'pending') {
-      statusDiv.innerHTML = '<span class="verified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
+    const status = user.verificationStatus;
+
+    if (user.isVerified || status === 'verified') {
+      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
       if(uploadSection) uploadSection.style.display = "none";
-      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-info-circle'></i> طلبك قيد المراجعة حالياً";
-    } else if (status === 'verified') {
-      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> موثق</span>';
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> تم التوثيق بنجاح";
+    } else if (status === 'pending') {
+      statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
       if(uploadSection) uploadSection.style.display = "none";
-      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> حسابك موثق بالكامل";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-hourglass-half'></i> طلبك قيد المراجعة";
     } else if (status === 'rejected') {
       statusDiv.innerHTML = `
         <span class="unverified-badge">
