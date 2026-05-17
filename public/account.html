@@ -12,9 +12,9 @@
       font-family: 'Cairo', sans-serif;
       background: radial-gradient(circle at 10% 30%, #0a0f2a, #030617);
       min-height: 100vh;
-      padding: 20px;
+      padding: 10px;
       position: relative;
-      overflow-y: auto;
+      overflow-x: hidden;
     }
     .stars {
       position: fixed;
@@ -41,7 +41,7 @@
       margin: 0 auto;
       position: relative;
       z-index: 2;
-      padding-bottom: 20px;
+      padding-bottom: 5px;
     }
     .back-btn {
       display: inline-flex;
@@ -60,20 +60,20 @@
     .glass-card {
       background: rgba(15, 25, 45, 0.65);
       backdrop-filter: blur(16px);
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 16px;
-      margin-bottom: 10px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 12px;
+      margin-bottom: 8px;
     }
     h2 {
       color: #F0B90B;
-      font-size: 17px;
-      margin-bottom: 16px;
+      font-size: 15px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      border-right: 3px solid #F0B90B;
-      padding-right: 12px;
+      gap: 6px;
+      border-right: 2px solid #F0B90B;
+      padding-right: 8px;
     }
     .info-row {
       display: flex;
@@ -107,17 +107,17 @@
     }
     .btn {
       width: 100%;
-      padding: 10px;
-      border-radius: 40px;
+      padding: 8px;
+      border-radius: 30px;
       font-weight: bold;
-      font-size: 15px;
+      font-size: 13px;
       cursor: pointer;
       transition: 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin-top: 12px;
+      gap: 6px;
+      margin-top: 8px;
     }
     .btn-gold {
       background: linear-gradient(95deg, #F0B90B, #FFD966);
@@ -451,54 +451,35 @@
   // ============================================
   async function loadUserData() {
     try {
-      const res = await fetch(`${API_BASE}/user-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: localStorage.getItem("userEmail") })
-      });
-
+      const res = await fetch(`${API_BASE}/user-data?email=${email}`);
       const data = await res.json();
-
       if (data.success) {
-        document.getElementById('userName').innerText = data.name;
-        document.getElementById('userEmail').innerText = data.email;
-        document.getElementById('userPhone').innerText = data.phone;
-        
-        if (typeof updateVerificationStatus === 'function') {
-          updateVerificationStatus(data);
-        }
+        document.getElementById('userName').innerText = data.user.fullName;
+        document.getElementById('userEmail').innerText = data.user.email;
+        document.getElementById('userPhone').innerText = data.user.phone;
+        updateVerificationUI(data.user.verificationStatus);
       }
-
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
-  // ============================================
-  // 🔐 دالة تحديث حالة التوثيق
-  // ============================================
-  function updateVerificationStatus(user) {
+  function updateVerificationUI(status) {
     const statusDiv = document.getElementById('verificationStatus');
-    const uploadSection = document.getElementById("uploadSection");
-    const statusMessage = document.getElementById("statusMessage");
-    
-    if (!statusDiv) return;
+    const uploadSection = document.getElementById('uploadSection');
+    const statusMessage = document.getElementById('statusMessage');
 
-    const status = user.verificationStatus;
-
-    if (user.isVerified || status === 'verified') {
-      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> حساب موثق</span>';
+    if (status === 'pending') {
+      statusDiv.innerHTML = '<span class="verified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
       if(uploadSection) uploadSection.style.display = "none";
-      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> تم التوثيق بنجاح";
-    } else if (status === 'pending') {
-      statusDiv.innerHTML = '<span class="unverified-badge" style="background:rgba(240,185,11,0.2); border-color:#F0B90B; color:#F0B90B;"><i class="fa-solid fa-clock"></i> قيد المراجعة</span>';
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-info-circle'></i> طلبك قيد المراجعة حالياً";
+    } else if (status === 'verified') {
+      statusDiv.innerHTML = '<span class="verified-badge"><i class="fa-solid fa-check-circle"></i> موثق</span>';
       if(uploadSection) uploadSection.style.display = "none";
-      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-hourglass-half'></i> طلبك قيد المراجعة";
+      if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-check'></i> حسابك موثق بالكامل";
     } else if (status === 'rejected') {
       statusDiv.innerHTML = `
-        <span class="unverified-badge">
-          <i class="fa-solid fa-circle-xmark"></i> مرفوض - ${user.verificationRejectReason || ""}
-        </span>
+        <span class="unverified-badge"><i class="fa-solid fa-times-circle"></i> مرفوض</span>
       `;
       if(uploadSection) uploadSection.style.display = "block";
       if(statusMessage) statusMessage.innerHTML = "<i class='fa-solid fa-circle-exclamation'></i> تم رفض الطلب، يمكنك إعادة المحاولة";
@@ -698,7 +679,7 @@
   // ============================================
   function createStars() {
     const container = document.getElementById('starsContainer');
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 60; i++) {
       const star = document.createElement('div');
       star.classList.add('star');
       star.style.width = (Math.random() * 3 + 1) + 'px';
@@ -720,4 +701,4 @@
 </script>
 
 </body>
-  </html>
+</html>
