@@ -175,7 +175,7 @@ font-weight:bold;
 letter-spacing:6px;
 color:#F0B90B;
 ">
-\${code}
+${code}
 </span>
 
 </div>
@@ -319,7 +319,7 @@ font-weight:bold;
 letter-spacing:6px;
 color:#F0B90B;
 ">
-\${code}
+${code}
 </span>
 
 </div>
@@ -497,7 +497,7 @@ font-weight:bold;
 letter-spacing:6px;
 color:#F0B90B;
 ">
-\${code}
+${code}
 </span>
 
 </div>
@@ -586,12 +586,12 @@ app.post("/set-withdraw-password", async (req, res) => {
   res.json({ success: true });
 });
 
-// 📜 سجل العمليات
-app.post("/transactions", async (req, res) => {
+// 📜 سجل العمليات (Updated to GET /transactions/:email)
+app.get("/transactions/:email", async (req, res) => {
 
   try {
 
-    const { email } = req.body;
+    const email = req.params.email;
 
     const deposits = await Deposit.find({ email });
     const withdraws = await Withdraw.find({ email });
@@ -604,7 +604,7 @@ app.post("/transactions", async (req, res) => {
         type: "deposit",
         amount: d.amount,
         status: d.status,
-        createdAt: d.createdAt
+        date: d.createdAt
       });
     });
 
@@ -613,7 +613,7 @@ app.post("/transactions", async (req, res) => {
         type: "withdraw",
         amount: w.amount,
         status: w.status,
-        createdAt: w.createdAt
+        date: w.createdAt
       });
     });
 
@@ -622,15 +622,15 @@ app.post("/transactions", async (req, res) => {
         type: p.type,
         amount: p.amount,
         status: p.status,
-        createdAt: p.createdAt
+        date: p.createdAt
       });
     });
 
-    all.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+    all.sort((a,b)=> new Date(b.date) - new Date(a.date));
 
     res.json({
       success:true,
-      transactions: all
+      data: all
     });
 
   } catch(err){
@@ -660,6 +660,64 @@ app.post("/daily-income", async (req, res) => {
     res.json({
       success:true,
       profits
+    });
+
+  } catch(err){
+
+    console.log(err);
+
+    res.json({
+      success:false
+    });
+
+  }
+
+});
+
+// 🔗 الإحالات (Added)
+app.get("/referrals/:email", async (req, res) => {
+
+  try {
+
+    const user = await User.findOne({
+      email: req.params.email
+    });
+
+    if (!user) {
+      return res.json({ success:false });
+    }
+
+    const level1 = await User.find({
+      refBy: user.refCode
+    });
+
+    const level2 = await User.find({
+      refBy: { $in: level1.map(u => u.refCode) }
+    });
+
+    const level3 = await User.find({
+      refBy: { $in: level2.map(u => u.refCode) }
+    });
+
+    const level4 = await User.find({
+      refBy: { $in: level3.map(u => u.refCode) }
+    });
+
+    const level5 = await User.find({
+      refBy: { $in: level4.map(u => u.refCode) }
+    });
+
+    res.json({
+      success: true,
+      refCode: user.refCode,
+      income: user.referralBalance,
+      levels: {
+        level1,
+        level2,
+        level3,
+        level4,
+        level5
+      }
     });
 
   } catch(err){
@@ -735,7 +793,7 @@ app.post("/admin-reject-verification", async (req, res) => {
 app.get("/admin-deposits", async (req, res) => {
   try {
     const deposits = await Deposit.find().sort({ createdAt: -1 });
-    res.json({ success: true, deposits });
+    res.json({ success: true, requests: deposits });
   } catch (err) {
     res.json({ success: false });
   }
@@ -863,7 +921,7 @@ app.post("/admin-approve-deposit", async (req, res) => {
   await deposit.save();
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
-  user.balance = Number(deposit.amount);
+  user.balance += Number(deposit.amount);
   user.investedAmount += Number(deposit.amount);
   await user.save();
 
@@ -911,9 +969,27 @@ app.post("/withdraw-request", async (req, res) => {
   res.json({ success: true });
 });
 
+// 💸 طلبات السحب (Updated to requests)
 app.get("/admin-withdraws", async (req, res) => {
-  const withdraws = await Withdraw.find().sort({ createdAt: -1 });
-  res.json({ success: true, withdraws });
+
+  try {
+
+    const data = await Withdraw.find()
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      requests: data
+    });
+
+  } catch (err) {
+
+    res.json({
+      success: false
+    });
+
+  }
+
 });
 
 app.post("/admin-approve-withdraw", async (req, res) => {
