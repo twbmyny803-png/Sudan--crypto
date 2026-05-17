@@ -5,7 +5,6 @@ const { Resend } = require("resend");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const multer = require("multer");
-const crypto = require("crypto");
 
 const app = express();
 app.use(express.json());
@@ -176,7 +175,7 @@ font-weight:bold;
 letter-spacing:6px;
 color:#F0B90B;
 ">
-${code}
+\${code}
 </span>
 
 </div>
@@ -255,10 +254,26 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email, password });
+
   if (!user) {
-    return res.json({ success: false, message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
+    return res.json({
+      success: false,
+      message: "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+    });
   }
-  res.json({ success: true, name: user.name, email: user.email });
+
+  if (user.isBlocked) {
+    return res.json({
+      success: false,
+      message: "تم حظر هذا الحساب"
+    });
+  }
+
+  res.json({
+    success: true,
+    name: user.name,
+    email: user.email
+  });
 });
 
 // ================== نسيت كلمة السر ==================
@@ -304,7 +319,7 @@ font-weight:bold;
 letter-spacing:6px;
 color:#F0B90B;
 ">
-${code}
+\${code}
 </span>
 
 </div>
@@ -482,7 +497,7 @@ font-weight:bold;
 letter-spacing:6px;
 color:#F0B90B;
 ">
-${code}
+\${code}
 </span>
 
 </div>
@@ -880,4 +895,4 @@ app.post("/submit-verification", upload.array("images", 2), async (req, res) => 
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(\`🚀 Server running on port \${PORT}\`));
