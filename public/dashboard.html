@@ -337,9 +337,6 @@
   <div class="glass-card">
     <div class="extra-buttons">
       <div id="msgBox"></div>
-      <button class="extra-btn" onclick="transferIncome()">
-        <i class="fa-solid fa-exchange-alt"></i> تحويل الأرباح
-      </button>
       <button class="extra-btn" onclick="location.href='withdraw.html'">
         <i class="fa-solid fa-arrow-up"></i> سحب
       </button>
@@ -518,36 +515,6 @@
     const minutes = Math.floor((diff % 3600000) / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     document.getElementById('nextProfitTime').innerHTML = `${hours} ساعة ${minutes} دقيقة ${seconds} ثانية`;
-  }
-
-  async function transferIncome() {
-    const box = document.getElementById("msgBox");
-    box.style.display = "block";
-
-    try {
-      const res = await fetch(`${API_BASE}/transfer-profit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        box.innerHTML = "تم تحويل الأرباح بنجاح";
-        box.className = "success";
-        setTimeout(() => location.reload(), 2000);
-      } else {
-        box.innerHTML = data.message;
-        box.className = "error";
-      }
-    } catch (err) {
-      box.innerHTML = "خطأ في الاتصال بالسيرفر";
-      box.className = "error";
-    }
-
-    setTimeout(() => {
-      box.style.display = "none";
-    }, 3000);
   }
 
   async function loadUserData() {
