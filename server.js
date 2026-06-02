@@ -472,7 +472,8 @@ app.post("/withdraw-request", async (req, res) => {
 
   const withdraw = new Withdraw({
     email,
-    amount: Number(amount),
+    // Modification: Use finalAmount (amount - 1)
+    amount: finalAmount,
     wallet,
     status: "pending"
   });
@@ -589,7 +590,7 @@ app.post("/submit-deposit", upload.single("image"), async (req, res) => {
   }
 });
 
-// Modification 1: Change expiration check interval
+// Corrected: Reverted to 60000 for pending deposits check
 setInterval(async () => {
   try {
     const expiredTime = new Date(Date.now() - 20 * 60 * 1000);
@@ -600,7 +601,7 @@ setInterval(async () => {
   } catch (err) {
     console.log("Expiration check error:", err);
   }
-}, 3600000);
+}, 60000);
 
 app.get("/transactions/:email", async (req, res) => {
   const email = req.params.email;
@@ -664,7 +665,7 @@ app.get("/referrals/:email", async (req, res) => {
   }
 });
 
-// Modification 1: Change daily profit interval
+// Modification 1: Change daily profit interval to 1 hour
 setInterval(async () => {
   try {
     const users = await User.find({ packageName: { $ne: null } });
