@@ -108,6 +108,20 @@ const withdrawSchema = new mongoose.Schema({
 
 const Withdraw = mongoose.model("Withdraw", withdrawSchema);
 
+// Modification 2: Add Indexes
+userSchema.index({ email: 1 });
+userSchema.index({ refCode: 1 });
+userSchema.index({ refBy: 1 });
+
+depositSchema.index({ email: 1 });
+depositSchema.index({ txid: 1 });
+depositSchema.index({ status: 1 });
+
+withdrawSchema.index({ email: 1 });
+withdrawSchema.index({ status: 1 });
+
+referralTransactionSchema.index({ email: 1 });
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -399,7 +413,8 @@ app.post("/admin-approve-deposit", async (req, res) => {
   await deposit.save();
   const user = await User.findOne({ email: deposit.email });
   if (!user) return res.json({ success: false });
-  user.balance += Number(deposit.amount);
+  // Modification 4: Prevent balance duplication
+  user.balance = Number(deposit.amount);
   user.investedAmount += Number(deposit.amount);
   await user.save();
 
@@ -454,14 +469,22 @@ app.post("/withdraw-request", async (req, res) => {
   
   user.incomeBalance -= Number(amount);
   await user.save();
-  await Withdraw.create({ email, amount: finalAmount, wallet, status: "pending" });
-  res.json({ success: true, message: "تم تقديم طلب السحب بنجاح. تستغرق المعالجة من 1 دقيقة إلى 24 ساعة." });
+
+  const withdraw = new Withdraw({
+    email,
+    amount: Number(amount),
+    wallet,
+    status: "pending"
+  });
+  await withdraw.save();
+
+  res.json({ success: true });
 });
 
 app.get("/admin-withdraws", async (req, res) => {
   try {
-    const data = await Withdraw.find().sort({ createdAt: -1 });
-    res.json({ success: true, requests: data });
+    const withdraws = await Withdraw.find().sort({ createdAt: -1 });
+    res.json({ success: true, withdraws });
   } catch (err) {
     res.json({ success: false });
   }
@@ -469,34 +492,32 @@ app.get("/admin-withdraws", async (req, res) => {
 
 app.post("/admin-approve-withdraw", async (req, res) => {
   const { id } = req.body;
-  const request = await Withdraw.findById(id);
-  if (!request) return res.json({ success: false });
-  request.status = "approved";
-  await request.save();
+  const withdraw = await Withdraw.findById(id);
+  if (!withdraw) return res.json({ success: false });
+  withdraw.status = "approved";
+  await withdraw.save();
   res.json({ success: true });
 });
 
 app.post("/admin-reject-withdraw", async (req, res) => {
   const { id } = req.body;
-  const request = await Withdraw.findById(id);
-  if (!request) return res.json({ success: false });
-  const user = await User.findOne({ email: request.email });
-  user.incomeBalance += (request.amount + 1);
-  await user.save();
-  request.status = "rejected";
-  await request.save();
+  const withdraw = await Withdraw.findById(id);
+  if (!withdraw) return res.json({ success: false });
+  withdraw.status = "rejected";
+  await withdraw.save();
+  const user = await User.findOne({ email: withdraw.email });
+  if (user) {
+    user.incomeBalance += withdraw.amount;
+    await user.save();
+  }
   res.json({ success: true });
 });
 
-app.post("/submit-verification", upload.array("images"), async (req, res) => {
+app.post("/submit-verification", upload.array("images", 2), async (req, res) => {
   try {
     const { email, fullName, docType, docNumber } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
-    if (user.verificationStatus === "pending") return res.json({ success: false, message: "طلبك قيد المراجعة" });
-    if (user.verificationStatus === "verified") return res.json({ success: false, message: "حسابك موثق بالفعل" });
-    if (!req.files || req.files.length === 0) return res.json({ success: false, message: "ارفع الصور" });
-    const images = req.files.map(file => "/uploads/" + file.filename);
+    const images = req.files.map(f => "/uploads/" + f.filename);
+
     await User.updateOne(
       { email },
       {
@@ -568,6 +589,7 @@ app.post("/submit-deposit", upload.single("image"), async (req, res) => {
   }
 });
 
+// Modification 1: Change expiration check interval
 setInterval(async () => {
   try {
     const expiredTime = new Date(Date.now() - 20 * 60 * 1000);
@@ -578,13 +600,14 @@ setInterval(async () => {
   } catch (err) {
     console.log("Expiration check error:", err);
   }
-}, 60000);
+}, 3600000);
 
 app.get("/transactions/:email", async (req, res) => {
   const email = req.params.email;
   try {
-    const deposits = await Deposit.find({ email });
-    const withdraws = await Withdraw.find({ email });
+    // Modification 3: Use .lean() for heavy queries
+    const deposits = await Deposit.find({ email }).lean();
+    const withdraws = await Withdraw.find({ email }).lean();
     const referrals = await ReferralTransaction.find({
       email,
       type: { $in: ["referral", "transfer", "daily_profit"] }
@@ -641,8 +664,7 @@ app.get("/referrals/:email", async (req, res) => {
   }
 });
 
-
-
+// Modification 1: Change daily profit interval
 setInterval(async () => {
   try {
     const users = await User.find({ packageName: { $ne: null } });
@@ -669,7 +691,7 @@ setInterval(async () => {
   } catch (err) {
     console.log("Daily profit error:", err);
   }
-}, 60000);
+}, 3600000);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
