@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, index: true },
   phone: String,
-  password: { type: String, select: true }, // أبقيناها true لعدم تغيير منطقك
+  password: { type: String, select: true },
   ref: String,
   refCode: { type: String, index: true },
   refBy: { type: String, index: true },
@@ -111,8 +111,6 @@ const withdrawSchema = new mongoose.Schema({
 
 const Withdraw = mongoose.model("Withdraw", withdrawSchema);
 
-// الفهارس موجودة بالفعل في التعريف بالأعلى للسرعة
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -140,7 +138,7 @@ function generateRefCode() {
 app.post("/send-code", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.json({ success: false, message: "أدخل الإيميل" });
-  const exists = await User.findOne({ email }).lean(); // تحسين السرعة بـ lean
+  const exists = await User.findOne({ email }).lean();
   if (exists) return res.json({ success: false, message: "هذا البريد مسجل بالفعل" });
   const code = Math.floor(100000 + Math.random() * 900000);
   codes[email] = code;
@@ -257,10 +255,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ================== جلب بيانات المستخدم - تحسين السرعة ==================
+// ================== جلب بيانات المستخدم ==================
 app.post("/user-data", async (req, res) => {
   const { email } = req.body;
-  const user = await User.findOne({ email }).lean(); // استخدام lean لتقليل استهلاك الذاكرة
+  const user = await User.findOne({ email }).lean();
   if (!user) return res.json({ success: false });
 
   const now = new Date();
@@ -295,26 +293,14 @@ app.post("/set-withdraw-password", async (req, res) => {
   res.json({ success: true });
 });
 
-// 🚀 تحسين: إضافة Pagination لمسار admin-users
 app.get("/admin-users", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const skip = (page - 1) * limit;
-
-    const users = await User.find({})
-      .sort({ _id: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
+    const users = await User.find({}).sort({ _id: -1 }).skip(skip).limit(limit).lean();
     const total = await User.countDocuments({});
-    res.json({ 
-      success: true, 
-      users, 
-      totalPages: Math.ceil(total / limit),
-      currentPage: page
-    });
+    res.json({ success: true, users, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     res.json({ success: false });
   }
@@ -329,62 +315,42 @@ app.get("/admin-verifications", async (req, res) => {
   }
 });
 
-// 🟢 موافقة التوثيق
 app.post("/admin-verify", async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false, message: "المستخدم غير موجود" });
-    }
+    if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
     user.isVerified = true;
     user.verificationStatus = "verified";
     await user.save();
     res.json({ success: true });
   } catch (err) {
-    console.log(err);
     res.json({ success: false });
   }
 });
 
-// 🔴 رفض التوثيق
 app.post("/admin-reject-verification", async (req, res) => {
   try {
     const { email, reason } = req.body;
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ success: false });
-    }
+    if (!user) return res.json({ success: false });
     user.verificationStatus = "rejected";
     user.verificationRejectReason = reason || "تم الرفض";
     await user.save();
     res.json({ success: true });
   } catch (err) {
-    console.log(err);
     res.json({ success: false });
   }
 });
 
-// 🚀 تحسين: إضافة Pagination لمسار admin-deposits
 app.get("/admin-deposits", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const skip = (page - 1) * limit;
-
-    const deposits = await Deposit.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
+    const deposits = await Deposit.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
     const total = await Deposit.countDocuments({});
-    res.json({ 
-      success: true, 
-      deposits,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page
-    });
+    res.json({ success: true, deposits, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     res.json({ success: false });
   }
@@ -475,42 +441,19 @@ app.post("/admin-approve-deposit", async (req, res) => {
 app.post("/deposit", upload.single("image"), async (req, res) => {
   const { email, name, amount, txid, orderId, packageName, network } = req.body;
   const image = req.file ? req.file.filename : null;
-
-  const deposit = new Deposit({
-    email,
-    name,
-    amount,
-    txid,
-    image,
-    orderId,
-    packageName,
-    network
-  });
-
+  const deposit = new Deposit({ email, name, amount, txid, image, orderId, packageName, network });
   await deposit.save();
   res.json({ success: true });
 });
 
-// 🚀 تحسين: إضافة Pagination لمسار admin-withdraws
 app.get("/admin-withdraws", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const skip = (page - 1) * limit;
-
-    const withdraws = await Withdraw.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
+    const withdraws = await Withdraw.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
     const total = await Withdraw.countDocuments({});
-    res.json({ 
-      success: true, 
-      withdraws,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page
-    });
+    res.json({ success: true, withdraws, totalPages: Math.ceil(total / limit) });
   } catch (err) {
     res.json({ success: false });
   }
@@ -519,18 +462,14 @@ app.get("/admin-withdraws", async (req, res) => {
 app.post("/withdraw", async (req, res) => {
   const { email, amount, wallet, withdrawPassword } = req.body;
   const user = await User.findOne({ email });
-
   if (!user) return res.json({ success: false, message: "المستخدم غير موجود" });
   if (user.withdrawBlocked) return res.json({ success: false, message: "عمليات السحب محظورة لحسابك" });
   if (user.withdrawPassword !== withdrawPassword) return res.json({ success: false, message: "كلمة سر السحب غير صحيحة" });
   if (user.incomeBalance < amount) return res.json({ success: false, message: "رصيد الأرباح غير كافٍ" });
-
   user.incomeBalance -= amount;
   await user.save();
-
   const withdraw = new Withdraw({ email, amount, wallet });
   await withdraw.save();
-
   res.json({ success: true });
 });
 
@@ -554,7 +493,6 @@ app.post("/admin-reject-withdraw", async (req, res) => {
 app.post("/verify-account", upload.array("images", 2), async (req, res) => {
   const { email, fullName, docType, docNumber } = req.body;
   const images = req.files.map(f => f.filename);
-
   await User.updateOne({ email }, {
     verificationFullName: fullName,
     verificationDocType: docType,
@@ -562,7 +500,6 @@ app.post("/verify-account", upload.array("images", 2), async (req, res) => {
     verificationImages: images,
     verificationStatus: "pending"
   });
-
   res.json({ success: true });
 });
 
@@ -608,66 +545,40 @@ app.post("/lock-wallet", async (req, res) => {
   res.json({ success: true });
 });
 
-// ================== نظام توزيع الأرباح التلقائي ==================
 async function distributeProfits() {
-  const users = await User.find({
-    packageName: { $ne: null },
-    packageStart: { $ne: null }
-  });
-
+  const users = await User.find({ packageName: { $ne: null }, packageStart: { $ne: null } });
   const now = new Date();
-
   for (let user of users) {
     const startDate = new Date(user.packageStart);
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + user.packageDurationDays);
-
     if (now < endDate) {
       const lastProfit = user.lastProfitDate ? new Date(user.lastProfitDate) : startDate;
       const diffMs = now - lastProfit;
       const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
       if (diffDays >= 1) {
         const totalProfit = diffDays * user.dailyProfit;
         user.incomeBalance += totalProfit;
         user.lastProfitDate = new Date();
         await user.save();
-        console.log(`✅ Distributed ${totalProfit} USDT to ${user.email}`);
       }
     }
   }
 }
-
 setInterval(distributeProfits, 60 * 60 * 1000);
 
-// ================== الإحصائيات ==================
 app.get("/admin-stats", async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const verifiedUsers = await User.countDocuments({ isVerified: true });
     const pendingVerifications = await User.countDocuments({ verificationStatus: "pending" });
-
     const deposits = await Deposit.find({ status: "approved" }).lean();
     const totalDeposits = deposits.reduce((sum, d) => sum + d.amount, 0);
-
     const withdraws = await Withdraw.find({ status: "approved" }).lean();
     const totalWithdraws = withdraws.reduce((sum, w) => sum + w.amount, 0);
-
     const pendingDeposits = await Deposit.countDocuments({ status: "pending" });
     const pendingWithdraws = await Withdraw.countDocuments({ status: "pending" });
-
-    res.json({
-      success: true,
-      stats: {
-        totalUsers,
-        verifiedUsers,
-        pendingVerifications,
-        totalDeposits,
-        totalWithdraws,
-        pendingDeposits,
-        pendingWithdraws
-      }
-    });
+    res.json({ success: true, stats: { totalUsers, verifiedUsers, pendingVerifications, totalDeposits, totalWithdraws, pendingDeposits, pendingWithdraws } });
   } catch (err) {
     res.json({ success: false });
   }
@@ -675,13 +586,7 @@ app.get("/admin-stats", async (req, res) => {
 
 app.post("/admin-edit-user", async (req, res) => {
   const { email, name, phone, balance, incomeBalance, referralBalance } = req.body;
-  await User.updateOne({ email }, {
-    name,
-    phone,
-    balance: Number(balance),
-    incomeBalance: Number(incomeBalance),
-    referralBalance: Number(referralBalance)
-  });
+  await User.updateOne({ email }, { name, phone, balance: Number(balance), incomeBalance: Number(incomeBalance), referralBalance: Number(referralBalance) });
   res.json({ success: true });
 });
 
@@ -697,32 +602,18 @@ app.get("/referrals", async (req, res) => {
   const { email } = req.query;
   const user = await User.findOne({ email }).lean();
   if (!user) return res.json({ success: false });
-
   const level1 = await User.find({ refBy: user.refCode }).select("name email createdAt isVerified balance").lean();
-  
   let level2 = [];
   for (let u of level1) {
     const subs = await User.find({ refBy: u.refCode }).select("name email createdAt isVerified balance").lean();
     level2 = level2.concat(subs);
   }
-
   let level3 = [];
   for (let u of level2) {
     const subs = await User.find({ refBy: u.refCode }).select("name email createdAt isVerified balance").lean();
     level3 = level3.concat(subs);
   }
-
-  res.json({
-    success: true,
-    level1,
-    level2,
-    level3,
-    counts: {
-      l1: level1.length,
-      l2: level2.length,
-      l3: level3.length
-    }
-  });
+  res.json({ success: true, level1, level2, level3, counts: { l1: level1.length, l2: level2.length, l3: level3.length } });
 });
 
 app.get("/transactions", async (req, res) => {
@@ -730,11 +621,8 @@ app.get("/transactions", async (req, res) => {
   const deposits = await Deposit.find({ email }).sort({ createdAt: -1 }).lean();
   const withdraws = await Withdraw.find({ email }).sort({ createdAt: -1 }).lean();
   const referrals = await ReferralTransaction.find({ email }).sort({ createdAt: -1 }).lean();
-
   res.json({ success: true, deposits, withdraws, referrals });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => { console.log(`🚀 Server running on port ${PORT}`); });
